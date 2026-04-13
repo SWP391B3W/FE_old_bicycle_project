@@ -1,5 +1,7 @@
 import { Button } from '@/components/ui/button'
 import { useAuth } from '@/contexts/AuthContext'
+import { Link } from 'react-router-dom'
+import { ROUTES } from '@/constants/routes'
 
 export default function HomePage() {
   const { user, logout, isAuthenticated } = useAuth()
@@ -36,11 +38,11 @@ export default function HomePage() {
                 </div>
               ) : (
                 <div className="flex gap-2">
-                  <Button variant="outline" size="sm" className="border-white/20 text-white hover:bg-white/10">
-                    Đăng nhập
+                  <Button variant="outline" size="sm" className="border-white/20 text-white hover:bg-white/10" asChild>
+                    <Link to={ROUTES.LOGIN}>Đăng nhập</Link>
                   </Button>
-                  <Button size="sm" className="bg-sky-500 text-white hover:bg-sky-400">
-                    Đăng ký
+                  <Button size="sm" className="bg-sky-500 text-white hover:bg-sky-400" asChild>
+                    <Link to={ROUTES.REGISTER}>Đăng ký</Link>
                   </Button>
                 </div>
               )}
@@ -57,6 +59,15 @@ export default function HomePage() {
             <p className="mx-auto mt-5 max-w-2xl text-base leading-8 text-slate-200 sm:text-lg">
               Tìm kiếm linh hoạt, an tâm giao dịch với mọi tin đăng đã được ban quản trị kiểm định kỹ lưỡng.
             </p>
+
+            <div className="mt-8 flex flex-col items-center justify-center gap-3 sm:flex-row">
+              <Button asChild className="rounded-full bg-sky-500 px-7 py-3 text-sm font-semibold text-white shadow-lg shadow-sky-500/20 hover:bg-sky-400">
+                <Link to={ROUTES.MARKET}>Khám phá tin mua xe</Link>
+              </Button>
+              <Button asChild variant="outline" className="rounded-full border-white/20 px-7 py-3 text-sm font-semibold text-white hover:bg-white/10">
+                <Link to={ROUTES.SELL}>Đăng tin bán xe</Link>
+              </Button>
+            </div>
 
             <div className="mt-10 rounded-[1.5rem] border border-white/15 bg-slate-900/75 p-5 shadow-2xl shadow-slate-950/30 backdrop-blur sm:p-6">
               <div className="grid gap-3 sm:grid-cols-[1.6fr_1fr_1fr_1fr]">
