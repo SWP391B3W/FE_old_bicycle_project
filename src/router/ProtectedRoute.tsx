@@ -1,7 +1,6 @@
 import type { ReactNode } from 'react'
 import { Navigate, useLocation } from 'react-router-dom'
 import type { AppRole } from '@/types/auth'
-import BikeLoader from '../components/common/BikeLoader'
 import { ROUTES } from '../constants/routes'
 import { useAuth } from '../contexts/AuthContext'
 
@@ -15,7 +14,7 @@ export default function ProtectedRoute({ children, allowedRoles }: ProtectedRout
     const { hasRole, isAuthenticated, isLoading } = useAuth()
 
     if (isLoading) {
-        return <BikeLoader />
+        return <div>Loading...</div>
     }
 
     if (!isAuthenticated) {

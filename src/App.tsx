@@ -1,12 +1,12 @@
-import { ThemeProvider } from '@/components/theme-provider'
+import { AuthProvider } from '@/contexts/AuthContext'
 import AppRouter from './router'
 import './index.css'
 
 function App() {
   return (
-    <ThemeProvider defaultTheme="light" storageKey="bike-exchange-theme">
+    <AuthProvider>
       <AppRouter />
-    </ThemeProvider>
+    </AuthProvider>
   )
 }
 
