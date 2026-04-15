@@ -11,7 +11,7 @@ export interface Product {
   year: string
   wheelSize: string
   frameSize: string
-  image: string
+  images: string[]
   description: string
   highlights: string[]
   sellerName: string

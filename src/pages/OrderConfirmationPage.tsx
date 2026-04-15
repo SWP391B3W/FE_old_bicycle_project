@@ -91,7 +91,7 @@ export default function OrderConfirmationPage() {
               <CardContent>
                 <div className="flex gap-4">
                   <img
-                    src={bike.image}
+                    src={bike.images[0]}
                     alt={bike.title}
                     className="h-24 w-24 rounded-2xl object-cover"
                   />
