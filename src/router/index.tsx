@@ -10,6 +10,10 @@ import {
     LoginPage,
     ForgotPasswordPage,
     RegisterPage,
+    VerifyEmailPage,
+    CheckoutPage,
+    PaymentPage,
+    OrderConfirmationPage,
 } from './LazyPages';
 
 export default function AppRouter() {
@@ -26,6 +30,10 @@ export default function AppRouter() {
                     <Route path={ROUTES.LOGIN} element={<LoginPage />} />
                     <Route path={ROUTES.REGISTER} element={<RegisterPage />} />
                     <Route path={ROUTES.FORGOT_PASSWORD} element={<ForgotPasswordPage />} />
+                    <Route path={ROUTES.VERIFY_EMAIL} element={<VerifyEmailPage />} />
+                    <Route path={ROUTES.CHECKOUT} element={<CheckoutPage />} />
+                    <Route path={ROUTES.PAYMENT} element={<PaymentPage />} />
+                    <Route path={ROUTES.ORDER_CONFIRMATION} element={<OrderConfirmationPage />} />
                 </Route>
             </Routes>
         </Suspense>

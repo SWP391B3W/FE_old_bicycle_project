@@ -2,6 +2,7 @@ import { Button } from '@/components/ui/button'
 import { useAuth } from '@/contexts/AuthContext'
 import { Link } from 'react-router-dom'
 import { ROUTES } from '@/constants/routes'
+import Logo from '@/components/Logo'
 
 export default function HomePage() {
   const { user, logout, isAuthenticated } = useAuth()
@@ -17,15 +18,13 @@ export default function HomePage() {
         <div className="relative mx-auto max-w-7xl">
           <nav className="flex flex-wrap items-center justify-between gap-4 py-3">
             <div className="flex items-center gap-3">
-              <div className="flex h-11 w-11 items-center justify-center rounded-2xl bg-sky-500 text-white shadow-xl shadow-sky-900/15">
-                🚴
-              </div>
-              <span className="text-lg font-semibold tracking-tight text-white">BikeExchange</span>
+              <Logo className="h-11 w-11" showText={false} />
+              <span className="text-lg font-semibold tracking-tight text-white">Market Bike</span>
             </div>
             <div className="hidden items-center gap-8 text-sm text-slate-200 md:flex">
-              <a className="transition hover:text-white" href="#home">Trang chủ</a>
-              <a className="transition hover:text-white" href="#buy">Mua xe</a>
-              <a className="transition hover:text-white" href="#sell">Bán xe</a>
+              <Link className="transition hover:text-white" to={ROUTES.HOME}>Trang chủ</Link>
+              <Link className="transition hover:text-white" to={ROUTES.MARKET}>Mua xe</Link>
+              <Link className="transition hover:text-white" to={ROUTES.SELL}>Bán xe</Link>
               <a className="transition hover:text-white" href="#guide">Hướng dẫn</a>
             </div>
             <div className="flex items-center gap-3">

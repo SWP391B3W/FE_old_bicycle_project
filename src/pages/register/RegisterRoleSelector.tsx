@@ -26,7 +26,7 @@ interface RegisterRoleSelectorProps {
 export function RegisterRoleSelector({ role, onChange }: RegisterRoleSelectorProps) {
     return (
         <div className="space-y-2">
-            <label className="text-sm font-medium">Bạn muốn</label>
+            <label className="text-sm font-medium text-slate-200">Bạn muốn</label>
             <div className="grid grid-cols-2 gap-3">
                 {ROLE_OPTIONS.map((option) => (
                     <button
@@ -36,12 +36,12 @@ export function RegisterRoleSelector({ role, onChange }: RegisterRoleSelectorPro
                         className={cn(
                             'rounded-lg border-2 p-4 text-center transition-all',
                             role === option.value
-                                ? 'border-primary bg-primary/5'
-                                : 'border-border hover:border-primary/50',
+                                ? 'border-sky-500 bg-sky-500/10 text-white'
+                                : 'border-slate-600 bg-slate-800/50 text-slate-200 hover:border-sky-500/50',
                         )}
                     >
                         <div className="font-medium">{option.title}</div>
-                        <div className="text-sm text-muted-foreground">{option.description}</div>
+                        <div className="text-sm text-slate-400">{option.description}</div>
                     </button>
                 ))}
             </div>

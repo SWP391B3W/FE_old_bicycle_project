@@ -1,11 +1,12 @@
 import { useState } from 'react'
-import { Link, useNavigate } from 'react-router-dom'
-import { Bike, Mail, AlertCircle, ArrowLeft } from 'lucide-react'
+import { useNavigate } from 'react-router-dom'
+import { Mail, AlertCircle, ArrowLeft } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { ROUTES } from '@/constants/routes'
 import { authService } from '@/services/authService'
+import Logo from '@/components/Logo'
 
 export default function ForgotPasswordPage() {
     const [email, setEmail] = useState('')
@@ -49,12 +50,7 @@ export default function ForgotPasswordPage() {
             <div className="w-full max-w-md">
                 {/* Logo */}
                 <div className="mb-8 text-center">
-                    <Link to={ROUTES.HOME} className="inline-flex items-center gap-2">
-                        <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-primary">
-                            <Bike className="h-6 w-6 text-primary-foreground" />
-                        </div>
-                        <span className="text-2xl font-bold text-foreground">BikeExchange</span>
-                    </Link>
+                    <Logo className="h-10 w-10" textClassName="text-2xl font-bold text-foreground" />
                 </div>
 
                 <Card>

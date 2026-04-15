@@ -2,7 +2,7 @@ import { useMemo } from 'react'
 import { Link, useParams } from 'react-router-dom'
 import { Button } from '@/components/ui/button'
 import { bikes, conditions } from '@/data/bikes'
-import { ROUTES } from '@/constants/routes'
+import { ROUTES, buildRoute } from '@/constants/routes'
 
 export default function BikeDetailPage() {
   const { id } = useParams<{ id: string }>()
@@ -66,9 +66,14 @@ export default function BikeDetailPage() {
                   <p className="mt-1">{bike.wheelSize}</p>
                 </div>
               </div>
-              <Button asChild className="w-full bg-sky-600 text-white hover:bg-sky-500">
-                <Link to={ROUTES.SELL}>Đăng tin bán tương tự</Link>
-              </Button>
+              <div className="space-y-3">
+                <Button asChild className="w-full bg-sky-600 text-white hover:bg-sky-500 h-11">
+                  <Link to={buildRoute.checkout(bike.id)}>Mua ngay</Link>
+                </Button>
+                <Button asChild variant="outline" className="w-full border-slate-300 h-11">
+                  <Link to={ROUTES.SELL}>Đăng tin bán tương tự</Link>
+                </Button>
+              </div>
             </div>
           </div>
 

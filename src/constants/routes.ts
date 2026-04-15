@@ -1,9 +1,9 @@
 // Route path constants for type-safe navigation
 export const ROUTES = {
   HOME: '/',
-  MARKET: '/market',
+  MARKET: '/mua-xe',
   BIKE_DETAIL: '/bikes/:id',
-  SELL: '/sell',
+  SELL: '/ban-xe',
   NOTIFICATIONS: '/notifications',
   LOGIN: '/login',
   REGISTER: '/register',
@@ -36,6 +36,9 @@ export const ROUTES = {
   SELLER_ORDERS: '/seller/orders',
   // User routes
   WISHLIST: '/wishlist',
+  CHECKOUT: '/thanh-toan-don-hang/:id',
+  PAYMENT: '/thanh-toan/:id',
+  ORDER_CONFIRMATION: '/xac-nhan-don-hang',
 } as const;
 
 // Helper function to build dynamic routes
@@ -61,4 +64,6 @@ export const buildRoute = {
   },
   sellerNewProduct: () => ROUTES.SELLER_NEW_PRODUCT,
   sellerEditProduct: (id: string | number) => `/seller/listings/${id}/edit`,
+  checkout: (id: string | number) => `/thanh-toan-don-hang/${id}`,
+  payment: (id: string | number) => `/thanh-toan/${id}`,
 };

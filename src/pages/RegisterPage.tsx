@@ -1,4 +1,4 @@
-import { Bike } from 'lucide-react'
+import Logo from '@/components/Logo'
 import { Link } from 'react-router-dom'
 import {
     Card,
@@ -21,12 +21,7 @@ export default function RegisterPage() {
         <div className="flex min-h-screen items-center justify-center bg-muted/40 px-4 py-12">
             <div className="w-full max-w-md">
                 <div className="mb-8 text-center">
-                    <Link to={ROUTES.HOME} className="inline-flex items-center gap-2">
-                        <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-primary">
-                            <Bike className="h-6 w-6 text-primary-foreground" />
-                        </div>
-                        <span className="text-2xl font-bold text-foreground">BikeExchange</span>
-                    </Link>
+                    <Logo className="h-10 w-10" textClassName="text-2xl font-bold text-foreground" />
                 </div>
 
                 <Card>
