@@ -1,8 +1,7 @@
 import { useState } from 'react'
 import { Link, useLocation, useNavigate } from 'react-router-dom'
-import { AlertCircle, Bike, Eye, EyeOff, Lock, Mail } from 'lucide-react'
+import { AlertCircle, Eye, EyeOff, Lock, Mail } from 'lucide-react'
 import { Button } from '@/components/ui/button'
-import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card'
 import { Input } from '@/components/ui/input'
 import { ROUTES } from '@/constants/routes'
 import { useAuth } from '@/contexts/AuthContext'
@@ -99,133 +98,133 @@ export default function LoginPage() {
     }
 
     return (
-        <div className="flex min-h-screen items-center justify-center bg-muted/40 px-4 py-12">
-            <div className="w-full max-w-md">
-                <div className="mb-8 text-center">
-                    <Link to={ROUTES.HOME} className="inline-flex items-center gap-2">
-                        <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-primary">
-                            <Bike className="h-6 w-6 text-primary-foreground" />
-                        </div>
-                        <span className="text-2xl font-bold text-foreground">BikeExchange</span>
-                    </Link>
-                </div>
-
-                <Card>
-                    <CardHeader className="text-center">
-                        <CardTitle className="text-2xl">Đăng nhập</CardTitle>
-                        <CardDescription>Đăng nhập để mua bán xe đạp</CardDescription>
-                    </CardHeader>
-
-                    <CardContent>
-                        <form onSubmit={handleSubmit} className="space-y-4" noValidate>
-                            {error && (
-                                <div className="flex items-center gap-2 rounded-lg bg-destructive/10 px-4 py-3 text-sm text-destructive">
-                                    <AlertCircle className="h-4 w-4 shrink-0" />
-                                    {error}
-                                </div>
-                            )}
-
-                            {resendMessage && (
-                                <div className="rounded-lg bg-green-50 px-4 py-3 text-sm text-green-700">{resendMessage}</div>
-                            )}
-
-                            <div className="space-y-2">
-                                <label htmlFor="email" className="text-sm font-medium">
-                                    Email
-                                </label>
-                                <div className="relative">
-                                    <Mail className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
-                                    <Input
-                                        id="email"
-                                        type="email"
-                                        placeholder="example@email.com"
-                                        className="pl-10"
-                                        value={email}
-                                        onChange={(event) => setEmail(event.target.value)}
-                                        required
-                                    />
-                                </div>
+        <main className="min-h-screen bg-slate-950 text-white">
+            <section className="relative overflow-hidden px-6 py-8 sm:px-8 lg:px-10">
+                <div className="absolute inset-0 bg-[radial-gradient(circle_at_top,_rgba(56,189,248,0.24),_transparent_40%),linear-gradient(180deg,rgba(15,23,42,0.96),rgba(15,23,42,0.86))]" />
+                <div className="relative mx-auto max-w-7xl">
+                    <div className="flex min-h-[calc(100vh-120px)] items-center justify-center">
+                        <div className="w-full max-w-md">
+                            <div className="mb-8 text-center">
+                                <h1 className="text-3xl font-semibold tracking-tight text-white sm:text-4xl">
+                                    Đăng nhập
+                                </h1>
+                                <p className="mt-3 text-base leading-8 text-slate-200">
+                                    Đăng nhập để mua bán xe đạp thể thao
+                                </p>
                             </div>
 
-                            <div className="space-y-2">
-                                <div className="flex items-center justify-between">
-                                    <label htmlFor="password" className="text-sm font-medium">
-                                        Mật khẩu
-                                    </label>
-                                    <Link to={ROUTES.FORGOT_PASSWORD} className="text-sm text-primary hover:underline">
-                                        Quên mật khẩu?
-                                    </Link>
-                                </div>
+                            <div className="rounded-3xl border border-white/15 bg-slate-900/75 p-8 shadow-2xl shadow-slate-950/30 backdrop-blur">
+                                <form onSubmit={handleSubmit} className="space-y-6" noValidate>
+                                    {error && (
+                                        <div className="flex items-center gap-2 rounded-lg bg-red-500/10 px-4 py-3 text-sm text-red-400 border border-red-500/20">
+                                            <AlertCircle className="h-4 w-4 shrink-0" />
+                                            {error}
+                                        </div>
+                                    )}
 
-                                <div className="relative">
-                                    <Lock className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
-                                    <Input
-                                        id="password"
-                                        type={showPassword ? 'text' : 'password'}
-                                        placeholder="••••••••"
-                                        className="pl-10 pr-10"
-                                        value={password}
-                                        onChange={(event) => setPassword(event.target.value)}
-                                        required
-                                    />
-                                    <button
-                                        type="button"
-                                        onClick={() => setShowPassword(!showPassword)}
-                                        className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground"
-                                        aria-label={showPassword ? 'Ẩn mật khẩu' : 'Hiện mật khẩu'}
-                                    >
-                                        {showPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
-                                    </button>
-                                </div>
-                            </div>
+                                    {resendMessage && (
+                                        <div className="rounded-lg bg-green-500/10 px-4 py-3 text-sm text-green-400 border border-green-500/20">{resendMessage}</div>
+                                    )}
 
-                            <div className="flex items-center gap-2">
-                                <input
-                                    type="checkbox"
-                                    id="remember"
-                                    className="h-4 w-4 rounded border-input"
-                                    checked={rememberMe}
-                                    onChange={(e) => setRememberMe(e.target.checked)}
-                                />
-                                <label htmlFor="remember" className="text-sm font-medium leading-none cursor-pointer">
-                                    Nhớ mật khẩu
-                                </label>
-                            </div>
+                                    <div className="space-y-2">
+                                        <label htmlFor="email" className="text-sm font-medium text-slate-200">
+                                            Email
+                                        </label>
+                                        <div className="relative">
+                                            <Mail className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-400" />
+                                            <Input
+                                                id="email"
+                                                type="email"
+                                                placeholder="example@email.com"
+                                                className="pl-10 bg-slate-800/90 border-slate-600 text-white placeholder:text-slate-400 focus:border-sky-400 focus:ring-sky-400/30"
+                                                value={email}
+                                                onChange={(event) => setEmail(event.target.value)}
+                                                required
+                                            />
+                                        </div>
+                                    </div>
 
-                            {canResendVerification && (
-                                <div className="rounded-lg border border-border/70 bg-muted/40 px-4 py-3 text-sm">
-                                    <p className="font-medium text-foreground">Tài khoản này chưa xác thực email.</p>
-                                    <p className="mt-1 text-muted-foreground">
-                                        Bạn có thể yêu cầu hệ thống gửi lại email xác thực tới địa chỉ vừa nhập.
-                                    </p>
-                                    <Button
-                                        className="mt-3 w-full"
-                                        type="button"
-                                        variant="outline"
-                                        onClick={handleResendVerification}
-                                        disabled={isResending || !email.trim()}
-                                    >
-                                        {isResending ? 'Đang gửi lại email...' : 'Gửi lại email xác thực'}
+                                    <div className="space-y-2">
+                                        <div className="flex items-center justify-between">
+                                            <label htmlFor="password" className="text-sm font-medium text-slate-200">
+                                                Mật khẩu
+                                            </label>
+                                            <Link to={ROUTES.FORGOT_PASSWORD} className="text-sm text-sky-400 hover:text-sky-300">
+                                                Quên mật khẩu?
+                                            </Link>
+                                        </div>
+
+                                        <div className="relative">
+                                            <Lock className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-400" />
+                                            <Input
+                                                id="password"
+                                                type={showPassword ? 'text' : 'password'}
+                                                placeholder="••••••••"
+                                                className="pl-10 pr-10 bg-slate-800/90 border-slate-600 text-white placeholder:text-slate-400 focus:border-sky-400 focus:ring-sky-400/30"
+                                                value={password}
+                                                onChange={(event) => setPassword(event.target.value)}
+                                                required
+                                            />
+                                            <button
+                                                type="button"
+                                                onClick={() => setShowPassword(!showPassword)}
+                                                className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-200"
+                                                aria-label={showPassword ? 'Ẩn mật khẩu' : 'Hiện mật khẩu'}
+                                            >
+                                                {showPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
+                                            </button>
+                                        </div>
+                                    </div>
+
+                                    <div className="flex items-center gap-2">
+                                        <input
+                                            type="checkbox"
+                                            id="remember"
+                                            className="h-4 w-4 rounded border-slate-600 bg-slate-800/90 text-sky-500 focus:ring-sky-400"
+                                            checked={rememberMe}
+                                            onChange={(e) => setRememberMe(e.target.checked)}
+                                        />
+                                        <label htmlFor="remember" className="text-sm font-medium leading-none cursor-pointer text-slate-200">
+                                            Nhớ mật khẩu
+                                        </label>
+                                    </div>
+
+                                    {canResendVerification && (
+                                        <div className="rounded-lg border border-slate-600 bg-slate-800/50 px-4 py-3 text-sm">
+                                            <p className="font-medium text-slate-200">Tài khoản này chưa xác thực email.</p>
+                                            <p className="mt-1 text-slate-400">
+                                                Bạn có thể yêu cầu hệ thống gửi lại email xác thực tới địa chỉ vừa nhập.
+                                            </p>
+                                            <Button
+                                                className="mt-3 w-full bg-slate-700 text-white hover:bg-slate-600 border-slate-600"
+                                                type="button"
+                                                variant="outline"
+                                                onClick={handleResendVerification}
+                                                disabled={isResending || !email.trim()}
+                                            >
+                                                {isResending ? 'Đang gửi lại email...' : 'Gửi lại email xác thực'}
+                                            </Button>
+                                        </div>
+                                    )}
+
+                                    <Button type="submit" className="w-full bg-sky-500 text-white hover:bg-sky-400 shadow-lg shadow-sky-500/20" size="lg" disabled={isLoading}>
+                                        {isLoading ? 'Đang đăng nhập...' : 'Đăng nhập'}
                                     </Button>
+                                </form>
+
+                                <div className="mt-6 text-center">
+                                    <p className="text-sm text-slate-400">
+                                        Chưa có tài khoản?{' '}
+                                        <Link to={ROUTES.REGISTER} className="font-medium text-sky-400 hover:text-sky-300">
+                                            Đăng ký ngay
+                                        </Link>
+                                    </p>
                                 </div>
-                            )}
-
-                            <Button type="submit" className="w-full" size="lg" disabled={isLoading}>
-                                {isLoading ? 'Đang đăng nhập...' : 'Đăng nhập'}
-                            </Button>
-                        </form>
-                    </CardContent>
-
-                    <CardFooter className="justify-center">
-                        <p className="text-sm text-muted-foreground">
-                            Chưa có tài khoản?{' '}
-                            <Link to={ROUTES.REGISTER} className="font-medium text-primary hover:underline">
-                                Đăng ký ngay
-                            </Link>
-                        </p>
-                    </CardFooter>
-                </Card>
-            </div>
-        </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+        </main>
     )
 }

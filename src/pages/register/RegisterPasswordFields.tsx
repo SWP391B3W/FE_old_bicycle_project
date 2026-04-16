@@ -39,17 +39,17 @@ export function RegisterPasswordFields({
   return (
     <>
       <div className="space-y-2">
-        <label htmlFor="password" className="text-sm font-medium">
+        <label htmlFor="password" className="text-sm font-medium text-slate-200">
           Mật khẩu
         </label>
         <div className="relative">
-          <Lock className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
+          <Lock className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-400" />
           <Input
             id="password"
             name="password"
             type={showPassword ? 'text' : 'password'}
             placeholder="••••••••"
-            className="pl-10 pr-10"
+            className="pl-10 pr-10 bg-slate-800/90 border-slate-600 text-white placeholder:text-slate-400 focus:border-sky-400 focus:ring-sky-400/30"
             value={password}
             onChange={onFieldChange}
             required
@@ -57,7 +57,7 @@ export function RegisterPasswordFields({
           <button
             type="button"
             onClick={onTogglePasswordVisibility}
-            className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground"
+            className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-200"
             aria-label={showPassword ? 'Ẩn mật khẩu' : 'Hiện mật khẩu'}
           >
             {showPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
@@ -70,7 +70,7 @@ export function RegisterPasswordFields({
               key={requirement.key}
               className={cn(
                 'flex items-center gap-1',
-                passwordChecks[requirement.key] ? 'text-green-600' : 'text-muted-foreground',
+                passwordChecks[requirement.key] ? 'text-green-400' : 'text-slate-400',
               )}
             >
               <Check className="h-3 w-3" />
@@ -81,17 +81,17 @@ export function RegisterPasswordFields({
       </div>
 
       <div className="space-y-2">
-        <label htmlFor="confirmPassword" className="text-sm font-medium">
+        <label htmlFor="confirmPassword" className="text-sm font-medium text-slate-200">
           Xác nhận mật khẩu
         </label>
         <div className="relative">
-          <Lock className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
+          <Lock className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-400" />
           <Input
             id="confirmPassword"
             name="confirmPassword"
             type="password"
             placeholder="••••••••"
-            className="pl-10"
+            className="pl-10 bg-slate-800/90 border-slate-600 text-white placeholder:text-slate-400 focus:border-sky-400 focus:ring-sky-400/30"
             value={confirmPassword}
             onChange={onFieldChange}
             required
@@ -101,7 +101,7 @@ export function RegisterPasswordFields({
             <div
               className={cn(
                 'absolute right-3 top-1/2 -translate-y-1/2',
-                passwordChecks.passwordsMatch ? 'text-green-600' : 'text-red-500',
+                passwordChecks.passwordsMatch ? 'text-green-400' : 'text-red-400',
               )}
             >
               {passwordChecks.passwordsMatch ? <Check className="h-4 w-4" /> : '×'}
