@@ -8,7 +8,7 @@ interface ImageUploadProps {
   maxImages?: number
 }
 
-export default function ImageUpload({ images, onImagesChange, maxImages = 10 }: ImageUploadProps) {
+export default function ImageUpload({ images, onImagesChange, maxImages = 10 }: Readonly<ImageUploadProps>) {
   const fileInputRef = useRef<HTMLInputElement>(null)
   const cameraInputRef = useRef<HTMLInputElement>(null)
 
@@ -65,7 +65,7 @@ export default function ImageUpload({ images, onImagesChange, maxImages = 10 }: 
   return (
     <div className="space-y-4">
       <div>
-        <label className="mb-2 block text-sm font-medium text-slate-700">
+        <label htmlFor="image-upload-input" className="mb-2 block text-sm font-medium text-slate-700">
           Hình ảnh xe đạp <span className="text-red-500">*</span>
         </label>
         <p className="text-xs text-slate-500 mb-3">
@@ -80,7 +80,7 @@ export default function ImageUpload({ images, onImagesChange, maxImages = 10 }: 
           variant="outline"
           onClick={openFileDialog}
           disabled={images.length >= maxImages}
-          className="flex items-center gap-2"
+          className="flex items-center gap-2 border-2 border-black text-slate-900 hover:bg-slate-100"
         >
           <Upload className="h-4 w-4" />
           Chọn từ thư mục
@@ -90,7 +90,7 @@ export default function ImageUpload({ images, onImagesChange, maxImages = 10 }: 
           variant="outline"
           onClick={openCamera}
           disabled={images.length >= maxImages}
-          className="flex items-center gap-2"
+          className="flex items-center gap-2 border-2 border-black text-slate-900 hover:bg-slate-100"
         >
           <Camera className="h-4 w-4" />
           Chụp ảnh
@@ -99,6 +99,7 @@ export default function ImageUpload({ images, onImagesChange, maxImages = 10 }: 
 
       {/* Hidden file inputs */}
       <input
+        id="image-upload-input"
         ref={fileInputRef}
         type="file"
         accept="image/*"
@@ -119,8 +120,8 @@ export default function ImageUpload({ images, onImagesChange, maxImages = 10 }: 
       {images.length > 0 && (
         <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-4">
           {images.map((image, index) => (
-            <div key={index} className="relative group">
-              <div className="aspect-square rounded-lg overflow-hidden border-2 border-slate-200">
+            <div key={`${image}-${index}`} className="relative group">
+              <div className="aspect-square overflow-hidden rounded-lg border-2 border-black">
                 <img
                   src={image}
                   alt={`Hình ${index + 1}`}
@@ -145,7 +146,7 @@ export default function ImageUpload({ images, onImagesChange, maxImages = 10 }: 
       )}
 
       {images.length === 0 && (
-        <div className="border-2 border-dashed border-slate-300 rounded-lg p-8 text-center">
+        <div className="rounded-lg border-2 border-dashed border-black p-8 text-center">
           <Upload className="h-12 w-12 text-slate-400 mx-auto mb-4" />
           <p className="text-slate-500">Chưa có hình ảnh nào</p>
           <p className="text-sm text-slate-400">Nhấp vào nút "Chọn từ thư mục" hoặc "Chụp ảnh" để thêm hình</p>

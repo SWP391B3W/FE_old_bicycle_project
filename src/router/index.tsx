@@ -14,6 +14,8 @@ import {
     CheckoutPage,
     PaymentPage,
     OrderConfirmationPage,
+    GuidePage,
+    MessagesPage,
 } from './LazyPages';
 
 export default function AppRouter() {
@@ -34,6 +36,8 @@ export default function AppRouter() {
                     <Route path={ROUTES.CHECKOUT} element={<CheckoutPage />} />
                     <Route path={ROUTES.PAYMENT} element={<PaymentPage />} />
                     <Route path={ROUTES.ORDER_CONFIRMATION} element={<OrderConfirmationPage />} />
+                    <Route path={ROUTES.GUIDE} element={<GuidePage />} />
+                    <Route path={ROUTES.MESSAGES} element={<MessagesPage />} />
                 </Route>
             </Routes>
         </Suspense>

@@ -33,13 +33,13 @@ export default function SellBikePage() {
   return (
     <main className="min-h-screen bg-slate-50 px-6 py-10 sm:px-8 lg:px-10">
       <div className="mx-auto max-w-5xl space-y-8">
-        <div className="rounded-3xl border border-slate-200/80 bg-white p-8 shadow-sm shadow-slate-900/5">
+        <div className="rounded-3xl border-2 border-black bg-white p-8 shadow-sm shadow-slate-900/5">
           <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
             <div>
               <p className="text-sm font-medium uppercase tracking-[0.2em] text-sky-600">Đăng tin bán xe</p>
               <h1 className="mt-2 text-3xl font-semibold text-slate-950">Đăng tin nhanh trong vài bước</h1>
             </div>
-            <Button asChild variant="outline" className="border-slate-300 text-slate-900 hover:bg-slate-100">
+            <Button asChild variant="outline" className="border-2 border-black text-slate-900 hover:bg-slate-100">
               <Link to={ROUTES.MARKET}>Xem thị trường</Link>
             </Button>
           </div>
@@ -50,7 +50,7 @@ export default function SellBikePage() {
         </div>
 
         {success ? (
-          <div className="rounded-3xl border border-green-200 bg-green-50 p-8 text-center shadow-sm shadow-slate-900/5">
+          <div className="rounded-3xl border-2 border-black bg-green-50 p-8 text-center shadow-sm shadow-slate-900/5">
             <h2 className="text-2xl font-semibold text-slate-950">Tin đăng đã được gửi</h2>
             <p className="mt-3 text-sm leading-6 text-slate-700">
               Cảm ơn bạn đã đăng tin. Ban quản trị sẽ kiểm duyệt và gửi thông báo khi tin đăng được duyệt.
@@ -60,7 +60,7 @@ export default function SellBikePage() {
             </Button>
           </div>
         ) : (
-          <form onSubmit={handleSubmit} className="rounded-3xl border border-slate-200/80 bg-white p-8 shadow-sm shadow-slate-900/5">
+          <form onSubmit={handleSubmit} className="rounded-3xl border-2 border-black bg-white p-8 shadow-sm shadow-slate-900/5">
             <div className="grid gap-6 sm:grid-cols-2">
               <div>
                 <label htmlFor="sell-title" className="mb-2 block text-sm font-medium text-slate-700">Tiêu đề tin đăng</label>
@@ -69,7 +69,7 @@ export default function SellBikePage() {
                   value={title}
                   onChange={(event) => setTitle(event.target.value)}
                   placeholder="Ví dụ: Xe đạp đua Pinarello F12 đã kiểm định"
-                  className="w-full rounded-2xl border border-slate-200 bg-slate-50 px-4 py-3 text-sm text-slate-900 outline-none transition focus:border-sky-500 focus:ring-2 focus:ring-sky-500/20"
+                  className="w-full rounded-2xl border-2 border-black bg-slate-50 px-4 py-3 text-sm text-slate-900 outline-none transition focus:border-black focus:ring-2 focus:ring-black/20"
                 />
               </div>
               <div>
@@ -79,7 +79,7 @@ export default function SellBikePage() {
                   value={brand}
                   onChange={(event) => setBrand(event.target.value)}
                   placeholder="Pinarello, Trek, Giant..."
-                  className="w-full rounded-2xl border border-slate-200 bg-slate-50 px-4 py-3 text-sm text-slate-900 outline-none transition focus:border-sky-500 focus:ring-2 focus:ring-sky-500/20"
+                  className="w-full rounded-2xl border-2 border-black bg-slate-50 px-4 py-3 text-sm text-slate-900 outline-none transition focus:border-black focus:ring-2 focus:ring-black/20"
                 />
               </div>
               <div>
@@ -89,7 +89,7 @@ export default function SellBikePage() {
                   value={model}
                   onChange={(event) => setModel(event.target.value)}
                   placeholder="Mẫu xe"
-                  className="w-full rounded-2xl border border-slate-200 bg-slate-50 px-4 py-3 text-sm text-slate-900 outline-none transition focus:border-sky-500 focus:ring-2 focus:ring-sky-500/20"
+                  className="w-full rounded-2xl border-2 border-black bg-slate-50 px-4 py-3 text-sm text-slate-900 outline-none transition focus:border-black focus:ring-2 focus:ring-black/20"
                 />
               </div>
               <div>
@@ -99,7 +99,7 @@ export default function SellBikePage() {
                   value={price}
                   onChange={(event) => setPrice(event.target.value)}
                   placeholder="VNĐ"
-                  className="w-full rounded-2xl border border-slate-200 bg-slate-50 px-4 py-3 text-sm text-slate-900 outline-none transition focus:border-sky-500 focus:ring-2 focus:ring-sky-500/20"
+                  className="w-full rounded-2xl border-2 border-black bg-slate-50 px-4 py-3 text-sm text-slate-900 outline-none transition focus:border-black focus:ring-2 focus:ring-black/20"
                 />
               </div>
             </div>
@@ -117,7 +117,7 @@ export default function SellBikePage() {
                   value={location}
                   onChange={(event) => setLocation(event.target.value)}
                   placeholder="Quận, tỉnh"
-                  className="w-full rounded-2xl border border-slate-200 bg-slate-50 px-4 py-3 text-sm text-slate-900 outline-none transition focus:border-sky-500 focus:ring-2 focus:ring-sky-500/20"
+                  className="w-full rounded-2xl border-2 border-black bg-slate-50 px-4 py-3 text-sm text-slate-900 outline-none transition focus:border-black focus:ring-2 focus:ring-black/20"
                 />
               </div>
               <div>
@@ -128,7 +128,7 @@ export default function SellBikePage() {
                   onChange={(event) => setDescription(event.target.value)}
                   placeholder="Ghi rõ tình trạng, tuổi xe, bảo trì..."
                   rows={5}
-                  className="w-full rounded-2xl border border-slate-200 bg-slate-50 px-4 py-3 text-sm text-slate-900 outline-none transition focus:border-sky-500 focus:ring-2 focus:ring-sky-500/20"
+                  className="w-full rounded-2xl border-2 border-black bg-slate-50 px-4 py-3 text-sm text-slate-900 outline-none transition focus:border-black focus:ring-2 focus:ring-black/20"
                 />
               </div>
             </div>

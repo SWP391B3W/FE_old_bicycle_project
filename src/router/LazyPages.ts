@@ -12,3 +12,5 @@ export const VerifyEmailPage = lazy(() => import('../pages/VerifyEmailPage'));
 export const CheckoutPage = lazy(() => import('../pages/CheckoutPage'));
 export const PaymentPage = lazy(() => import('../pages/PaymentPage'));
 export const OrderConfirmationPage = lazy(() => import('../pages/OrderConfirmationPage'));
+export const GuidePage = lazy(() => import('../pages/GuidePage'));
+export const MessagesPage = lazy(() => import('../pages/messages/MessagesPage'));
