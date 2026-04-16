@@ -14,3 +14,15 @@ export const PaymentPage = lazy(() => import('../pages/PaymentPage'));
 export const OrderConfirmationPage = lazy(() => import('../pages/OrderConfirmationPage'));
 export const GuidePage = lazy(() => import('../pages/GuidePage'));
 export const MessagesPage = lazy(() => import('../pages/messages/MessagesPage'));
+
+// Inspector Pages
+export const InspectorDashboardPage = lazy(() => import('../pages/inspector/InspectorDashboardPage'));
+export const InspectionRequestsPage = lazy(() => import('../pages/inspector/InspectionRequestsPage'));
+export const InspectionFormPage = lazy(() => import('../pages/inspector/InspectionFormPage'));
+export const InspectionHistoryPage = lazy(() => import('../pages/inspector/InspectionHistoryPage'));
+
+// Seller Pages
+export const SellerDashboardPage = lazy(() => import('../pages/seller/SellerDashboardPage'));
+export const SellerListingsPage = lazy(() => import('../pages/seller/SellerListingsPage'));
+export const SellerEditProductPage = lazy(() => import('../pages/seller/SellerEditProductPage'));
+export const SellerOrdersPage = lazy(() => import('../pages/seller/SellerOrdersPage'));
