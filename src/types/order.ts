@@ -1,6 +1,6 @@
 export type PaymentOption = 'partial' | 'full'
 
-export type PaymentMethod = 'transfer' | 'cash' | 'online'
+export type PaymentMethod = 'transfer' | 'cash' | 'online' | 'credit_card' | 'bank_transfer' | 'cod'
 
 export type OrderEvidenceType = 'seller_handover' | 'buyer_receipt'
 

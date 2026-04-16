@@ -45,6 +45,8 @@ export interface Product {
   province?: string | null
   district?: string | null
   location?: string | null // For compatibility with Home page
+  brand?: string | null // Legacy compatibility
+  category?: string | null // Legacy compatibility
   year?: string | null
   frameSize?: string | null
   wheelSize?: string | null
@@ -59,7 +61,7 @@ export interface Product {
   categoryName?: string | null
   brakeTypeName?: string | null
   frameMaterialName?: string | null
-  images: ProductImage[]
+  images: (ProductImage | string)[]
   isVerified: boolean
   lockedForTransaction: boolean
   sellerActionLocked?: boolean

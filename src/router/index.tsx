@@ -18,6 +18,11 @@ import {
     AdminDashboardPage,
     AdminUsersPage,
     AdminOrdersPage,
+    AdminListingsPage,
+    AdminReportsPage,
+    AdminCategoriesPage,
+    AdminDisputesPage,
+    AdminPayoutsPage,
 } from './LazyPages';
 
 export default function AppRouter() {
