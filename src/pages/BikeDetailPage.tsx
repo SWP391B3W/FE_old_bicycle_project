@@ -47,7 +47,7 @@ export default function BikeDetailPage() {
 
           <div className="grid gap-4 lg:grid-cols-[1.5fr_0.8fr]">
             <div className="overflow-hidden rounded-3xl bg-slate-100">
-              <img src={bike.image} alt={bike.title} className="h-full w-full object-cover" />
+              <img src={bike.images[0]} alt={bike.title} className="h-full w-full object-cover" />
             </div>
             <div className="space-y-4 rounded-3xl border border-slate-200/80 bg-slate-50 p-6">
               <div>

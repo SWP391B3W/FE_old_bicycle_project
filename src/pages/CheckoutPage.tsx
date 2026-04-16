@@ -184,7 +184,7 @@ export default function CheckoutPage() {
                 <div className="rounded-2xl border border-slate-200/80 bg-slate-50 p-4">
                   <div className="flex gap-4">
                     <img
-                      src={bike.image}
+                      src={bike.images[0]}
                       alt={bike.title}
                       className="h-20 w-20 rounded-xl object-cover"
                     />

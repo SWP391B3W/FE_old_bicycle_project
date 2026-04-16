@@ -135,7 +135,7 @@ export default function MarketPage() {
                 {filteredBikes.map((bike) => (
                   <article key={bike.id} className="overflow-hidden rounded-3xl border border-slate-200/80 bg-white shadow-sm shadow-slate-900/5">
                     <div className="relative h-56 overflow-hidden bg-slate-100">
-                      <img src={bike.image} alt={bike.title} className="h-full w-full object-cover" />
+                      <img src={bike.images[0]} alt={bike.title} className="h-full w-full object-cover" />
                       <span className="absolute left-4 top-4 rounded-full bg-slate-950/80 px-3 py-1 text-xs font-semibold uppercase tracking-[0.2em] text-white">
                         {bike.category}
                       </span>

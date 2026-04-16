@@ -1,4 +1,4 @@
-export type ConditionType = 'new_90' | 'used' | 'needs_repair'
+export type ConditionType = 'new_90' | 'used' | 'needs_repair' | 'new'
 
 export type ProductStatus =
   | 'pending'
@@ -15,6 +15,7 @@ export interface ProductSeller {
   lastName: string
   avatarUrl?: string | null
   phone?: string | null
+  sellerSince?: string | null
 }
 
 export interface ProductImage {
@@ -43,10 +44,13 @@ export interface Product {
   status: ProductStatus
   province?: string | null
   district?: string | null
+  location?: string | null // For compatibility with Home page
+  year?: string | null
   frameSize?: string | null
   wheelSize?: string | null
   groupsetId?: string | null
   groupset?: string | null
+  highlights?: string[] | null
   createdAt: string
   expiresAt?: string | null
   seller?: ProductSeller | null

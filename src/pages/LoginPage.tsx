@@ -2,7 +2,6 @@ import { useState } from 'react'
 import { Link, useLocation, useNavigate } from 'react-router-dom'
 import { AlertCircle, Eye, EyeOff, Lock, Mail } from 'lucide-react'
 import { Button } from '@/components/ui/button'
-import Logo from '@/components/Logo'
 import { Input } from '@/components/ui/input'
 import { ROUTES } from '@/constants/routes'
 import { useAuth } from '@/contexts/AuthContext'
@@ -103,24 +102,6 @@ export default function LoginPage() {
             <section className="relative overflow-hidden px-6 py-8 sm:px-8 lg:px-10">
                 <div className="absolute inset-0 bg-[radial-gradient(circle_at_top,_rgba(56,189,248,0.24),_transparent_40%),linear-gradient(180deg,rgba(15,23,42,0.96),rgba(15,23,42,0.86))]" />
                 <div className="relative mx-auto max-w-7xl">
-                    <nav className="flex flex-wrap items-center justify-between gap-4 py-3">
-                        <div className="flex items-center gap-3">
-                            <Logo className="h-11 w-11" showText={false} />
-                        <span className="text-lg font-semibold tracking-tight text-white">Market Bike</span>
-                        </div>
-                        <div className="hidden items-center gap-8 text-sm text-slate-200 md:flex">
-                            <Link className="transition hover:text-white" to={ROUTES.HOME}>Trang chủ</Link>
-                            <Link className="transition hover:text-white" to={ROUTES.MARKET}>Mua xe</Link>
-                            <Link className="transition hover:text-white" to={ROUTES.SELL}>Bán xe</Link>
-                            <a className="transition hover:text-white" href="#guide">Hướng dẫn</a>
-                        </div>
-                        <div className="flex items-center gap-3">
-                            <Button variant="outline" size="sm" className="border-white/20 text-white hover:bg-white/10" asChild>
-                                <Link to={ROUTES.REGISTER}>Đăng ký</Link>
-                            </Button>
-                        </div>
-                    </nav>
-
                     <div className="flex min-h-[calc(100vh-120px)] items-center justify-center">
                         <div className="w-full max-w-md">
                             <div className="mb-8 text-center">
