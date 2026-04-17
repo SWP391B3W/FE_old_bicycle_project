@@ -9,7 +9,7 @@ export interface AdminProductFilters {
   page?: number
   size?: number
 }
-
+// fix bug
 export const adminProductsApi = {
   getAll(filters: AdminProductFilters = {}) {
     return getResult<PageResult<Product>>('/api/admin/products', {
