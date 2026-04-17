@@ -86,7 +86,7 @@ export function HomeFeaturedProductsSection({
 
               return (
                 <Link key={product.id} to={buildRoute.bikeDetail(product.id)}>
-                  <Card className="group h-full cursor-pointer overflow-hidden transition-all hover:-translate-y-0.5 hover:shadow-lg">
+                  <Card className="group h-full cursor-pointer overflow-hidden border-slate-300 transition-all hover:-translate-y-0.5 hover:border-slate-400 hover:shadow-lg">
                     <div className="relative aspect-[4/3] overflow-hidden">
                       <ProductPreviewImage
                         imageUrl={getPrimaryImage(product)}

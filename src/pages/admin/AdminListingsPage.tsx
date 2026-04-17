@@ -27,7 +27,7 @@ import { getAdminListingStatusPresentation, getProductTimelineEntries } from '@/
 import type { Product, ProductStatus } from '@/types/product'
 
 type ListingAction = 'route_to_inspection' | 'hide'
-type StatusFilter = 'all_status' | ProductStatus
+type StatusFilter = 'all' | ProductStatus
 
 const PAGE_SIZE = 12
 
@@ -38,7 +38,7 @@ const initialDialogState: {
 } = { open: false, product: null, action: 'route_to_inspection' }
 
 const statusOptions: Array<{ value: StatusFilter; label: string }> = [
-  { value: 'all_status', label: 'Tất cả trạng thái' },
+  { value: 'all', label: 'Tất cả trạng thái' },
   { value: 'pending', label: 'Chờ kiểm duyệt ban đầu' },
   { value: 'active', label: 'Đang hiển thị công khai' },
   { value: 'hidden', label: 'Đã ẩn' },
@@ -104,7 +104,7 @@ export default function AdminListingsPage() {
   const navigate = useNavigate()
   const [searchQuery, setSearchQuery] = useState('')
   const deferredSearchQuery = useDeferredValue(searchQuery.trim())
-  const [statusFilter, setStatusFilter] = useState<StatusFilter>('all_status')
+  const [statusFilter, setStatusFilter] = useState<StatusFilter>('all')
   const [products, setProducts] = useState<Product[]>([])
   const [page, setPage] = useState(0)
   const [totalPages, setTotalPages] = useState(0)
@@ -124,7 +124,7 @@ export default function AdminListingsPage() {
       try {
         const result = await adminProductsApi.getAll({
           keyword: deferredSearchQuery || undefined,
-          status: statusFilter === 'all_status' ? undefined : statusFilter,
+          status: statusFilter === 'all' ? undefined : statusFilter,
           page,
           size: PAGE_SIZE,
         })
@@ -264,7 +264,7 @@ export default function AdminListingsPage() {
     {
       accessorKey: 'createdAt',
       header: 'Ngày đăng',
-      cell: ({ row }) => formatDate(row.original.createdAt),
+      cell: ({ row }) => formatDate(row.original.createdAt ?? new Date().toISOString()),
     },
     {
       id: 'actions',
@@ -310,8 +310,8 @@ export default function AdminListingsPage() {
         </p>
       </div>
 
-      <div className="grid gap-3 rounded-xl border bg-card p-4 shadow-sm md:grid-cols-[minmax(0,1fr)_256px]">
-        <div className="relative">
+      <div className="flex flex-col gap-4 md:flex-row md:items-center">
+        <div className="relative max-w-sm flex-1">
           <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
           <Input
             placeholder="Tìm kiếm tin đăng..."
@@ -324,7 +324,7 @@ export default function AdminListingsPage() {
           />
         </div>
 
-        <div className="w-full">
+        <div className="w-full md:w-64">
           <Select
             value={statusFilter}
             onValueChange={(value) => {
@@ -356,7 +356,7 @@ export default function AdminListingsPage() {
         <div className="flex flex-col gap-2 text-sm text-muted-foreground md:flex-row md:items-center md:justify-between">
           <p>{loading ? 'Đang tải danh sách...' : `Tìm thấy ${totalElements} tin đăng`}</p>
           <p>
-            {statusFilter === 'all_status'
+            {statusFilter === 'all'
               ? 'Đang xem tất cả trạng thái'
               : `Đang lọc: ${statusOptions.find((option) => option.value === statusFilter)?.label}`}
           </p>

@@ -56,7 +56,8 @@ export function hasExpiredInspection(product: Product, now = new Date()): boolea
 }
 
 export function isBlockedFromPublicVisibility(product: Product): boolean {
-  return isPublicStatus(product.status) && !product.isVerified
+  const status = product.status ?? 'pending'
+  return isPublicStatus(status) && !product.isVerified
 }
 
 export function getProductTimelineEntries(product: Product, now = new Date()): ProductTimelineEntry[] {
@@ -105,9 +106,11 @@ export function getAdminListingStatusPresentation(
   product: Product,
   now = new Date(),
 ): AdminListingStatusPresentation {
+  const status = product.status ?? 'pending'
+
   if (product.lockedForTransaction) {
     return {
-      status: product.status,
+      status,
       labelOverride: 'Đang bị khóa bởi giao dịch mở',
       className:
         'bg-sky-100 text-sky-800 border-sky-200 dark:bg-sky-900/30 dark:text-sky-300 dark:border-sky-800',
@@ -117,7 +120,7 @@ export function getAdminListingStatusPresentation(
 
   if (!isBlockedFromPublicVisibility(product)) {
     return {
-      status: product.status,
+      status,
       hint: null,
     }
   }
@@ -125,7 +128,7 @@ export function getAdminListingStatusPresentation(
   const inspectionExpired = hasExpiredInspection(product, now)
 
   return {
-    status: product.status,
+    status,
     labelOverride: inspectionExpired ? 'Hết hạn kiểm định' : 'Chưa đủ điều kiện public',
     className:
       'bg-amber-100 text-amber-800 border-amber-200 dark:bg-amber-900/30 dark:text-amber-300 dark:border-amber-800',

@@ -176,9 +176,7 @@ export default function AdminDashboardPage() {
             <div className="rounded-lg border border-border bg-card p-4">
               <div className="flex items-center gap-2">
                 <RotateCcw className="h-4 w-4 text-primary" />
-                <h3 className="font-semibold text-foreground">
-                  Phí sàn bị reverse
-                </h3>
+                <h3 className="font-semibold text-foreground">Phí sàn bị reverse</h3>
               </div>
               <p className="mt-3 text-2xl font-bold text-primary">
                 {formatCurrency(reversedPlatformFee)}

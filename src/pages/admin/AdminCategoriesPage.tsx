@@ -510,14 +510,14 @@ export default function AdminCategoriesPage() {
       </div>
 
       {/* Tab navigation */}
-      <div className="flex gap-1 border-b border-border overflow-x-auto scrollbar-hide">
+      <div className="flex gap-1 border-b border-border">
         {TABS.map((tab) => {
           const Icon = tab.icon
           return (
             <button
               key={tab.id}
               onClick={() => setActiveTab(tab.id)}
-              className={`flex items-center gap-2 px-4 py-2.5 text-sm font-medium transition-all border-b-2 -mb-px whitespace-nowrap ${activeTab === tab.id
+              className={`flex items-center gap-2 px-4 py-2.5 text-sm font-medium transition-all border-b-2 -mb-px ${activeTab === tab.id
                 ? 'border-primary text-primary'
                 : 'border-transparent text-muted-foreground hover:text-foreground'
                 }`}

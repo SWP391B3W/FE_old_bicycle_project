@@ -34,8 +34,8 @@ export default function AdminUsersPage() {
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState<string | null>(null);
     const [searchQuery, setSearchQuery] = useState('');
-    const [roleFilter, setRoleFilter] = useState<string>('all_role');
-    const [statusFilter, setStatusFilter] = useState<string>('all_status');
+    const [roleFilter, setRoleFilter] = useState<string>('all');
+    const [statusFilter, setStatusFilter] = useState<string>('all');
     const [page, setPage] = useState(0);
     const [totalPages, setTotalPages] = useState(0);
     const [totalElements, setTotalElements] = useState(0);
@@ -69,10 +69,10 @@ export default function AdminUsersPage() {
         try {
             const result = await adminUsersApi.getAll({
                 keyword: searchQuery || undefined,
-                role: roleFilter !== 'all_role' ? (roleFilter as AppRole) : undefined,
-                status: statusFilter !== 'all_status' ? (statusFilter as UserStatus) : undefined,
+                role: roleFilter !== 'all' ? (roleFilter as AppRole) : undefined,
+                status: statusFilter !== 'all' ? (statusFilter as UserStatus) : undefined,
                 page,
-                size: 8,
+                size: 10,
             });
             setUsers(result.content);
             setTotalPages(result.totalPages);
@@ -218,24 +218,24 @@ export default function AdminUsersPage() {
                         className="pl-9"
                     />
                 </div>
-                <Select value={roleFilter} onValueChange={(v) => { setRoleFilter(v); setPage(0); }}>
+                <Select value={roleFilter} onValueChange={(v) => { setRoleFilter(v ?? 'all'); setPage(0); }}>
                     <SelectTrigger className="w-40">
                         <SelectValue placeholder="Vai trò" />
                     </SelectTrigger>
                     <SelectContent>
-                        <SelectItem value="all_role">Tất cả vai trò</SelectItem>
-                        <SelectItem value="buyer">Người mua</SelectItem>
-                        <SelectItem value="seller">Người bán</SelectItem>
-                        <SelectItem value="inspector">Kiểm định viên</SelectItem>
-                        <SelectItem value="admin">Admin</SelectItem>
+                        <SelectItem value="all">Tất cả vai trò</SelectItem>
+                        <SelectItem value="BUYER">Người mua</SelectItem>
+                        <SelectItem value="SELLER">Người bán</SelectItem>
+                        <SelectItem value="INSPECTOR">Kiểm định viên</SelectItem>
+                        <SelectItem value="ADMIN">Admin</SelectItem>
                     </SelectContent>
                 </Select>
-                <Select value={statusFilter} onValueChange={(v) => { setStatusFilter(v); setPage(0); }}>
+                <Select value={statusFilter} onValueChange={(v) => { setStatusFilter(v ?? 'all'); setPage(0); }}>
                     <SelectTrigger className="w-36">
                         <SelectValue placeholder="Trạng thái" />
                     </SelectTrigger>
                     <SelectContent>
-                        <SelectItem value="all_status">Tất cả</SelectItem>
+                        <SelectItem value="all">Tất cả</SelectItem>
                         <SelectItem value="active">Hoạt động</SelectItem>
                         <SelectItem value="banned">Bị khóa</SelectItem>
                         <SelectItem value="unactive">Chưa kích hoạt</SelectItem>
@@ -253,97 +253,19 @@ export default function AdminUsersPage() {
                         <div key={i} className="h-12 bg-muted animate-pulse rounded" />
                     ))}
                 </div>
-            ) : users.length === 0 ? (
-                <div className="rounded-xl border border-dashed border-border bg-card px-6 py-10 text-center">
-                    <p className="text-base font-medium text-foreground">Không tìm thấy người dùng phù hợp.</p>
-                    <p className="mt-2 text-sm text-muted-foreground">
-                        Thử đổi bộ lọc hoặc từ khóa tìm kiếm để xem kết quả khác.
-                    </p>
-                </div>
             ) : (
                 <>
-                    <DataTable columns={columns} data={users} pageSize={8} showPagination={false} />
+                    <DataTable columns={columns} data={users} />
                     {/* Pagination */}
                     {totalPages > 1 && (
-                        <div className="flex items-center justify-between pt-2">
-                            <p className="text-sm text-muted-foreground">
-                                Trang <span className="font-medium text-foreground">{page + 1}</span> / {totalPages}
-                                <span className="ml-2 text-xs">(tổng {totalElements} người dùng)</span>
-                            </p>
-                            <div className="flex items-center gap-1">
-                                {/* First page */}
-                                <Button
-                                    variant="outline"
-                                    size="sm"
-                                    className="h-8 w-8 p-0"
-                                    disabled={page === 0}
-                                    onClick={() => setPage(0)}
-                                    title="Trang đầu"
-                                >
-                                    <ChevronLeft className="h-3 w-3" />
-                                    <ChevronLeft className="h-3 w-3 -ml-2" />
-                                </Button>
-                                {/* Prev */}
-                                <Button
-                                    variant="outline"
-                                    size="sm"
-                                    className="h-8 w-8 p-0"
-                                    disabled={page === 0}
-                                    onClick={() => setPage(p => p - 1)}
-                                >
-                                    <ChevronLeft className="h-4 w-4" />
-                                </Button>
-                                {/* Page number buttons */}
-                                {Array.from({ length: totalPages }, (_, i) => i)
-                                    .filter(i => {
-                                        if (totalPages <= 5) return true;
-                                        if (i === 0 || i === totalPages - 1) return true;
-                                        return Math.abs(i - page) <= 1;
-                                    })
-                                    .reduce<(number | 'ellipsis')[]>((acc, cur, idx, arr) => {
-                                        if (idx > 0 && cur - (arr[idx - 1] as number) > 1) acc.push('ellipsis');
-                                        acc.push(cur);
-                                        return acc;
-                                    }, [])
-                                    .map((item, idx) =>
-                                        item === 'ellipsis' ? (
-                                            <span key={`ellipsis-${idx}`} className="px-1 text-muted-foreground text-sm">…</span>
-                                        ) : (
-                                            <Button
-                                                key={item}
-                                                variant={page === item ? 'default' : 'outline'}
-                                                size="sm"
-                                                className="h-8 w-8 p-0 text-xs"
-                                                onClick={() => setPage(item as number)}
-                                            >
-                                                {(item as number) + 1}
-                                            </Button>
-                                        )
-                                    )
-                                }
-                                {/* Next */}
-                                <Button
-                                    variant="outline"
-                                    size="sm"
-                                    className="h-8 w-8 p-0"
-                                    disabled={page >= totalPages - 1}
-                                    onClick={() => setPage(p => p + 1)}
-                                >
-                                    <ChevronRight className="h-4 w-4" />
-                                </Button>
-                                {/* Last page */}
-                                <Button
-                                    variant="outline"
-                                    size="sm"
-                                    className="h-8 w-8 p-0"
-                                    disabled={page >= totalPages - 1}
-                                    onClick={() => setPage(totalPages - 1)}
-                                    title="Trang cuối"
-                                >
-                                    <ChevronRight className="h-3 w-3" />
-                                    <ChevronRight className="h-3 w-3 -ml-2" />
-                                </Button>
-                            </div>
+                        <div className="flex items-center justify-center gap-2">
+                            <Button variant="outline" size="sm" disabled={page === 0} onClick={() => setPage(p => p - 1)}>
+                                <ChevronLeft className="h-4 w-4" />
+                            </Button>
+                            <span className="text-sm text-muted-foreground">Trang {page + 1} / {totalPages}</span>
+                            <Button variant="outline" size="sm" disabled={page >= totalPages - 1} onClick={() => setPage(p => p + 1)}>
+                                <ChevronRight className="h-4 w-4" />
+                            </Button>
                         </div>
                     )}
                 </>

@@ -1,6 +1,12 @@
 export type PaymentOption = 'partial' | 'full'
 
-export type PaymentMethod = 'transfer' | 'cash' | 'online' | 'credit_card' | 'bank_transfer' | 'cod'
+export type PaymentMethod =
+  | 'credit_card'
+  | 'bank_transfer'
+  | 'cod'
+  | 'transfer'
+  | 'cash'
+  | 'online'
 
 export type OrderEvidenceType = 'seller_handover' | 'buyer_receipt'
 
@@ -32,6 +38,7 @@ export interface OrderEvidenceInput {
 
 export type OrderStatus =
   | 'pending'
+  | 'processing'
   | 'deposited'
   | 'awaiting_buyer_confirmation'
   | 'completed'
@@ -56,17 +63,28 @@ export type OrderCancelReason =
 
 export interface Order {
   id: string
-  productId: string
-  productTitle: string
+
+  // Legacy fields
+  bikeId?: string
+  quantity?: number
+  price?: number
+  deliveryAddress?: string
+  deliveryPhone?: string
+  deliveryName?: string
+  notes?: string
+
+  // New schema fields
+  productId?: string
+  productTitle?: string
   buyerId: string
-  buyerName: string
+  buyerName?: string
   sellerId: string
-  sellerName: string
+  sellerName?: string
   totalAmount: number
   depositAmount?: number | null
-  requiredUpfrontAmount: number
-  paidAmount: number
-  remainingAmount: number
+  requiredUpfrontAmount?: number
+  paidAmount?: number
+  remainingAmount?: number
   serviceFee?: number | null
   feeBaseAmount?: number | null
   platformFeeRate?: number | null
@@ -79,17 +97,17 @@ export interface Order {
   platformFeeStatus?: PlatformFeeStatus | null
   platformFeeRecognizedAt?: string | null
   platformFeeReversedAt?: string | null
-  paymentOption: PaymentOption
-  status: OrderStatus
-  fundingStatus: OrderFundingStatus
+  paymentOption?: PaymentOption
+  fundingStatus?: OrderFundingStatus
   paymentMethod: PaymentMethod
-  buyerReviewSubmitted: boolean
+  buyerReviewSubmitted?: boolean
   sellerHandoverEvidence?: OrderEvidenceSubmission | null
   buyerReceiptEvidence?: OrderEvidenceSubmission | null
   acceptedAt?: string | null
   paymentDeadline?: string | null
   cancelReason?: OrderCancelReason | null
   cancelledAt?: string | null
+  status: OrderStatus
   createdAt: string
   updatedAt: string
 }

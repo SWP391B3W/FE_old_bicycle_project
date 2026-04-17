@@ -56,7 +56,7 @@ export function getOrderBuyerFeeAmount(order: Order) {
 }
 
 export function getOrderBuyerChargeAmount(order: Order) {
-  return order.buyerChargeAmount ?? order.paidAmount
+  return order.buyerChargeAmount ?? order.paidAmount ?? 0
 }
 
 export function getOrderSellerFeeAmount(order: Order) {
@@ -64,7 +64,7 @@ export function getOrderSellerFeeAmount(order: Order) {
 }
 
 export function getOrderSellerGrossPayoutAmount(order: Order) {
-  return order.sellerGrossPayoutAmount ?? order.requiredUpfrontAmount
+  return order.sellerGrossPayoutAmount ?? order.requiredUpfrontAmount ?? 0
 }
 
 export function getOrderSellerNetPayoutAmount(order: Order) {
@@ -74,7 +74,7 @@ export function getOrderSellerNetPayoutAmount(order: Order) {
 
 export function getOrderRefundableBuyerAmount(order: Order) {
   const buyerChargeAmount = order.buyerChargeAmount ?? 0
-  return buyerChargeAmount > 0 ? buyerChargeAmount : order.paidAmount
+  return buyerChargeAmount > 0 ? buyerChargeAmount : order.paidAmount ?? 0
 }
 
 function getPaymentDeadlineMs(order: Order) {
@@ -308,7 +308,7 @@ export function canBuyerRequestRefund(order: Order) {
   return (
     (order.status === 'deposited' || order.status === 'awaiting_buyer_confirmation') &&
     order.fundingStatus === 'held' &&
-    order.paidAmount > 0
+    (order.paidAmount ?? 0) > 0
   )
 }
 

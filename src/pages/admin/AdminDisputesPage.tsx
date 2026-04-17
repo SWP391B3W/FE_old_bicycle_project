@@ -28,12 +28,12 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Textarea } from '@/components/ui/textarea'
 import type { AdminRefund, RefundStatus } from '@/types/refund'
 
-type StatusFilter = 'all_status' | RefundStatus
+type StatusFilter = 'all' | RefundStatus
 
 const PAGE_SIZE = 10
 
 const statusOptions: Array<{ value: StatusFilter; label: string }> = [
-  { value: 'all_status', label: 'Tất cả trạng thái' },
+  { value: 'all', label: 'Tất cả trạng thái' },
   { value: 'pending', label: 'Chờ xử lý' },
   { value: 'approved', label: 'Đã duyệt hoàn tiền' },
   { value: 'rejected', label: 'Đã từ chối' },
@@ -92,7 +92,7 @@ function getErrorMessage(error: unknown, fallback: string) {
 export default function AdminDisputesPage() {
   const [searchQuery, setSearchQuery] = useState('')
   const deferredSearchQuery = useDeferredValue(searchQuery.trim())
-  const [statusFilter, setStatusFilter] = useState<StatusFilter>('all_status')
+  const [statusFilter, setStatusFilter] = useState<StatusFilter>('all')
   const [refunds, setRefunds] = useState<AdminRefund[]>([])
   const [page, setPage] = useState(0)
   const [totalPages, setTotalPages] = useState(0)
@@ -128,7 +128,7 @@ export default function AdminDisputesPage() {
       try {
         const result = await refundsApi.getAll({
           keyword: deferredSearchQuery || undefined,
-          status: statusFilter === 'all_status' ? undefined : statusFilter,
+          status: statusFilter === 'all' ? undefined : statusFilter,
           page,
           size: PAGE_SIZE,
         })
@@ -167,7 +167,7 @@ export default function AdminDisputesPage() {
   const reviewDialogTitle = useMemo(() => reviewLabels[reviewDialog.nextStatus], [reviewDialog.nextStatus])
 
   const emptyMessage = useMemo(() => {
-    if (deferredSearchQuery || statusFilter !== 'all_status') {
+    if (deferredSearchQuery || statusFilter !== 'all') {
       return 'Không tìm thấy yêu cầu tranh chấp phù hợp.'
     }
 
@@ -188,7 +188,7 @@ export default function AdminDisputesPage() {
   async function reloadRefunds() {
     const result = await refundsApi.getAll({
       keyword: deferredSearchQuery || undefined,
-      status: statusFilter === 'all_status' ? undefined : statusFilter,
+      status: statusFilter === 'all' ? undefined : statusFilter,
       page,
       size: PAGE_SIZE,
     })
@@ -273,7 +273,7 @@ export default function AdminDisputesPage() {
     {
       accessorKey: 'status',
       header: 'Trạng thái',
-      cell: ({ row }) => <StatusBadge status={row.original.status as any} />,
+      cell: ({ row }) => <StatusBadge status={row.original.status} />,
     },
     {
       accessorKey: 'createdAt',
@@ -330,8 +330,8 @@ export default function AdminDisputesPage() {
         </p>
       </div>
 
-      <div className="grid gap-3 rounded-xl border bg-card p-4 shadow-sm md:grid-cols-[minmax(0,1fr)_224px]">
-        <div className="relative">
+      <div className="flex flex-col gap-4 md:flex-row md:items-center">
+        <div className="relative max-w-sm flex-1">
           <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
           <Input
             placeholder="Tìm theo mã đơn, sản phẩm hoặc người dùng..."
@@ -344,7 +344,7 @@ export default function AdminDisputesPage() {
           />
         </div>
 
-        <div className="w-full">
+        <div className="w-full md:w-56">
           <Select
             value={statusFilter}
             onValueChange={(value) => {
@@ -376,7 +376,7 @@ export default function AdminDisputesPage() {
         <div className="flex flex-col gap-2 text-sm text-muted-foreground md:flex-row md:items-center md:justify-between">
           <p>{loading ? 'Đang tải dữ liệu tranh chấp...' : `Tìm thấy ${totalElements} yêu cầu tranh chấp`}</p>
           <p>
-            {statusFilter === 'all_status'
+            {statusFilter === 'all'
               ? 'Đang xem tất cả trạng thái'
               : `Đang lọc: ${statusOptions.find((option) => option.value === statusFilter)?.label}`}
           </p>

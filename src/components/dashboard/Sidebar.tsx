@@ -1,7 +1,6 @@
 import { useState } from 'react'
 import { Link, useLocation } from 'react-router-dom'
 import {
-  Bike,
   ChevronLeft,
   ChevronRight,
   ClipboardCheck,
@@ -16,6 +15,7 @@ import {
   Users,
   Wallet,
 } from 'lucide-react'
+import Logo from '@/components/Logo'
 import { Button } from '@/components/ui/button'
 import { ROUTES } from '@/constants/routes'
 import { cn } from '@/lib/utils'
@@ -38,27 +38,23 @@ export function Sidebar({ items }: SidebarProps) {
   return (
     <aside
       className={cn(
-        'flex h-screen flex-col border-r border-border bg-card transition-all duration-300',
+        'flex h-screen flex-col border-r border-slate-200 bg-white transition-all duration-300',
         collapsed ? 'w-16' : 'w-64',
       )}
     >
-      <div className="flex h-16 items-center border-b border-border px-3">
+      <div className="flex h-16 items-center border-b border-slate-200 px-3">
         {collapsed ? (
           <Button variant="ghost" size="icon" onClick={() => setCollapsed((current) => !current)} className="mx-auto">
             <ChevronRight className="h-4 w-4" />
           </Button>
         ) : (
           <>
-            <Link
-              to={ROUTES.HOME}
-              className="flex min-w-0 flex-1 items-center gap-2 text-foreground hover:opacity-80"
-              title="Về trang chủ"
-            >
-              <div className="flex h-10 w-10 shrink-0 items-center justify-center overflow-hidden rounded-full bg-white">
-                <img src="/logo.png" alt="Logo" className="h-full w-full object-cover" />
-              </div>
-              <span className="truncate text-base font-bold">MARKET BIKE</span>
-            </Link>
+            <div className="min-w-0 flex-1" title="Về trang chủ">
+              <Logo
+                className="h-8 w-8 rounded-lg object-cover shadow-none"
+                textClassName="truncate text-base font-bold !text-black"
+              />
+            </div>
 
             <Button variant="ghost" size="icon" onClick={() => setCollapsed((current) => !current)} className="shrink-0">
               <ChevronLeft className="h-4 w-4" />
@@ -78,8 +74,8 @@ export function Sidebar({ items }: SidebarProps) {
                 <Link
                   to={item.href}
                   className={cn(
-                    'flex cursor-pointer items-center gap-3 rounded-md px-3 py-2.5 transition-colors hover:bg-muted',
-                    isActive && 'bg-primary/10 font-medium text-primary',
+                    'flex cursor-pointer items-center gap-3 rounded-md px-3 py-2.5 text-slate-700 transition-colors hover:bg-sky-50 hover:text-sky-700',
+                    isActive && 'bg-sky-100 font-medium text-sky-700',
                     collapsed && 'justify-center',
                   )}
                   title={collapsed ? item.label : undefined}
@@ -118,6 +114,3 @@ export const sellerNavItems: NavItem[] = [
   { icon: Package, label: 'Quản lý tin đăng', href: ROUTES.SELLER_LISTINGS },
   { icon: ShoppingBag, label: 'Quản lý đơn cọc', href: ROUTES.SELLER_ORDERS },
 ]
-
-// Keep Bike icon imported from lucide but suppressed unused warning
-void Bike

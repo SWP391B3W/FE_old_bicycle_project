@@ -27,19 +27,19 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Textarea } from '@/components/ui/textarea'
 import type { AdminPayout, PayoutStatus, PayoutType } from '@/types/payout'
 
-type TypeFilter = 'all_type' | PayoutType
-type StatusFilter = 'all_status' | PayoutStatus
+type TypeFilter = 'all' | PayoutType
+type StatusFilter = 'all' | PayoutStatus
 
 const PAGE_SIZE = 10
 
 const typeOptions: Array<{ value: TypeFilter; label: string }> = [
-  { value: 'all_type', label: 'Tất cả payout' },
+  { value: 'all', label: 'Tất cả payout' },
   { value: 'refund', label: 'Hoàn tiền buyer' },
   { value: 'seller_release', label: 'Giải ngân seller' },
 ]
 
 const statusOptions: Array<{ value: StatusFilter; label: string }> = [
-  { value: 'all_status', label: 'Tất cả trạng thái' },
+  { value: 'all', label: 'Tất cả trạng thái' },
   { value: 'profile_required', label: 'Thiếu payout profile' },
   { value: 'pending_transfer', label: 'Chờ chuyển khoản' },
   { value: 'completed', label: 'Đã chuyển khoản' },
@@ -128,8 +128,8 @@ function getStatusTone(status: PayoutStatus) {
 export default function AdminPayoutsPage() {
   const [searchQuery, setSearchQuery] = useState('')
   const deferredSearchQuery = useDeferredValue(searchQuery.trim())
-  const [typeFilter, setTypeFilter] = useState<TypeFilter>('all_type')
-  const [statusFilter, setStatusFilter] = useState<StatusFilter>('all_status')
+  const [typeFilter, setTypeFilter] = useState<TypeFilter>('all')
+  const [statusFilter, setStatusFilter] = useState<StatusFilter>('all')
   const [payouts, setPayouts] = useState<AdminPayout[]>([])
   const [page, setPage] = useState(0)
   const [totalPages, setTotalPages] = useState(0)
@@ -165,8 +165,8 @@ export default function AdminPayoutsPage() {
       try {
         const result = await payoutsApi.getAdminPayouts({
           keyword: deferredSearchQuery || undefined,
-          type: typeFilter === 'all_type' ? undefined : typeFilter,
-          status: statusFilter === 'all_status' ? undefined : statusFilter,
+          type: typeFilter === 'all' ? undefined : typeFilter,
+          status: statusFilter === 'all' ? undefined : statusFilter,
           page,
           size: PAGE_SIZE,
         })
@@ -205,8 +205,8 @@ export default function AdminPayoutsPage() {
   async function reloadPayouts() {
     const result = await payoutsApi.getAdminPayouts({
       keyword: deferredSearchQuery || undefined,
-      type: typeFilter === 'all_type' ? undefined : typeFilter,
-      status: statusFilter === 'all_status' ? undefined : statusFilter,
+      type: typeFilter === 'all' ? undefined : typeFilter,
+      status: statusFilter === 'all' ? undefined : statusFilter,
       page,
       size: PAGE_SIZE,
     })
@@ -260,7 +260,7 @@ export default function AdminPayoutsPage() {
   }
 
   const emptyMessage = useMemo(() => {
-    if (deferredSearchQuery || typeFilter !== 'all_type' || statusFilter !== 'all_status') {
+    if (deferredSearchQuery || typeFilter !== 'all' || statusFilter !== 'all') {
       return 'Không tìm thấy payout phù hợp.'
     }
 
@@ -386,8 +386,8 @@ export default function AdminPayoutsPage() {
         </p>
       </div>
 
-      <div className="grid gap-3 rounded-xl border bg-card p-4 shadow-sm md:grid-cols-[minmax(0,1fr)_224px_224px]">
-        <div className="relative">
+      <div className="flex flex-col gap-4 md:flex-row md:items-center">
+        <div className="relative max-w-sm flex-1">
           <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
           <Input
             placeholder="Tìm theo sản phẩm, order, buyer, seller..."
@@ -400,7 +400,7 @@ export default function AdminPayoutsPage() {
           />
         </div>
 
-        <div className="w-full">
+        <div className="w-full md:w-56">
           <Select
             value={typeFilter}
             onValueChange={(value) => {
@@ -421,7 +421,7 @@ export default function AdminPayoutsPage() {
           </Select>
         </div>
 
-        <div className="w-full">
+        <div className="w-full md:w-56">
           <Select
             value={statusFilter}
             onValueChange={(value) => {
@@ -458,7 +458,7 @@ export default function AdminPayoutsPage() {
       <div className="space-y-4">
         <div className="flex flex-col gap-2 text-sm text-muted-foreground md:flex-row md:items-center md:justify-between">
           <p>{loading ? 'Đang tải danh sách payout...' : `Tìm thấy ${totalElements} payout`}</p>
-          <p>{typeFilter === 'all_type' ? 'Đang xem tất cả loại payout' : `Đang lọc: ${typeLabelMap[typeFilter]}`}</p>
+          <p>{typeFilter === 'all' ? 'Đang xem tất cả loại payout' : `Đang lọc: ${typeLabelMap[typeFilter]}`}</p>
         </div>
 
         <DataTable
@@ -548,11 +548,11 @@ export default function AdminPayoutsPage() {
                 </p>
 
                 {detailDialog.payout.qrCodeUrl ? (
-                  <div className="overflow-hidden rounded-lg border bg-white p-2 text-center">
+                  <div className="overflow-hidden rounded-lg border bg-white p-2">
                     <img
                       src={detailDialog.payout.qrCodeUrl}
                       alt="VietQR payout"
-                      className="mx-auto"
+                      className="mx-auto h-full w-full object-contain"
                     />
                   </div>
                 ) : (

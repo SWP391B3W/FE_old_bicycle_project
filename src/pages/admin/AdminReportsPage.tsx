@@ -169,7 +169,7 @@ export default function AdminReportsPage() {
       header: 'Trạng thái',
       cell: ({ row }) => (
         <StatusBadge
-          status={row.original.status as any}
+          status={row.original.status}
           labelOverride={statusLabels[row.original.status]}
         />
       ),
@@ -233,7 +233,7 @@ export default function AdminReportsPage() {
         <Select
           value={statusFilter}
           onValueChange={(value) => {
-            setStatusFilter(value)
+            setStatusFilter(value ?? 'all')
             setPage(0)
           }}
         >
@@ -252,7 +252,7 @@ export default function AdminReportsPage() {
         <Select
           value={targetTypeFilter}
           onValueChange={(value) => {
-            setTargetTypeFilter(value)
+            setTargetTypeFilter(value ?? 'all')
             setPage(0)
           }}
         >
@@ -277,7 +277,7 @@ export default function AdminReportsPage() {
         </div>
       ) : (
         <>
-          <DataTable columns={columns} data={reports} showPagination={false} />
+          <DataTable columns={columns} data={reports} />
           {totalPages > 1 && (
             <div className="flex items-center justify-center gap-2">
               <Button variant="outline" size="sm" disabled={page === 0} onClick={() => setPage((current) => current - 1)}>

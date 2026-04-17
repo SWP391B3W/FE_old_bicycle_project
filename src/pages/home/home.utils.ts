@@ -2,8 +2,8 @@ import { formatPriceDisplay } from '@/lib/currency-input'
 import type { Product } from '@/types/product'
 
 const PRODUCT_CONDITION_LABELS: Record<string, string> = {
-  new: 'Mới',
-  new_90: 'Mới 90%',
+  new: 'Như mới',
+  new_90: 'Như mới',
   used: 'Đã qua sử dụng',
   need_repair: 'Cần sửa chữa',
   needs_repair: 'Cần sửa chữa',
@@ -14,19 +14,12 @@ export function formatPrice(price: number): string {
 }
 
 export function getPrimaryImage(product: Product): string {
-  if (!product.images || product.images.length === 0) {
+  const firstImage = product.images?.[0]
+  if (!firstImage) {
     return ''
   }
 
-  // Support both legacy string[] and new ProductImage[] systems during transition
-  const firstImage = product.images[0]
-  if (typeof firstImage === 'string') {
-    return firstImage
-  }
-
-  // Use primary logic or just the first image
-  const primary = product.images.find(img => img.isPrimary) || product.images[0]
-  return primary.url
+  return typeof firstImage === 'string' ? firstImage : firstImage.url
 }
 
 export function getProductConditionLabel(condition?: Product['condition']) {

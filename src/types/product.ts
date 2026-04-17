@@ -1,4 +1,5 @@
-export type ConditionType = 'new_90' | 'used' | 'needs_repair' | 'new'
+export type ProductCondition = 'new' | 'used' | 'need_repair'
+export type ConditionType = 'new_90' | 'used' | 'needs_repair' | ProductCondition
 
 export type ProductStatus =
   | 'pending'
@@ -15,7 +16,6 @@ export interface ProductSeller {
   lastName: string
   avatarUrl?: string | null
   phone?: string | null
-  sellerSince?: string | null
 }
 
 export interface ProductImage {
@@ -37,23 +37,20 @@ export interface ProductInspectionInfo {
 export interface Product {
   id: string
   title: string
-  description?: string | null
   price: number
+
+  // New schema (admin/API)
+  description?: string | null
   originalPrice?: number | null
   condition?: ConditionType | null
-  status: ProductStatus
+  status?: ProductStatus
   province?: string | null
   district?: string | null
-  location?: string | null // For compatibility with Home page
-  brand?: string | null // Legacy compatibility
-  category?: string | null // Legacy compatibility
-  year?: string | null
   frameSize?: string | null
   wheelSize?: string | null
   groupsetId?: string | null
   groupset?: string | null
-  highlights?: string[] | null
-  createdAt: string
+  createdAt?: string
   expiresAt?: string | null
   seller?: ProductSeller | null
   brandName?: string | null
@@ -61,11 +58,20 @@ export interface Product {
   categoryName?: string | null
   brakeTypeName?: string | null
   frameMaterialName?: string | null
-  images: (ProductImage | string)[]
-  isVerified: boolean
-  lockedForTransaction: boolean
+  images?: ProductImage[] | string[]
+  isVerified?: boolean
+  lockedForTransaction?: boolean
   sellerActionLocked?: boolean
   inspection?: ProductInspectionInfo | null
+
+  // Legacy schema (existing pages)
+  brand?: string
+  category?: string
+  location?: string
+  year?: string
+  highlights?: string[]
+  sellerName?: string
+  sellerSince?: string
 }
 
 export interface ProductFilterRequest {

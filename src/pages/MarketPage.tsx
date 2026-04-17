@@ -150,7 +150,7 @@ function BikeCard({ bike, viewMode }: Readonly<{ bike: FilteredBike; viewMode: '
   return (
     <Link
       to={buildRoute.bikeDetail(bike.id)}
-      className={`group overflow-hidden rounded-3xl border border-slate-200/80 bg-white shadow-sm shadow-slate-900/5 transition hover:shadow-md hover:shadow-slate-900/10 ${
+      className={`group overflow-hidden rounded-3xl border border-slate-300 bg-white shadow-sm shadow-slate-900/5 transition hover:border-slate-400 hover:shadow-md hover:shadow-slate-900/10 ${
         viewMode === 'list' ? 'flex' : ''
       }`}
     >
@@ -193,7 +193,7 @@ function BikeCard({ bike, viewMode }: Readonly<{ bike: FilteredBike; viewMode: '
           </div>
         </div>
         <div className="flex items-center justify-between gap-2 border-t border-slate-200 pt-3 mt-auto">
-          <p className="text-lg font-semibold text-sky-600">
+          <p className="rounded-xl border border-sky-400 bg-sky-50 px-3 py-1 text-lg font-semibold text-sky-600">
             {new Intl.NumberFormat('vi-VN', { style: 'currency', currency: 'VND' }).format(bike.price)}
           </p>
           <span className="text-xs font-semibold uppercase tracking-[0.2em] text-slate-600">
