@@ -43,17 +43,17 @@ function RegisterInputField({
 }: RegisterInputFieldProps) {
     return (
         <div className="space-y-2">
-            <label htmlFor={id} className="text-sm font-medium">
+            <label htmlFor={id} className="text-sm font-medium text-slate-200">
                 {label}
             </label>
             <div className="relative">
-                <Icon className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
+                <Icon className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-400" />
                 <Input
                     id={id}
                     name={id}
                     type={type}
                     placeholder={placeholder}
-                    className="pl-10"
+                    className="pl-10 bg-slate-800/90 border-slate-600 text-white placeholder:text-slate-400 focus:border-sky-400 focus:ring-sky-400/30"
                     value={value}
                     onChange={onChange}
                     required={required}
@@ -75,9 +75,9 @@ export function RegisterForm({
     onTogglePasswordVisibility,
 }: RegisterFormProps) {
     return (
-        <form onSubmit={onSubmit} className="space-y-4" noValidate>
+        <form onSubmit={onSubmit} className="space-y-6" noValidate>
             {error ? (
-                <div className="flex items-center gap-2 rounded-lg bg-destructive/10 px-4 py-3 text-sm text-destructive">
+                <div className="flex items-center gap-2 rounded-lg bg-red-500/10 px-4 py-3 text-sm text-red-400 border border-red-500/20">
                     <AlertCircle className="h-4 w-4 shrink-0" />
                     {error}
                 </div>
@@ -142,22 +142,22 @@ export function RegisterForm({
                     name="agreeTerms"
                     checked={formData.agreeTerms}
                     onChange={onFieldChange}
-                    className="mt-1 h-4 w-4 rounded border-input text-primary focus:ring-primary"
+                    className="mt-1 h-4 w-4 rounded border-slate-600 bg-slate-800/90 text-sky-500 focus:ring-sky-400"
                     required
                 />
-                <label htmlFor="agreeTerms" className="text-sm text-muted-foreground">
+                <label htmlFor="agreeTerms" className="text-sm text-slate-400">
                     Tôi đồng ý với{' '}
-                    <Link to="/terms" className="text-primary hover:underline">
+                    <Link to="/terms" className="text-sky-400 hover:text-sky-300">
                         Điều khoản sử dụng
                     </Link>{' '}
                     và{' '}
-                    <Link to="/privacy" className="text-primary hover:underline">
+                    <Link to="/privacy" className="text-sky-400 hover:text-sky-300">
                         Chính sách bảo mật
                     </Link>
                 </label>
             </div>
 
-            <Button type="submit" className="w-full" size="lg" disabled={isLoading}>
+            <Button type="submit" className="w-full bg-sky-500 text-white hover:bg-sky-400 shadow-lg shadow-sky-500/20" size="lg" disabled={isLoading}>
                 {isLoading ? 'Đang đăng ký...' : 'Đăng ký'}
             </Button>
         </form>

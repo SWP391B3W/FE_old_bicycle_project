@@ -9,7 +9,7 @@ interface AuthContextValue {
     user: User | null
     isAuthenticated: boolean
     isLoading: boolean
-    login: (data: LoginRequest) => Promise<void>
+    login: (data: LoginRequest) => Promise<User>
     register: (data: RegisterRequest) => Promise<void>
     resendVerification: (email: string) => Promise<string>
     logout: () => Promise<void>
@@ -64,6 +64,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     const login = useCallback(async (data: LoginRequest) => {
         const session = await authService.login(data)
         setUser(session.user)
+        return session.user
     }, [])
 
     const register = useCallback(async (data: RegisterRequest) => {

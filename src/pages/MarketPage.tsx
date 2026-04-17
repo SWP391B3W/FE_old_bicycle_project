@@ -15,12 +15,26 @@ export default function MarketPage() {
 
   const filteredBikes = useMemo(() => {
     return bikes.filter((bike) => {
-      const matchesSearch = [bike.title, bike.brand, bike.category, bike.location]
+      const searchStr = [
+        bike.title, 
+        bike.brand, 
+        bike.brandName, 
+        bike.category, 
+        bike.categoryName, 
+        bike.location, 
+        bike.province, 
+        bike.district
+      ]
         .join(' ')
         .toLowerCase()
-        .includes(search.toLowerCase())
 
-      const matchesCategory = category === 'all' || bike.category === category
+      const matchesSearch = searchStr.includes(search.toLowerCase())
+
+      const matchesCategory = category === 'all' || 
+        bike.category === category || 
+        bike.categoryName === category || 
+        bike.categoryId === category
+      
       const matchesCondition = condition === 'all' || bike.condition === condition
 
       return matchesSearch && matchesCategory && matchesCondition
@@ -135,16 +149,22 @@ export default function MarketPage() {
                 {filteredBikes.map((bike) => (
                   <article key={bike.id} className="overflow-hidden rounded-3xl border border-slate-200/80 bg-white shadow-sm shadow-slate-900/5">
                     <div className="relative h-56 overflow-hidden bg-slate-100">
-                      <img src={bike.image} alt={bike.title} className="h-full w-full object-cover" />
+                      <img 
+                        src={typeof bike.images[0] === 'string' ? bike.images[0] : bike.images[0]?.url} 
+                        alt={bike.title} 
+                        className="h-full w-full object-cover" 
+                      />
                       <span className="absolute left-4 top-4 rounded-full bg-slate-950/80 px-3 py-1 text-xs font-semibold uppercase tracking-[0.2em] text-white">
-                        {bike.category}
+                        {bike.categoryName || bike.category}
                       </span>
                     </div>
                     <div className="space-y-4 p-6">
                       <div className="flex items-start justify-between gap-3">
                         <div>
                           <h3 className="text-xl font-semibold text-slate-950">{bike.title}</h3>
-                          <p className="mt-2 text-sm text-slate-500">{bike.location} • {bike.year}</p>
+                          <p className="mt-2 text-sm text-slate-500">
+                            {bike.location || (bike.province ? `${bike.district}, ${bike.province}` : '—')} • {bike.year}
+                          </p>
                         </div>
                         <p className="text-right text-lg font-semibold text-slate-950">{new Intl.NumberFormat('vi-VN', { style: 'currency', currency: 'VND' }).format(bike.price)}</p>
                       </div>

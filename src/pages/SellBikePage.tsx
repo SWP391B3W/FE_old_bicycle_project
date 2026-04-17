@@ -2,6 +2,7 @@ import { useState } from 'react'
 import { Link } from 'react-router-dom'
 import { Button } from '@/components/ui/button'
 import { ROUTES } from '@/constants/routes'
+import ImageUpload from '@/components/ImageUpload'
 
 export default function SellBikePage() {
   const [title, setTitle] = useState('')
@@ -10,12 +11,22 @@ export default function SellBikePage() {
   const [price, setPrice] = useState('')
   const [location, setLocation] = useState('')
   const [description, setDescription] = useState('')
+  const [images, setImages] = useState<string[]>([])
   const [success, setSuccess] = useState(false)
 
-  const submitDisabled = !title || !brand || !model || !price || !location || !description
+  const submitDisabled = !title || !brand || !model || !price || !location || !description || images.length === 0
 
   const handleSubmit = (event: any) => {
     event.preventDefault()
+    console.log('Form data:', {
+      title,
+      brand,
+      model,
+      price,
+      location,
+      description,
+      images
+    })
     setSuccess(true)
   }
 
@@ -91,6 +102,11 @@ export default function SellBikePage() {
                   className="w-full rounded-2xl border border-slate-200 bg-slate-50 px-4 py-3 text-sm text-slate-900 outline-none transition focus:border-sky-500 focus:ring-2 focus:ring-sky-500/20"
                 />
               </div>
+            </div>
+
+            {/* Image Upload Section */}
+            <div className="mt-6">
+              <ImageUpload images={images} onImagesChange={setImages} />
             </div>
 
             <div className="mt-6 grid gap-6 sm:grid-cols-2">

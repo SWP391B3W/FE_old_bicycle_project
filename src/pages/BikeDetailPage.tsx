@@ -2,7 +2,7 @@ import { useMemo } from 'react'
 import { Link, useParams } from 'react-router-dom'
 import { Button } from '@/components/ui/button'
 import { bikes, conditions } from '@/data/bikes'
-import { ROUTES } from '@/constants/routes'
+import { ROUTES, buildRoute } from '@/constants/routes'
 
 export default function BikeDetailPage() {
   const { id } = useParams<{ id: string }>()
@@ -47,7 +47,7 @@ export default function BikeDetailPage() {
 
           <div className="grid gap-4 lg:grid-cols-[1.5fr_0.8fr]">
             <div className="overflow-hidden rounded-3xl bg-slate-100">
-              <img src={bike.image} alt={bike.title} className="h-full w-full object-cover" />
+              <img src={bike.images[0]} alt={bike.title} className="h-full w-full object-cover" />
             </div>
             <div className="space-y-4 rounded-3xl border border-slate-200/80 bg-slate-50 p-6">
               <div>
@@ -66,9 +66,14 @@ export default function BikeDetailPage() {
                   <p className="mt-1">{bike.wheelSize}</p>
                 </div>
               </div>
-              <Button asChild className="w-full bg-sky-600 text-white hover:bg-sky-500">
-                <Link to={ROUTES.SELL}>Đăng tin bán tương tự</Link>
-              </Button>
+              <div className="space-y-3">
+                <Button asChild className="w-full bg-sky-600 text-white hover:bg-sky-500 h-11">
+                  <Link to={buildRoute.checkout(bike.id)}>Mua ngay</Link>
+                </Button>
+                <Button asChild variant="outline" className="w-full border-slate-300 h-11">
+                  <Link to={ROUTES.SELL}>Đăng tin bán tương tự</Link>
+                </Button>
+              </div>
             </div>
           </div>
 
