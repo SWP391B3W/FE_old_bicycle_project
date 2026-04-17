@@ -68,7 +68,7 @@ export function HomeHeroSection({
                     searchActions.setProvince(value === ALL_LOCATION_VALUE ? '' : value || '')
                   }
                 >
-                  <SelectTrigger className="h-12 w-full rounded-xl bg-white py-0 pl-12 pr-3 text-left text-slate-900 shadow-sm ring-1 ring-slate-200 focus:border-sky-500 focus:ring-2 focus:ring-sky-500/20 flex items-center">
+                  <SelectTrigger className="h-12 w-full rounded-xl border-2 border-black bg-white py-0 pl-12 pr-3 text-left text-slate-900 shadow-sm focus:border-black focus:ring-2 focus:ring-black/20 flex items-center">
                     <SelectValue
                       placeholder={
                         provinceOptionsLoading
@@ -97,7 +97,7 @@ export function HomeHeroSection({
                   }
                   disabled={!province || districtOptionsLoading}
                 >
-                  <SelectTrigger className="h-12 w-full rounded-xl bg-white py-0 pl-12 pr-3 text-left text-slate-900 shadow-sm ring-1 ring-slate-200 focus:border-sky-500 focus:ring-2 focus:ring-sky-500/20 flex items-center">
+                  <SelectTrigger className="h-12 w-full rounded-xl border-2 border-black bg-white py-0 pl-12 pr-3 text-left text-slate-900 shadow-sm focus:border-black focus:ring-2 focus:ring-black/20 flex items-center">
                     <SelectValue
                       placeholder={
                         !province
@@ -128,7 +128,7 @@ export function HomeHeroSection({
                   }
                   disabled={!district || wardOptionsLoading}
                 >
-                  <SelectTrigger className="h-12 w-full rounded-xl bg-white py-0 pl-12 pr-3 text-left text-slate-900 shadow-sm ring-1 ring-slate-200 focus:border-sky-500 focus:ring-2 focus:ring-sky-500/20 flex items-center">
+                  <SelectTrigger className="h-12 w-full rounded-xl border-2 border-black bg-white py-0 pl-12 pr-3 text-left text-slate-900 shadow-sm focus:border-black focus:ring-2 focus:ring-black/20 flex items-center">
                     <SelectValue
                       placeholder={
                         !district

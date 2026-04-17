@@ -47,7 +47,12 @@ export default function Header() {
             </div>
           ) : (
             <div className="flex gap-2">
-              <Button variant="outline" size="sm" className="border-white/20 text-white hover:bg-white/10" asChild>
+              <Button
+                variant="outline"
+                size="sm"
+                className="border-slate-300/35 bg-slate-900/70 text-slate-100 hover:bg-slate-800/80 hover:text-white"
+                asChild
+              >
                 <Link to={ROUTES.LOGIN}>Đăng nhập</Link>
               </Button>
               <Button size="sm" className="bg-sky-500 text-white hover:bg-sky-400" asChild>

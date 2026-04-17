@@ -1,11 +1,11 @@
 import type { ReactNode } from 'react'
-import { Navigate, useLocation } from 'react-router-dom'
+import { Navigate, Outlet, useLocation } from 'react-router-dom'
 import type { AppRole } from '@/types/auth'
 import { ROUTES } from '../constants/routes'
 import { useAuth } from '../contexts/AuthContext'
 
 interface ProtectedRouteProps {
-    children: ReactNode
+    children?: ReactNode
     allowedRoles?: AppRole[]
 }
 
@@ -25,5 +25,5 @@ export default function ProtectedRoute({ children, allowedRoles }: ProtectedRout
         return <Navigate to={ROUTES.HOME} replace />
     }
 
-    return <>{children}</>
+    return children ? <>{children}</> : <Outlet />
 }
