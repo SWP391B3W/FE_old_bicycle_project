@@ -28,7 +28,7 @@ import {
 import { Badge } from '@/components/ui/badge'
 import { formatPriceDisplay } from '@/lib/currency-input'
 import type { Inspection, InspectionEvaluationRequest } from '@/types/inspection'
-import type { Product } from '@/types/product'
+import type { Product, ProductImage } from '@/types/product'
 
 interface ScoreItem {
   id: keyof Pick<
@@ -67,7 +67,15 @@ const CONDITION_LABEL: Record<string, string> = {
 function BikeDetailDialog({ product }: { product: Product | null }) {
   const [imgIndex, setImgIndex] = useState(0)
   const images = product?.images ?? []
-  const sortedImages = [...images].sort((a, b) => (b.isPrimary ? 1 : 0) - (a.isPrimary ? 1 : 0))
+  const sortedImages = useMemo(() => {
+    if (images.length === 0) return []
+    // If it's a string array, just return as is
+    if (typeof images[0] === 'string') return images as string[]
+    // If it's a ProductImage array, sort by isPrimary
+    return [...(images as ProductImage[])].sort(
+      (a, b) => (b.isPrimary ? 1 : 0) - (a.isPrimary ? 1 : 0),
+    )
+  }, [images])
 
   const specs: Array<{ label: string; value?: string | number | null }> = [
     { label: 'Thương hiệu', value: product?.brandName },
@@ -99,7 +107,11 @@ function BikeDetailDialog({ product }: { product: Product | null }) {
         {sortedImages.length > 0 && (
           <div className="relative overflow-hidden rounded-xl bg-muted">
             <img
-              src={sortedImages[imgIndex]?.url}
+              src={
+                typeof sortedImages[imgIndex] === 'object'
+                  ? (sortedImages[imgIndex] as ProductImage).url
+                  : (sortedImages[imgIndex] as string)
+              }
               alt={`Ảnh ${imgIndex + 1}`}
               className="h-64 w-full object-cover"
             />
@@ -396,17 +408,24 @@ export default function InspectionFormPage() {
           <div className="rounded-xl border bg-card p-5">
             <div className="flex flex-col gap-4 lg:flex-row">
               <div className="h-40 overflow-hidden rounded-xl bg-muted lg:w-64">
-                {product?.images?.[0]?.url ? (
-                  <img
-                    src={product.images[0].url}
-                    alt={product.title}
-                    className="h-full w-full object-cover"
-                  />
-                ) : (
-                  <div className="flex h-full items-center justify-center text-muted-foreground">
-                    <ShieldCheck className="h-10 w-10 opacity-40" />
-                  </div>
-                )}
+                {(() => {
+                  const firstImage = product?.images?.[0]
+                  const imageUrl = typeof firstImage === 'object' ? firstImage?.url : firstImage
+                  if (imageUrl) {
+                    return (
+                      <img
+                        src={imageUrl}
+                        alt={product?.title}
+                        className="h-full w-full object-cover"
+                      />
+                    )
+                  }
+                  return (
+                    <div className="flex h-full items-center justify-center text-muted-foreground">
+                      <ShieldCheck className="h-10 w-10 opacity-40" />
+                    </div>
+                  )
+                })()}
               </div>
 
               <div className="min-w-0 flex-1 space-y-2">
