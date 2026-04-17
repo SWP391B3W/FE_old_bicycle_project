@@ -59,14 +59,19 @@ export default function Footer() {
                 </Link>
               </li>
               <li>
+                <Link to={ROUTES.MESSAGES} className="text-slate-400 hover:text-sky-400 transition">
+                  Nhắn tin
+                </Link>
+              </li>
+              <li>
                 <Link to={ROUTES.HOME} className="text-slate-400 hover:text-sky-400 transition">
                   Trang chủ
                 </Link>
               </li>
               <li>
-                <a href="#guide" className="text-slate-400 hover:text-sky-400 transition">
+                <Link to={ROUTES.GUIDE} className="text-slate-400 hover:text-sky-400 transition">
                   Hướng dẫn
-                </a>
+                </Link>
               </li>
             </ul>
           </div>

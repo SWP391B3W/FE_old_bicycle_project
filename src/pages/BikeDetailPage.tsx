@@ -1,4 +1,4 @@
-import { useMemo } from 'react'
+import { useEffect, useMemo, useState } from 'react'
 import { Link, useParams } from 'react-router-dom'
 import { Button } from '@/components/ui/button'
 import { bikes, conditions } from '@/data/bikes'
@@ -11,6 +11,12 @@ export default function BikeDetailPage() {
     () => bikes.find((item) => item.id === id),
     [id],
   )
+
+  const [selectedImage, setSelectedImage] = useState('')
+
+  useEffect(() => {
+    setSelectedImage(bike?.images[0] ?? '')
+  }, [bike?.id])
 
   if (!bike) {
     return (
@@ -27,6 +33,8 @@ export default function BikeDetailPage() {
       </main>
     )
   }
+
+  const currentImage = bike.images.includes(selectedImage) ? selectedImage : bike.images[0]
 
   return (
     <main className="min-h-screen bg-slate-50 px-6 py-10 sm:px-8 lg:px-10">
@@ -46,8 +54,28 @@ export default function BikeDetailPage() {
           </div>
 
           <div className="grid gap-4 lg:grid-cols-[1.5fr_0.8fr]">
-            <div className="overflow-hidden rounded-3xl bg-slate-100">
-              <img src={bike.images[0]} alt={bike.title} className="h-full w-full object-cover" />
+            <div className="space-y-4">
+              <div className="overflow-hidden rounded-3xl bg-slate-100">
+                <img src={currentImage} alt={bike.title} className="h-full min-h-[360px] w-full object-cover" />
+              </div>
+              <div className="grid grid-cols-2 gap-3 sm:grid-cols-4">
+                {bike.images.map((image, index) => (
+                  <button
+                    key={`${bike.id}-${index}`}
+                    type="button"
+                    onClick={() => setSelectedImage(image)}
+                    className={`overflow-hidden rounded-2xl border-2 transition ${
+                      currentImage === image ? 'border-black' : 'border-slate-200 hover:border-slate-400'
+                    }`}
+                  >
+                    <img
+                      src={image}
+                      alt={`${bike.title} - góc chụp ${index + 1}`}
+                      className="h-24 w-full object-cover"
+                    />
+                  </button>
+                ))}
+              </div>
             </div>
             <div className="space-y-4 rounded-3xl border border-slate-200/80 bg-slate-50 p-6">
               <div>

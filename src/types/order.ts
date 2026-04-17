@@ -111,8 +111,4 @@ export interface CheckoutFormData {
 
 export interface PaymentFormData {
   paymentMethod: PaymentMethod
-  cardholderName?: string
-  cardNumber?: string
-  expiryDate?: string
-  cvv?: string
 }

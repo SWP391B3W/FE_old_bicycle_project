@@ -8,6 +8,40 @@ export const conditions: Record<ProductCondition, string> = {
   need_repair: 'Cần sửa chữa',
 }
 
+function createBikeGallery(primaryImage: string, extraImages: string[]) {
+  return [primaryImage, ...extraImages]
+}
+
+const roadBikeAngles = [
+  'https://images.unsplash.com/photo-1541625602330-2277a4c46182?auto=format&fit=crop&w=900&q=80',
+  'https://images.unsplash.com/photo-1502744688674-c619d1586c9e?auto=format&fit=crop&w=900&q=80',
+  'https://images.unsplash.com/photo-1511994298241-608e28f14fde?auto=format&fit=crop&w=900&q=80',
+]
+
+const mountainBikeAngles = [
+  'https://images.unsplash.com/photo-1541625810516-44f1ce894bcd?auto=format&fit=crop&w=900&q=80',
+  'https://images.unsplash.com/photo-1517649763962-0c623066013b?auto=format&fit=crop&w=900&q=80',
+  'https://images.unsplash.com/photo-1507035895480-2b3156c31fc8?auto=format&fit=crop&w=900&q=80',
+]
+
+const gravelBikeAngles = [
+  'https://images.unsplash.com/photo-1519389950473-47ba0277781c?auto=format&fit=crop&w=900&q=80',
+  'https://images.unsplash.com/photo-1485965120184-e220f721d03e?auto=format&fit=crop&w=900&q=80',
+  'https://images.unsplash.com/photo-1559348349-86f1f65817fe?auto=format&fit=crop&w=900&q=80',
+]
+
+const cityBikeAngles = [
+  'https://images.unsplash.com/photo-1507035895480-2b3156c31fc8?auto=format&fit=crop&w=900&q=80',
+  'https://images.unsplash.com/photo-1508979828023-c5249a1ae61f?auto=format&fit=crop&w=900&q=80',
+  'https://images.unsplash.com/photo-1471506480208-91b3a4cc78be?auto=format&fit=crop&w=900&q=80',
+]
+
+const foldingBikeAngles = [
+  'https://images.unsplash.com/photo-1505705694340-019e1e335916?auto=format&fit=crop&w=900&q=80',
+  'https://images.unsplash.com/photo-1529429611270-2c7f914bb123?auto=format&fit=crop&w=900&q=80',
+  'https://images.unsplash.com/photo-1519583272095-6433daf26b6e?auto=format&fit=crop&w=900&q=80',
+]
+
 export const bikes: Product[] = [
   {
     id: '1',
@@ -20,7 +54,7 @@ export const bikes: Product[] = [
     year: '2022',
     wheelSize: '700c',
     frameSize: 'M',
-    images: ['https://images.unsplash.com/photo-1519074002996-a69e7ac46a42?auto=format&fit=crop&w=900&q=80'],
+    images: createBikeGallery('https://images.unsplash.com/photo-1519074002996-a69e7ac46a42?auto=format&fit=crop&w=900&q=80', roadBikeAngles),
     description: 'Xe đạp đường trường Trek Domane SL 6 Disc, khung carbon, full groupset Shimano 105, bảo quản cẩn thận. Phù hợp đi phượt và đua xe.',
     highlights: ['Khung carbon', 'Thắng đĩa thủy lực', 'Đã bảo dưỡng định kỳ'],
     sellerName: 'Anh Thành',
@@ -37,7 +71,7 @@ export const bikes: Product[] = [
     year: '2024',
     wheelSize: '700c',
     frameSize: 'L',
-    images: ['https://images.unsplash.com/photo-1519985176271-adb1088fa94c?auto=format&fit=crop&w=900&q=80'],
+    images: createBikeGallery('https://images.unsplash.com/photo-1519985176271-adb1088fa94c?auto=format&fit=crop&w=900&q=80', cityBikeAngles),
     description: 'Xe đạp địa hình nhẹ, thích hợp đi phố và commuting. Thiết kế năng động, tay lái thẳng, lốp đa địa hình.',
     highlights: ['Khung nhôm', 'Phuộc dầu', 'Tư thế ngồi thẳng lưng'],
     sellerName: 'Chị Lan',
@@ -54,7 +88,7 @@ export const bikes: Product[] = [
     year: '2021',
     wheelSize: '29"',
     frameSize: 'M',
-    images: ['https://images.unsplash.com/photo-1515809231992-1ae6b51b17f2?auto=format&fit=crop&w=900&q=80'],
+    images: createBikeGallery('https://images.unsplash.com/photo-1515809231992-1ae6b51b17f2?auto=format&fit=crop&w=900&q=80', mountainBikeAngles),
     description: 'Xe địa hình Giant Talon 3, đã qua sử dụng, phù hợp leo đồi và đi đường đất. Lốp mới, phanh đĩa cơ, tấm chắn bùn rời.',
     highlights: ['Khung nhôm', 'Phanh đĩa cơ', 'Bánh 29 inch'],
     sellerName: 'Anh Nam',
@@ -71,7 +105,7 @@ export const bikes: Product[] = [
     year: '2023',
     wheelSize: '700c',
     frameSize: 'M',
-    images: ['https://images.unsplash.com/photo-1508599540940-1a42c4788e26?auto=format&fit=crop&w=900&q=80'],
+    images: createBikeGallery('https://images.unsplash.com/photo-1508599540940-1a42c4788e26?auto=format&fit=crop&w=900&q=80', gravelBikeAngles),
     description: 'Xe gravel Cannondale Topstone 105, phù hợp tour đường dài và đi phượt. Khung carbon nhẹ, groupset Shimano 105.',
     highlights: ['Khung carbon', 'Tay lái gravel', 'Bảo dưỡng tốt'],
     sellerName: 'Chị Hương',
@@ -88,7 +122,7 @@ export const bikes: Product[] = [
     year: '2024',
     wheelSize: '16"',
     frameSize: 'S',
-    images: ['https://images.unsplash.com/photo-1526738549142-91b8a8e3e31d?auto=format&fit=crop&w=900&q=80'],
+    images: createBikeGallery('https://images.unsplash.com/photo-1526738549142-91b8a8e3e31d?auto=format&fit=crop&w=900&q=80', foldingBikeAngles),
     description: 'Xe gấp Brompton M6L hàng chính hãng, tiện đi lại thành phố và du lịch. Gấp gọn nhanh, nhẹ nhàng.',
     highlights: ['Gấp gọn', 'Khung thép', 'Bánh 16 inch'],
     sellerName: 'Anh Hoàng',
@@ -105,7 +139,7 @@ export const bikes: Product[] = [
     year: '2020',
     wheelSize: '700c',
     frameSize: 'M',
-    images: ['https://images.unsplash.com/photo-1505751172876-fa1923c5c528?auto=format&fit=crop&w=900&q=80'],
+    images: createBikeGallery('https://images.unsplash.com/photo-1505751172876-fa1923c5c528?auto=format&fit=crop&w=900&q=80', roadBikeAngles),
     description: 'Xe đạp đường trường Scott Addict 30, cần kiểm tra bộ truyền động trước khi sử dụng. Khung nhẹ, dáng đua chuyên nghiệp.',
     highlights: ['Khung carbon', 'Tay lái cong', 'Phù hợp leo đèo'],
     sellerName: 'Chị Phương',
@@ -122,7 +156,7 @@ export const bikes: Product[] = [
     year: '2022',
     wheelSize: '700c',
     frameSize: 'L',
-    images: ['https://images.unsplash.com/photo-1544197150-b99a580bb7a8?auto=format&fit=crop&w=900&q=80'],
+    images: createBikeGallery('https://images.unsplash.com/photo-1544197150-b99a580bb7a8?auto=format&fit=crop&w=900&q=80', cityBikeAngles),
     description: 'Xe đạp thành phố Giant Escape 3, phù hợp đi làm và mua sắm. Khung nhôm chắc chắn, yên thoải mái.',
     highlights: ['Khung nhôm', 'Yên gel', 'Phanh đĩa'],
     sellerName: 'Anh Minh',
@@ -139,7 +173,7 @@ export const bikes: Product[] = [
     year: '2021',
     wheelSize: '27.5"',
     frameSize: 'M',
-    images: ['https://images.unsplash.com/photo-1571019613454-1cb2f99b2d8b?auto=format&fit=crop&w=900&q=80'],
+    images: createBikeGallery('https://images.unsplash.com/photo-1571019613454-1cb2f99b2d8b?auto=format&fit=crop&w=900&q=80', mountainBikeAngles),
     description: 'Xe địa hình Trek Marlin 5, đã sử dụng ít, phù hợp đi đường mòn và leo núi. Phuộc trước SR Suntour.',
     highlights: ['Phuộc trước', 'Khung nhôm', 'Bánh 27.5 inch'],
     sellerName: 'Chị Linh',
@@ -156,7 +190,7 @@ export const bikes: Product[] = [
     year: '2024',
     wheelSize: '700c',
     frameSize: 'M',
-    images: ['https://images.unsplash.com/photo-1485965120184-e220f721d03e?auto=format&fit=crop&w=900&q=80'],
+    images: createBikeGallery('https://images.unsplash.com/photo-1485965120184-e220f721d03e?auto=format&fit=crop&w=900&q=80', roadBikeAngles),
     description: 'Xe đạp đường trường Specialized Allez Sprint, khung carbon cao cấp, groupset Shimano Tiagra. Phù hợp đua xe nghiệp dư.',
     highlights: ['Khung carbon', 'Groupset Tiagra', 'Bánh carbon'],
     sellerName: 'Anh Đức',
@@ -173,7 +207,7 @@ export const bikes: Product[] = [
     year: '2023',
     wheelSize: '29"',
     frameSize: 'L',
-    images: ['https://images.unsplash.com/photo-1558618666-fcd25c85cd64?auto=format&fit=crop&w=900&q=80'],
+    images: createBikeGallery('https://images.unsplash.com/photo-1558618666-fcd25c85cd64?auto=format&fit=crop&w=900&q=80', mountainBikeAngles),
     description: 'Xe địa hình Cannondale Trail 5, khung carbon, phuộc RockShox, phù hợp địa hình khó. Đã bảo dưỡng đầy đủ.',
     highlights: ['Khung carbon', 'Phuộc RockShox', 'Phanh đĩa thủy lực'],
     sellerName: 'Anh Tùng',
@@ -190,7 +224,7 @@ export const bikes: Product[] = [
     year: '2022',
     wheelSize: '700c',
     frameSize: 'M',
-    images: ['https://images.unsplash.com/photo-1578662996442-48f60103fc96?auto=format&fit=crop&w=900&q=80'],
+    images: createBikeGallery('https://images.unsplash.com/photo-1578662996442-48f60103fc96?auto=format&fit=crop&w=900&q=80', gravelBikeAngles),
     description: 'Xe gravel Giant Roam 2, phù hợp đi phượt đường mòn và đường đất. Khung nhôm, lốp rộng.',
     highlights: ['Khung nhôm', 'Lốp gravel', 'Tay lái rộng'],
     sellerName: 'Chị Mai',
@@ -207,7 +241,7 @@ export const bikes: Product[] = [
     year: '2024',
     wheelSize: '700c',
     frameSize: 'M',
-    images: ['https://images.unsplash.com/photo-1558618047-3c8c76ca7d13?auto=format&fit=crop&w=900&q=80'],
+    images: createBikeGallery('https://images.unsplash.com/photo-1558618047-3c8c76ca7d13?auto=format&fit=crop&w=900&q=80', cityBikeAngles),
     description: 'Xe đạp điện Trek Verve+ 2, hỗ trợ đạp xe, pin Bosch, đi được 100km mỗi lần sạc. Phù hợp đi làm.',
     highlights: ['Động cơ Bosch', 'Pin lithium', 'Hỗ trợ đạp'],
     sellerName: 'Anh Khoa',
@@ -224,7 +258,7 @@ export const bikes: Product[] = [
     year: '2020',
     wheelSize: '29"',
     frameSize: 'S',
-    images: ['https://images.unsplash.com/photo-1544197150-b99a580bb7a8?auto=format&fit=crop&w=900&q=80'],
+    images: createBikeGallery('https://images.unsplash.com/photo-1544197150-b99a580bb7a8?auto=format&fit=crop&w=900&q=80', mountainBikeAngles),
     description: 'Xe địa hình Scott Aspect 950, khung nhôm, phuộc trước, phù hợp người mới chơi. Cần vệ sinh và bảo dưỡng.',
     highlights: ['Khung nhôm', 'Phuộc trước', 'Giá rẻ'],
     sellerName: 'Anh Việt',
@@ -241,7 +275,7 @@ export const bikes: Product[] = [
     year: '2023',
     wheelSize: '700c',
     frameSize: 'L',
-    images: ['https://images.unsplash.com/photo-1571019613454-1cb2f99b2d8b?auto=format&fit=crop&w=900&q=80'],
+    images: createBikeGallery('https://images.unsplash.com/photo-1571019613454-1cb2f99b2d8b?auto=format&fit=crop&w=900&q=80', cityBikeAngles),
     description: 'Xe đạp điện Specialized Turbo Vado 4.0, động cơ Specialized, pin 604Wh, hỗ trợ đạp mạnh. Đi được 130km.',
     highlights: ['Động cơ Specialized', 'Pin lớn', 'Màn hình điều khiển'],
     sellerName: 'Chị Nga',
@@ -258,7 +292,7 @@ export const bikes: Product[] = [
     year: '2021',
     wheelSize: '700c',
     frameSize: 'M',
-    images: ['https://images.unsplash.com/photo-1505751172876-fa1923c5c528?auto=format&fit=crop&w=900&q=80'],
+    images: createBikeGallery('https://images.unsplash.com/photo-1505751172876-fa1923c5c528?auto=format&fit=crop&w=900&q=80', roadBikeAngles),
     description: 'Xe đạp đường trường Giant Contend AR 2, khung nhôm, groupset Shimano Tiagra. Phù hợp tập luyện và đua.',
     highlights: ['Khung nhôm', 'Groupset Tiagra', 'Tay lái carbon'],
     sellerName: 'Anh Sơn',
@@ -275,7 +309,7 @@ export const bikes: Product[] = [
     year: '2024',
     wheelSize: '700c',
     frameSize: 'M',
-    images: ['https://images.unsplash.com/photo-1526738549142-91b8a8e3e31d?auto=format&fit=crop&w=900&q=80'],
+    images: createBikeGallery('https://images.unsplash.com/photo-1526738549142-91b8a8e3e31d?auto=format&fit=crop&w=900&q=80', cityBikeAngles),
     description: 'Xe đạp hybrid Trek FX 3 Disc, phù hợp đi phố và đường mòn nhẹ. Khung nhôm, thắng đĩa thủy lực.',
     highlights: ['Khung nhôm', 'Thắng đĩa', 'Lốp đa dụng'],
     sellerName: 'Chị Trang',
@@ -292,7 +326,7 @@ export const bikes: Product[] = [
     year: '2022',
     wheelSize: '700c',
     frameSize: 'L',
-    images: ['https://images.unsplash.com/photo-1519074002996-a69e7ac46a42?auto=format&fit=crop&w=900&q=80'],
+    images: createBikeGallery('https://images.unsplash.com/photo-1519074002996-a69e7ac46a42?auto=format&fit=crop&w=900&q=80', roadBikeAngles),
     description: 'Xe đạp đường trường Cannondale Synapse Carbon 105, khung carbon, groupset Shimano 105. Đã sử dụng ít.',
     highlights: ['Khung carbon', 'Groupset 105', 'Tay lái carbon'],
     sellerName: 'Anh Long',
@@ -309,7 +343,7 @@ export const bikes: Product[] = [
     year: '2023',
     wheelSize: '29"',
     frameSize: 'M',
-    images: ['https://images.unsplash.com/photo-1558618666-fcd25c85cd64?auto=format&fit=crop&w=900&q=80'],
+    images: createBikeGallery('https://images.unsplash.com/photo-1558618666-fcd25c85cd64?auto=format&fit=crop&w=900&q=80', mountainBikeAngles),
     description: 'Xe địa hình Scott Spark 960, khung carbon, phuộc Fox, phù hợp đua downhill. Bảo quản tốt.',
     highlights: ['Khung carbon', 'Phuộc Fox', 'Phanh đĩa'],
     sellerName: 'Anh Huy',
@@ -326,7 +360,7 @@ export const bikes: Product[] = [
     year: '2024',
     wheelSize: '700c',
     frameSize: 'M',
-    images: ['https://images.unsplash.com/photo-1558618047-3c8c76ca7d13?auto=format&fit=crop&w=900&q=80'],
+    images: createBikeGallery('https://images.unsplash.com/photo-1558618047-3c8c76ca7d13?auto=format&fit=crop&w=900&q=80', cityBikeAngles),
     description: 'Xe đạp điện Giant Explore E+ 2, động cơ Yamaha, pin lớn, hỗ trợ đạp mạnh. Phù hợp đi đường dài.',
     highlights: ['Động cơ Yamaha', 'Pin 500Wh', 'Màn hình LCD'],
     sellerName: 'Chị Hà',
@@ -343,7 +377,7 @@ export const bikes: Product[] = [
     year: '2022',
     wheelSize: '29"',
     frameSize: 'M',
-    images: ['https://images.unsplash.com/photo-1571019613454-1cb2f99b2d8b?auto=format&fit=crop&w=900&q=80'],
+    images: createBikeGallery('https://images.unsplash.com/photo-1571019613454-1cb2f99b2d8b?auto=format&fit=crop&w=900&q=80', mountainBikeAngles),
     description: 'Xe đạp điện địa hình Trek Powerfly 5, động cơ Bosch, pin 625Wh, hỗ trợ đạp. Phù hợp leo núi.',
     highlights: ['Động cơ Bosch', 'Pin lớn', 'Phuộc trước'],
     sellerName: 'Anh Bình',

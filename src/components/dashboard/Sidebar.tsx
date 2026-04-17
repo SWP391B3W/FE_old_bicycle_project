@@ -118,3 +118,6 @@ export const sellerNavItems: NavItem[] = [
   { icon: Package, label: 'Quản lý tin đăng', href: ROUTES.SELLER_LISTINGS },
   { icon: ShoppingBag, label: 'Quản lý đơn cọc', href: ROUTES.SELLER_ORDERS },
 ]
+
+// Keep Bike icon imported from lucide but suppressed unused warning
+void Bike

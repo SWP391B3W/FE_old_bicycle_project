@@ -39,9 +39,7 @@ export function HomeHeroSection({
       <div className="absolute inset-0 bg-[radial-gradient(circle_at_top,_rgba(56,189,248,0.30),_transparent_35%),linear-gradient(180deg,rgba(15,23,42,0.88),rgba(15,23,42,0.95))]" />
       <div className="relative mx-auto max-w-7xl">
         <div className="mx-auto mt-10 max-w-4xl text-center">
-          <span className="inline-flex rounded-full bg-sky-500/10 px-4 py-1.5 text-sm font-medium text-sky-100 ring-1 ring-sky-200/20">
-            Nền tảng mua bán xe đạp thể thao
-          </span>
+          
           <h1 className="mt-6 text-4xl font-semibold tracking-tight text-white sm:text-5xl">
             Nền tảng mua bán xe đạp thể thao cũ có kiểm định
           </h1>
@@ -55,7 +53,7 @@ export function HomeHeroSection({
                 <Search className="pointer-events-none absolute left-4 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-400" />
                 <Input
                   placeholder="Tìm theo tên xe, thương hiệu"
-                  className="h-12 w-full rounded-xl border border-slate-200 bg-white px-12 text-slate-900 placeholder:text-slate-400 shadow-sm transition focus:border-sky-500 focus:ring-2 focus:ring-sky-500/20"
+                  className="h-12 w-full rounded-xl border-2 border-black bg-white px-12 text-slate-900 placeholder:text-slate-400 shadow-sm transition focus:border-black focus:ring-2 focus:ring-black/20"
                   value={keyword}
                   onChange={(event) => searchActions.setKeyword(event.target.value)}
                   onKeyDown={(event) => event.key === 'Enter' && onSearch()}

@@ -29,9 +29,12 @@ export default function Header() {
           <Link className="transition hover:text-white" to={ROUTES.SELL}>
             Bán xe
           </Link>
-          <a className="transition hover:text-white" href="#guide">
+          <Link className="transition hover:text-white" to={ROUTES.MESSAGES}>
+            Nhắn tin
+          </Link>
+          <Link className="transition hover:text-white" to={ROUTES.GUIDE}>
             Hướng dẫn
-          </a>
+          </Link>
         </div>
 
         <div className="flex items-center gap-3">
