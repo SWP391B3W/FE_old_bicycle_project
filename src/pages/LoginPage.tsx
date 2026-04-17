@@ -42,7 +42,7 @@ export default function LoginPage() {
         setIsLoading(true)
 
         try {
-            await login({ email, password })
+            const loggedInUser = await login({ email, password })
 
             if (rememberMe) {
                 localStorage.setItem('rememberedEmail', email)
@@ -50,7 +50,12 @@ export default function LoginPage() {
                 localStorage.removeItem('rememberedEmail')
             }
 
-            navigate(from, { replace: true })
+            // Redirect admin thẳng vào trang quản trị
+            if (loggedInUser?.role === 'admin') {
+                navigate(ROUTES.ADMIN, { replace: true })
+            } else {
+                navigate(from, { replace: true })
+            }
         } catch (err: unknown) {
             const errorCode = (err as { response?: { data?: { code?: number } } })?.response?.data?.code
             let message = (err as { response?: { data?: { message?: string } } })?.response?.data?.message

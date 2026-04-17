@@ -72,7 +72,7 @@ export default function AdminUsersPage() {
                 role: roleFilter !== 'all_role' ? (roleFilter as AppRole) : undefined,
                 status: statusFilter !== 'all_status' ? (statusFilter as UserStatus) : undefined,
                 page,
-                size: 10,
+                size: 8,
             });
             setUsers(result.content);
             setTotalPages(result.totalPages);
@@ -262,17 +262,88 @@ export default function AdminUsersPage() {
                 </div>
             ) : (
                 <>
-                    <DataTable columns={columns} data={users} pageSize={10} showPagination={false} />
+                    <DataTable columns={columns} data={users} pageSize={8} showPagination={false} />
                     {/* Pagination */}
                     {totalPages > 1 && (
-                        <div className="flex items-center justify-center gap-2">
-                            <Button variant="outline" size="sm" disabled={page === 0} onClick={() => setPage(p => p - 1)}>
-                                <ChevronLeft className="h-4 w-4" />
-                            </Button>
-                            <span className="text-sm text-muted-foreground">Trang {page + 1} / {totalPages}</span>
-                            <Button variant="outline" size="sm" disabled={page >= totalPages - 1} onClick={() => setPage(p => p + 1)}>
-                                <ChevronRight className="h-4 w-4" />
-                            </Button>
+                        <div className="flex items-center justify-between pt-2">
+                            <p className="text-sm text-muted-foreground">
+                                Trang <span className="font-medium text-foreground">{page + 1}</span> / {totalPages}
+                                <span className="ml-2 text-xs">(tổng {totalElements} người dùng)</span>
+                            </p>
+                            <div className="flex items-center gap-1">
+                                {/* First page */}
+                                <Button
+                                    variant="outline"
+                                    size="sm"
+                                    className="h-8 w-8 p-0"
+                                    disabled={page === 0}
+                                    onClick={() => setPage(0)}
+                                    title="Trang đầu"
+                                >
+                                    <ChevronLeft className="h-3 w-3" />
+                                    <ChevronLeft className="h-3 w-3 -ml-2" />
+                                </Button>
+                                {/* Prev */}
+                                <Button
+                                    variant="outline"
+                                    size="sm"
+                                    className="h-8 w-8 p-0"
+                                    disabled={page === 0}
+                                    onClick={() => setPage(p => p - 1)}
+                                >
+                                    <ChevronLeft className="h-4 w-4" />
+                                </Button>
+                                {/* Page number buttons */}
+                                {Array.from({ length: totalPages }, (_, i) => i)
+                                    .filter(i => {
+                                        if (totalPages <= 5) return true;
+                                        if (i === 0 || i === totalPages - 1) return true;
+                                        return Math.abs(i - page) <= 1;
+                                    })
+                                    .reduce<(number | 'ellipsis')[]>((acc, cur, idx, arr) => {
+                                        if (idx > 0 && cur - (arr[idx - 1] as number) > 1) acc.push('ellipsis');
+                                        acc.push(cur);
+                                        return acc;
+                                    }, [])
+                                    .map((item, idx) =>
+                                        item === 'ellipsis' ? (
+                                            <span key={`ellipsis-${idx}`} className="px-1 text-muted-foreground text-sm">…</span>
+                                        ) : (
+                                            <Button
+                                                key={item}
+                                                variant={page === item ? 'default' : 'outline'}
+                                                size="sm"
+                                                className="h-8 w-8 p-0 text-xs"
+                                                onClick={() => setPage(item as number)}
+                                            >
+                                                {(item as number) + 1}
+                                            </Button>
+                                        )
+                                    )
+                                }
+                                {/* Next */}
+                                <Button
+                                    variant="outline"
+                                    size="sm"
+                                    className="h-8 w-8 p-0"
+                                    disabled={page >= totalPages - 1}
+                                    onClick={() => setPage(p => p + 1)}
+                                >
+                                    <ChevronRight className="h-4 w-4" />
+                                </Button>
+                                {/* Last page */}
+                                <Button
+                                    variant="outline"
+                                    size="sm"
+                                    className="h-8 w-8 p-0"
+                                    disabled={page >= totalPages - 1}
+                                    onClick={() => setPage(totalPages - 1)}
+                                    title="Trang cuối"
+                                >
+                                    <ChevronRight className="h-3 w-3" />
+                                    <ChevronRight className="h-3 w-3 -ml-2" />
+                                </Button>
+                            </div>
                         </div>
                     )}
                 </>
