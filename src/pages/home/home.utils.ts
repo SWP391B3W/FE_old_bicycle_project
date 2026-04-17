@@ -1,10 +1,12 @@
 import { formatPriceDisplay } from '@/lib/currency-input'
 import type { Product } from '@/types/product'
 
-const PRODUCT_CONDITION_LABELS: Record<NonNullable<Product['condition']>, string> = {
+const PRODUCT_CONDITION_LABELS: Record<string, string> = {
   new: 'Như mới',
+  new_90: 'Như mới',
   used: 'Đã qua sử dụng',
   need_repair: 'Cần sửa chữa',
+  needs_repair: 'Cần sửa chữa',
 }
 
 export function formatPrice(price: number): string {
@@ -12,7 +14,12 @@ export function formatPrice(price: number): string {
 }
 
 export function getPrimaryImage(product: Product): string {
-  return product.images[0] ?? ''
+  const firstImage = product.images?.[0]
+  if (!firstImage) {
+    return ''
+  }
+
+  return typeof firstImage === 'string' ? firstImage : firstImage.url
 }
 
 export function getProductConditionLabel(condition?: Product['condition']) {

@@ -4,6 +4,30 @@ import { Button } from '@/components/ui/button'
 import { bikes, conditions } from '@/data/bikes'
 import { ROUTES, buildRoute } from '@/constants/routes'
 
+function toImageUrl(image: string | { url: string }) {
+  return typeof image === 'string' ? image : image.url
+}
+
+function getConditionLabel(condition?: string | null) {
+  if (!condition) {
+    return 'Chua cap nhat'
+  }
+
+  if (condition in conditions) {
+    return conditions[condition as keyof typeof conditions]
+  }
+
+  if (condition === 'new_90') {
+    return conditions.new
+  }
+
+  if (condition === 'needs_repair') {
+    return conditions.need_repair
+  }
+
+  return 'Chua cap nhat'
+}
+
 export default function BikeDetailPage() {
   const { id } = useParams<{ id: string }>()
 
@@ -15,7 +39,8 @@ export default function BikeDetailPage() {
   const [selectedImage, setSelectedImage] = useState('')
 
   useEffect(() => {
-    setSelectedImage(bike?.images[0] ?? '')
+    const firstImage = bike?.images?.[0]
+    setSelectedImage(firstImage ? toImageUrl(firstImage) : '')
   }, [bike?.id])
 
   if (!bike) {
@@ -34,7 +59,8 @@ export default function BikeDetailPage() {
     )
   }
 
-  const currentImage = bike.images.includes(selectedImage) ? selectedImage : bike.images[0]
+  const bikeImages = (bike.images ?? []).map((image) => toImageUrl(image))
+  const currentImage = bikeImages.includes(selectedImage) ? selectedImage : bikeImages[0] ?? ''
 
   return (
     <main className="min-h-screen bg-slate-50 px-6 py-10 sm:px-8 lg:px-10">
@@ -59,7 +85,7 @@ export default function BikeDetailPage() {
                 <img src={currentImage} alt={bike.title} className="h-full min-h-[360px] w-full object-cover" />
               </div>
               <div className="grid grid-cols-2 gap-3 sm:grid-cols-4">
-                {bike.images.map((image, index) => (
+                {bikeImages.map((image, index) => (
                   <button
                     key={`${bike.id}-${index}`}
                     type="button"
@@ -87,7 +113,7 @@ export default function BikeDetailPage() {
               <div className="grid gap-3 text-sm text-slate-700">
                 <div className="rounded-2xl bg-white p-4 shadow-sm shadow-slate-900/5">
                   <p className="font-medium text-slate-900">Tình trạng</p>
-                  <p className="mt-1">{conditions[bike.condition]}</p>
+                  <p className="mt-1">{getConditionLabel(bike.condition)}</p>
                 </div>
                 <div className="rounded-2xl bg-white p-4 shadow-sm shadow-slate-900/5">
                   <p className="font-medium text-slate-900">Kích thước</p>
@@ -147,7 +173,7 @@ export default function BikeDetailPage() {
               </div>
               <div className="rounded-3xl bg-slate-50 p-5">
                 <p className="text-sm text-slate-600">Tình trạng xe</p>
-                <p className="mt-2 text-lg font-semibold text-slate-950">{conditions[bike.condition]}</p>
+                <p className="mt-2 text-lg font-semibold text-slate-950">{getConditionLabel(bike.condition)}</p>
               </div>
             </div>
           </div>

@@ -10,6 +10,30 @@ import { ROUTES } from '@/constants/routes'
 import { useAuth } from '@/contexts/AuthContext'
 import type { CheckoutFormData } from '@/types/order'
 
+function toImageUrl(image: string | { url: string }) {
+  return typeof image === 'string' ? image : image.url
+}
+
+function getConditionLabel(condition?: string | null) {
+  if (!condition) {
+    return 'Chua cap nhat'
+  }
+
+  if (condition in conditions) {
+    return conditions[condition as keyof typeof conditions]
+  }
+
+  if (condition === 'new_90') {
+    return conditions.new
+  }
+
+  if (condition === 'needs_repair') {
+    return conditions.need_repair
+  }
+
+  return 'Chua cap nhat'
+}
+
 export default function CheckoutPage() {
   const { id } = useParams<{ id: string }>()
   const navigator = useNavigate()
@@ -184,7 +208,7 @@ export default function CheckoutPage() {
                 <div className="rounded-2xl border border-slate-200/80 bg-slate-50 p-4">
                   <div className="flex gap-4">
                     <img
-                      src={bike.images[0]}
+                      src={bike.images?.[0] ? toImageUrl(bike.images[0]) : ''}
                       alt={bike.title}
                       className="h-20 w-20 rounded-xl object-cover"
                     />
@@ -240,7 +264,7 @@ export default function CheckoutPage() {
                 <div className="space-y-2 border-t border-slate-200/80 pt-4 text-sm">
                   <div className="flex justify-between">
                     <span className="text-slate-600">Tình trạng</span>
-                    <span className="font-medium text-slate-900">{conditions[bike.condition]}</span>
+                    <span className="font-medium text-slate-900">{getConditionLabel(bike.condition)}</span>
                   </div>
                   <div className="flex justify-between">
                     <span className="text-slate-600">Năm sản xuất</span>
