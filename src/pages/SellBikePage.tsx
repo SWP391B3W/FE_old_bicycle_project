@@ -1,9 +1,10 @@
 import { useEffect, useState } from 'react'
-import { Link, useLocation, useNavigate } from 'react-router-dom'
-import { ArrowLeft, Bike, Camera, CheckCircle2, Info, Loader2, Upload, X } from 'lucide-react'
+import { useLocation, useNavigate } from 'react-router-dom'
+import { ArrowLeft, Camera, Info, Loader2, Upload, X } from 'lucide-react'
 import { productsApi } from '@/api/products.api'
 import { referenceDataApi } from '@/api/reference-data.api'
 import { AdministrativeLocationFields } from '@/components/AdministrativeLocationFields'
+import Logo from '@/components/Logo'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { Input } from '@/components/ui/input'
@@ -151,6 +152,29 @@ export default function SellBikePage() {
   const [groupsets, setGroupsets] = useState<ReferenceValue[]>([])
   const [referenceLoading, setReferenceLoading] = useState(true)
 
+  // Default mock data khi API chưa sẵn sàng
+  const DEFAULT_BRANDS: Brand[] = [
+    { id: '1', name: 'Trek' },
+    { id: '2', name: 'Giant' },
+    { id: '3', name: 'Specialized' },
+    { id: '4', name: 'Scott' },
+    { id: '5', name: 'Cannondale' },
+    { id: '6', name: 'Merida' },
+    { id: '7', name: 'Cube' },
+    { id: '8', name: 'Focus' },
+  ]
+
+  const DEFAULT_CATEGORIES: Category[] = [
+    { id: '1', name: 'Road Bike (Xe Đạp Đường Trường)' },
+    { id: '2', name: 'Mountain Bike (Xe Đạp Leo Núi)' },
+    { id: '3', name: 'City Bike (Xe Đạp Thành Phố)' },
+    { id: '4', name: 'Gravel Bike (Xe Đạp Đa Năng)' },
+    { id: '5', name: 'Hybrid Bike (Xe Đạp Hybrid)' },
+    { id: '6', name: 'Folding Bike (Xe Đạp Gập Gọn)' },
+    { id: '7', name: 'BMX' },
+    { id: '8', name: 'Fixie' },
+  ]
+
   useEffect(() => {
     Promise.all([
       referenceDataApi.getBrands(),
@@ -160,15 +184,16 @@ export default function SellBikePage() {
       referenceDataApi.getGroupsets(),
     ])
       .then(([loadedBrands, loadedCategories, loadedBrakeTypes, loadedFrameMaterials, loadedGroupsets]) => {
-        setBrands(loadedBrands)
-        setCategories(loadedCategories)
+        setBrands(loadedBrands && loadedBrands.length > 0 ? loadedBrands : DEFAULT_BRANDS)
+        setCategories(loadedCategories && loadedCategories.length > 0 ? loadedCategories : DEFAULT_CATEGORIES)
         setBrakeTypes(loadedBrakeTypes)
         setFrameMaterials(loadedFrameMaterials)
         setGroupsets(loadedGroupsets)
       })
       .catch(() => {
-        setBrands([])
-        setCategories([])
+        // Sử dụng default data khi API fails
+        setBrands(DEFAULT_BRANDS)
+        setCategories(DEFAULT_CATEGORIES)
         setBrakeTypes([])
         setFrameMaterials([])
         setGroupsets([])
@@ -307,12 +332,7 @@ export default function SellBikePage() {
               {isSellerDashboardFlow ? 'Quay lại quản lý tin đăng' : 'Quay lại'}
             </Button>
 
-            <Link to={ROUTES.HOME} className="flex items-center gap-2 text-foreground hover:opacity-80">
-              <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-primary">
-                <Bike className="h-4 w-4 text-primary-foreground" />
-              </div>
-              <span className="text-base font-bold">Market Bike</span>
-            </Link>
+            <Logo className="h-8 w-8" showText />
           </div>
 
           <div className="text-center">
