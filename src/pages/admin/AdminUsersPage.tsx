@@ -34,8 +34,8 @@ export default function AdminUsersPage() {
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState<string | null>(null);
     const [searchQuery, setSearchQuery] = useState('');
-    const [roleFilter, setRoleFilter] = useState<string>('all');
-    const [statusFilter, setStatusFilter] = useState<string>('all');
+    const [roleFilter, setRoleFilter] = useState<string>('all_role');
+    const [statusFilter, setStatusFilter] = useState<string>('all_status');
     const [page, setPage] = useState(0);
     const [totalPages, setTotalPages] = useState(0);
     const [totalElements, setTotalElements] = useState(0);
@@ -69,8 +69,8 @@ export default function AdminUsersPage() {
         try {
             const result = await adminUsersApi.getAll({
                 keyword: searchQuery || undefined,
-                role: roleFilter !== 'all' ? (roleFilter as AppRole) : undefined,
-                status: statusFilter !== 'all' ? (statusFilter as UserStatus) : undefined,
+                role: roleFilter !== 'all_role' ? (roleFilter as AppRole) : undefined,
+                status: statusFilter !== 'all_status' ? (statusFilter as UserStatus) : undefined,
                 page,
                 size: 10,
             });
@@ -223,11 +223,11 @@ export default function AdminUsersPage() {
                         <SelectValue placeholder="Vai trò" />
                     </SelectTrigger>
                     <SelectContent>
-                        <SelectItem value="all">Tất cả vai trò</SelectItem>
-                        <SelectItem value="BUYER">Người mua</SelectItem>
-                        <SelectItem value="SELLER">Người bán</SelectItem>
-                        <SelectItem value="INSPECTOR">Kiểm định viên</SelectItem>
-                        <SelectItem value="ADMIN">Admin</SelectItem>
+                        <SelectItem value="all_role">Tất cả vai trò</SelectItem>
+                        <SelectItem value="buyer">Người mua</SelectItem>
+                        <SelectItem value="seller">Người bán</SelectItem>
+                        <SelectItem value="inspector">Kiểm định viên</SelectItem>
+                        <SelectItem value="admin">Admin</SelectItem>
                     </SelectContent>
                 </Select>
                 <Select value={statusFilter} onValueChange={(v) => { setStatusFilter(v); setPage(0); }}>
@@ -235,7 +235,7 @@ export default function AdminUsersPage() {
                         <SelectValue placeholder="Trạng thái" />
                     </SelectTrigger>
                     <SelectContent>
-                        <SelectItem value="all">Tất cả</SelectItem>
+                        <SelectItem value="all_status">Tất cả</SelectItem>
                         <SelectItem value="active">Hoạt động</SelectItem>
                         <SelectItem value="banned">Bị khóa</SelectItem>
                         <SelectItem value="unactive">Chưa kích hoạt</SelectItem>
@@ -252,6 +252,13 @@ export default function AdminUsersPage() {
                     {[...Array(5)].map((_, i) => (
                         <div key={i} className="h-12 bg-muted animate-pulse rounded" />
                     ))}
+                </div>
+            ) : users.length === 0 ? (
+                <div className="rounded-xl border border-dashed border-border bg-card px-6 py-10 text-center">
+                    <p className="text-base font-medium text-foreground">Không tìm thấy người dùng phù hợp.</p>
+                    <p className="mt-2 text-sm text-muted-foreground">
+                        Thử đổi bộ lọc hoặc từ khóa tìm kiếm để xem kết quả khác.
+                    </p>
                 </div>
             ) : (
                 <>

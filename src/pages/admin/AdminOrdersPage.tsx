@@ -13,11 +13,11 @@ import {
 } from '@/lib/order-display'
 import type { Order, OrderFundingStatus, OrderStatus } from '@/types/order'
 
-type StatusFilter = 'all' | OrderStatus
-type FundingFilter = 'all' | OrderFundingStatus
+type StatusFilter = 'all_status' | OrderStatus
+type FundingFilter = 'all_funding' | OrderFundingStatus
 
 const statusOptions: Array<{ value: StatusFilter; label: string }> = [
-  { value: 'all', label: 'Tất cả trạng thái đơn' },
+  { value: 'all_status', label: 'Tất cả trạng thái đơn' },
   { value: 'pending', label: 'Pending' },
   { value: 'deposited', label: 'Deposited' },
   { value: 'awaiting_buyer_confirmation', label: 'Chờ buyer xác nhận' },
@@ -26,7 +26,7 @@ const statusOptions: Array<{ value: StatusFilter; label: string }> = [
 ]
 
 const fundingOptions: Array<{ value: FundingFilter; label: string }> = [
-  { value: 'all', label: 'Tất cả trạng thái tiền' },
+  { value: 'all_funding', label: 'Tất cả trạng thái tiền' },
   { value: 'unpaid', label: 'Unpaid' },
   { value: 'awaiting_payment', label: 'Awaiting payment' },
   { value: 'held', label: 'Held' },
@@ -66,8 +66,8 @@ export default function AdminOrdersPage() {
   const [error, setError] = useState<string | null>(null)
   const [searchQuery, setSearchQuery] = useState('')
   const deferredSearchQuery = useDeferredValue(searchQuery.trim().toLowerCase())
-  const [statusFilter, setStatusFilter] = useState<StatusFilter>('all')
-  const [fundingFilter, setFundingFilter] = useState<FundingFilter>('all')
+  const [statusFilter, setStatusFilter] = useState<StatusFilter>('all_status')
+  const [fundingFilter, setFundingFilter] = useState<FundingFilter>('all_funding')
 
   useEffect(() => {
     let ignore = false
@@ -107,8 +107,8 @@ export default function AdminOrdersPage() {
 
   const filteredOrders = useMemo(() => {
     return orders.filter((order) => {
-      const matchesStatus = statusFilter === 'all' || order.status === statusFilter
-      const matchesFunding = fundingFilter === 'all' || order.fundingStatus === fundingFilter
+      const matchesStatus = statusFilter === 'all_status' || order.status === statusFilter
+      const matchesFunding = fundingFilter === 'all_funding' || order.fundingStatus === fundingFilter
 
       if (!matchesStatus || !matchesFunding) {
         return false

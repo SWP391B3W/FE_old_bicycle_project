@@ -54,10 +54,10 @@ export function Sidebar({ items }: SidebarProps) {
               className="flex min-w-0 flex-1 items-center gap-2 text-foreground hover:opacity-80"
               title="Về trang chủ"
             >
-              <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-primary">
-                <Bike className="h-4 w-4 text-primary-foreground" />
+              <div className="flex h-10 w-10 shrink-0 items-center justify-center overflow-hidden rounded-full bg-white">
+                <img src="/logo.png" alt="Logo" className="h-full w-full object-cover" />
               </div>
-              <span className="truncate text-base font-bold">BikeExchange</span>
+              <span className="truncate text-base font-bold">MARKET BIKE</span>
             </Link>
 
             <Button variant="ghost" size="icon" onClick={() => setCollapsed((current) => !current)} className="shrink-0">
