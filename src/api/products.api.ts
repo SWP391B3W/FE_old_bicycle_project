@@ -21,6 +21,18 @@ function appendFormField(formData: FormData, key: string, value: unknown) {
   formData.append(key, String(value))
 }
 
+function normalizeConditionForMutation(condition: ProductMutationInput['condition']) {
+  if (condition === 'new') {
+    return 'new_90'
+  }
+
+  if (condition === 'need_repair') {
+    return 'needs_repair'
+  }
+
+  return condition
+}
+
 function buildProductFormData(input: ProductMutationInput) {
   const formData = new FormData()
 
@@ -35,9 +47,43 @@ function buildProductFormData(input: ProductMutationInput) {
   appendFormField(formData, 'frameSize', input.frameSize)
   appendFormField(formData, 'wheelSize', input.wheelSize)
   appendFormField(formData, 'groupsetId', input.groupsetId)
-  appendFormField(formData, 'condition', input.condition)
+  appendFormField(formData, 'condition', normalizeConditionForMutation(input.condition))
   appendFormField(formData, 'province', input.province)
   appendFormField(formData, 'district', input.district)
+
+  input.images?.forEach((image) => {
+    formData.append('images', image)
+  })
+
+  return formData
+}
+
+function buildProductCreateFormData(input: ProductMutationInput) {
+  const formData = new FormData()
+
+  const requestPayload = compactParams({
+    brakeTypeId: input.brakeTypeId,
+    brandId: input.brandId,
+    groupsetId: input.groupsetId,
+    price: input.price,
+    frameSize: input.frameSize,
+    district: input.district,
+    frameMaterialId: input.frameMaterialId,
+    province: input.province,
+    originalPrice: input.originalPrice,
+    title: input.title,
+    categoryId: input.categoryId,
+    condition: normalizeConditionForMutation(input.condition),
+    wheelSize: input.wheelSize,
+    description: input.description,
+  })
+
+  formData.append(
+    'request',
+    new Blob([JSON.stringify(requestPayload)], {
+      type: 'application/json',
+    }),
+  )
 
   input.images?.forEach((image) => {
     formData.append('images', image)
@@ -91,21 +137,13 @@ export const productsApi = {
   },
 
   async create(payload: ProductMutationInput) {
-    const response = await http.post('/api/products', buildProductFormData(payload), {
-      headers: {
-        'Content-Type': 'multipart/form-data',
-      },
-    })
+    const response = await http.post('/api/products', buildProductCreateFormData(payload))
 
     return normalizeProduct(response.data.result as RawProduct)
   },
 
   async update(productId: string, payload: ProductMutationInput) {
-    const response = await http.put(`/api/products/${productId}`, buildProductFormData(payload), {
-      headers: {
-        'Content-Type': 'multipart/form-data',
-      },
-    })
+    const response = await http.put(`/api/products/${productId}`, buildProductFormData(payload))
 
     return normalizeProduct(response.data.result as RawProduct)
   },

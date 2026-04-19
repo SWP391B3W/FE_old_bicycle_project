@@ -78,6 +78,13 @@ export function validateSellBikeStep(
 
       if (parsedOriginalPrice !== null && parsedOriginalPrice > MAX_PRICE) {
         errors.originalPrice = 'Giá gốc không được vượt quá 1.000 tỷ VND.'
+      } else if (
+        parsedPrice !== null &&
+        parsedPrice > 0 &&
+        parsedOriginalPrice !== null &&
+        parsedOriginalPrice < parsedPrice
+      ) {
+        errors.originalPrice = 'Giá gốc cần lớn hơn hoặc bằng giá bán.'
       }
     }
 

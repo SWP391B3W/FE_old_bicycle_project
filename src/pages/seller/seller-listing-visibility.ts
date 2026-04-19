@@ -1,4 +1,5 @@
 import type { Product } from '@/types/product'
+import { getPublicVisibilityHint } from '@/lib/product-visibility'
 
 export interface SellerListingStatusPresentation {
   label: string
@@ -36,6 +37,17 @@ export function getSellerListingStatusPresentation(product: Product): SellerList
   }
 
   if (product.status === 'active') {
+    if (!product.isVerified) {
+      return {
+        label: 'Đang active (chưa public)',
+        className: 'bg-amber-100 text-amber-800 dark:bg-amber-900/40 dark:text-amber-300',
+        isPubliclyVisible: false,
+        hint:
+          getPublicVisibilityHint(product) ??
+          'Tin đang active nhưng chưa đủ điều kiện hiển thị công khai cho buyer.',
+      }
+    }
+
     return {
       label: 'Đang hiển thị',
       className: 'bg-emerald-100 text-emerald-800 dark:bg-emerald-900/40 dark:text-emerald-300',

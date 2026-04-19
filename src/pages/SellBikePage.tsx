@@ -88,6 +88,95 @@ interface SelectFieldProps {
   error?: string
 }
 
+function getSubmitErrorMessage(error: unknown) {
+  const axiosLikeError = error as {
+    config?: { url?: string }
+    response?: {
+      status?: number
+      data?:
+        | string
+        | {
+            message?: string
+            error?: string
+            detail?: string
+            errors?: Record<string, string> | string[]
+          }
+    }
+  }
+
+  const response = (error as {
+    response?: {
+      data?:
+        | string
+        | {
+            message?: string
+            error?: string
+            detail?: string
+            errors?: Record<string, string> | string[]
+          }
+    }
+  })?.response
+  const responseData = response?.data
+
+  if (typeof responseData === 'string' && responseData.trim()) {
+    return responseData
+  }
+
+  const responseObject =
+    responseData && typeof responseData === 'object'
+      ? responseData
+      : undefined
+
+  const backendMessage = responseObject?.message
+  const backendError = responseObject?.error
+  const backendDetail = responseObject?.detail
+  const backendErrors = responseObject?.errors
+  const statusCode = axiosLikeError.response?.status
+  const requestUrl = axiosLikeError.config?.url
+
+  if (Array.isArray(backendErrors) && backendErrors.length > 0) {
+    return `Lỗi dữ liệu: ${backendErrors.join(', ')}`
+  }
+
+  if (
+    backendErrors &&
+    typeof backendErrors === 'object' &&
+    Object.keys(backendErrors).length > 0
+  ) {
+    return `Lỗi dữ liệu: ${Object.values(backendErrors).join(', ')}`
+  }
+
+  if (backendMessage && backendMessage.trim()) {
+    if (
+      statusCode &&
+      statusCode >= 500 &&
+      backendMessage.trim().toLowerCase() === 'lỗi không xác định'
+    ) {
+      return `API đăng tin đang lỗi nội bộ (HTTP ${statusCode}). Vui lòng thử lại sau hoặc báo backend kiểm tra ${requestUrl ?? '/api/products'}.`
+    }
+
+    return backendMessage
+  }
+
+  if (backendDetail && backendDetail.trim()) {
+    return backendDetail
+  }
+
+  if (backendError && backendError.trim()) {
+    return backendError
+  }
+
+  if (error instanceof Error && error.message) {
+    if (statusCode && statusCode >= 500) {
+      return `API đăng tin đang lỗi nội bộ (HTTP ${statusCode}). Vui lòng thử lại sau.`
+    }
+
+    return error.message
+  }
+
+  return 'Đăng tin thất bại. Vui lòng kiểm tra lại thông tin và thử lại.'
+}
+
 function SelectField({
   label,
   value,
@@ -153,18 +242,9 @@ export default function SellBikePage() {
   const [referenceLoading, setReferenceLoading] = useState(true)
 
   // Default mock data khi API chưa sẵn sàng
-  const DEFAULT_BRANDS: Brand[] = [
-    { id: '1', name: 'Trek' },
-    { id: '2', name: 'Giant' },
-    { id: '3', name: 'Specialized' },
-    { id: '4', name: 'Scott' },
-    { id: '5', name: 'Cannondale' },
-    { id: '6', name: 'Merida' },
-    { id: '7', name: 'Cube' },
-    { id: '8', name: 'Focus' },
-  ]
+  const DEFAULT_BRANDS: Brand[] = []
 
-  const DEFAULT_CATEGORIES: Category[] = [
+  const DEFAULT_CATEGORIES: Category[] = [] /*
     { id: '1', name: 'Road Bike (Xe Đạp Đường Trường)' },
     { id: '2', name: 'Mountain Bike (Xe Đạp Leo Núi)' },
     { id: '3', name: 'City Bike (Xe Đạp Thành Phố)' },
@@ -173,7 +253,9 @@ export default function SellBikePage() {
     { id: '6', name: 'Folding Bike (Xe Đạp Gập Gọn)' },
     { id: '7', name: 'BMX' },
     { id: '8', name: 'Fixie' },
-  ]
+  */
+  void DEFAULT_BRANDS
+  void DEFAULT_CATEGORIES
 
   useEffect(() => {
     Promise.all([
@@ -184,16 +266,16 @@ export default function SellBikePage() {
       referenceDataApi.getGroupsets(),
     ])
       .then(([loadedBrands, loadedCategories, loadedBrakeTypes, loadedFrameMaterials, loadedGroupsets]) => {
-        setBrands(loadedBrands && loadedBrands.length > 0 ? loadedBrands : DEFAULT_BRANDS)
-        setCategories(loadedCategories && loadedCategories.length > 0 ? loadedCategories : DEFAULT_CATEGORIES)
+        setBrands(loadedBrands)
+        setCategories(loadedCategories)
         setBrakeTypes(loadedBrakeTypes)
         setFrameMaterials(loadedFrameMaterials)
         setGroupsets(loadedGroupsets)
       })
       .catch(() => {
         // Sử dụng default data khi API fails
-        setBrands(DEFAULT_BRANDS)
-        setCategories(DEFAULT_CATEGORIES)
+        setBrands([])
+        setCategories([])
         setBrakeTypes([])
         setFrameMaterials([])
         setGroupsets([])
@@ -309,8 +391,8 @@ export default function SellBikePage() {
     try {
       await productsApi.create(payload)
       navigate(ROUTES.SELLER_LISTINGS)
-    } catch {
-      setSubmitError('Đăng tin thất bại. Vui lòng kiểm tra lại thông tin và thử lại.')
+    } catch (error: unknown) {
+      setSubmitError(getSubmitErrorMessage(error))
       setIsSubmitting(false)
     }
   }
