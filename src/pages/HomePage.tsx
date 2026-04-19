@@ -1,5 +1,7 @@
 import { useNavigate } from 'react-router-dom'
-import { buildRoute, ROUTES } from '@/constants/routes'
+import { buildRoute } from '@/constants/routes'
+import { useAuth } from '@/contexts/AuthContext'
+import { canAccessSellerEntry, getSellEntryHref } from '@/layouts/app-header-visibility'
 import { HomeCategoriesSection } from './home/HomeCategoriesSection'
 import { HomeFeaturedProductsSection } from './home/HomeFeaturedProductsSection'
 import { HomeHeroSection } from './home/HomeHeroSection'
@@ -9,6 +11,7 @@ import { useHomePageData } from './home/useHomePageData'
 
 export default function HomePage() {
   const navigate = useNavigate()
+  const { user, isAuthenticated } = useAuth()
   const {
     searchState,
     searchActions,
@@ -41,7 +44,9 @@ export default function HomePage() {
       <HomeTrustSection />
       <HomeFeaturedProductsSection products={featuredProducts} loading={featuredLoading} />
       <HomeCategoriesSection categories={categories} loading={categoriesLoading} />
-      <HomeSellerCtaSection sellerEntryHref={ROUTES.SELL} />
+      {canAccessSellerEntry(user?.role, isAuthenticated) ? (
+        <HomeSellerCtaSection sellerEntryHref={getSellEntryHref(user?.role, isAuthenticated)} />
+      ) : null}
     </div>
   )
 }

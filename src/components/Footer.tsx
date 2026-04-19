@@ -1,9 +1,14 @@
 import { Link } from 'react-router-dom'
 import { ROUTES } from '@/constants/routes'
 import Logo from '@/components/Logo'
+import { useAuth } from '@/contexts/AuthContext'
+import { canAccessSellerEntry, getSellEntryHref } from '@/layouts/app-header-visibility'
 
 export default function Footer() {
   const currentYear = new Date().getFullYear()
+  const { isAuthenticated, user } = useAuth()
+  const showSellerEntry = canAccessSellerEntry(user?.role, isAuthenticated)
+  const sellEntryHref = getSellEntryHref(user?.role, isAuthenticated)
 
   return (
     <footer className="border-t border-slate-700 bg-slate-950 text-slate-200">
@@ -54,9 +59,13 @@ export default function Footer() {
                 </Link>
               </li>
               <li>
-                <Link to={ROUTES.SELL} className="text-slate-400 hover:text-sky-400 transition">
-                  Bán xe
-                </Link>
+                {showSellerEntry ? (
+                  <Link to={sellEntryHref} className="text-slate-400 hover:text-sky-400 transition">
+                    Bán xe
+                  </Link>
+                ) : (
+                  <span className="text-slate-600">Bán xe</span>
+                )}
               </li>
               <li>
                 <Link to={ROUTES.MESSAGES} className="text-slate-400 hover:text-sky-400 transition">

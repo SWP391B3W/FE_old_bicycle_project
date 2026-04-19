@@ -1,4 +1,4 @@
-import { type ReactNode, useMemo, useState } from 'react'
+import { type ReactNode, useEffect, useMemo, useState } from 'react'
 import { Link } from 'react-router-dom'
 import {
   ChevronDown,
@@ -10,22 +10,23 @@ import {
   SlidersHorizontal,
   X,
 } from 'lucide-react'
+import { productsApi } from '@/api/products.api'
+import { referenceDataApi } from '@/api/reference-data.api'
 import { Button } from '@/components/ui/button'
-import { bikes, categories, conditions } from '@/data/bikes'
 import { buildRoute, ROUTES } from '@/constants/routes'
+import { useAuth } from '@/contexts/AuthContext'
+import { canAccessSellerEntry, getSellEntryHref } from '@/layouts/app-header-visibility'
 import { formatCurrencyInput, formatPriceDisplay, parseCurrencyInput } from '@/lib/currency-input'
+import { getPrimaryImage, getProductConditionLabel, getProductLocation } from '@/pages/home/home.utils'
+import type { Product } from '@/types/product'
+import type { Category } from '@/types/reference-data'
 
 const conditionOptions = ['all', 'new', 'used', 'need_repair'] as const
 const PAGE_SIZE = 6
 const skeletonCardKeys = ['skeleton-1', 'skeleton-2', 'skeleton-3', 'skeleton-4', 'skeleton-5', 'skeleton-6'] as const
+const priceLevelMarks = [0, 10_000_000, 20_000_000, 30_000_000, 40_000_000, 50_000_000] as const
 
-const priceStepCandidates = [1_000_000, 2_000_000, 5_000_000, 10_000_000, 20_000_000, 50_000_000] as const
-
-function getRoundedPriceStep(minPrice: number, maxPrice: number) {
-  const targetStep = Math.max(maxPrice - minPrice, 1) / 4
-
-  return priceStepCandidates.find((step) => step >= targetStep) ?? priceStepCandidates.at(-1) ?? 50_000_000
-}
+type ConditionOption = typeof conditionOptions[number]
 
 function formatCompactPriceLabel(price: number) {
   if (price === 0) {
@@ -74,32 +75,6 @@ function getPriceRangeLabel(
   return ''
 }
 
-const bikePrices = bikes.map((bike) => bike.price)
-const rawMinBikePrice = Math.min(...bikePrices)
-const rawMaxBikePrice = Math.max(...bikePrices)
-const priceLevelStep = getRoundedPriceStep(rawMinBikePrice, rawMaxBikePrice)
-const priceSliderMin = Math.floor(rawMinBikePrice / priceLevelStep) * priceLevelStep
-const priceSliderMax = Math.ceil(rawMaxBikePrice / priceLevelStep) * priceLevelStep
-const priceLevelMarks = Array.from(
-  { length: Math.floor((priceSliderMax - priceSliderMin) / priceLevelStep) + 1 },
-  (_, index) => priceSliderMin + index * priceLevelStep,
-)
-
-type ConditionOption = typeof conditionOptions[number]
-
-interface FilteredBike {
-  id: string
-  title: string
-  brand: string
-  category: string
-  condition: ConditionOption
-  price: number
-  location: string
-  year: string
-  wheelSize: string
-  images: string[]
-}
-
 function CollapsibleFilterSection({
   title,
   selectedLabel,
@@ -128,7 +103,7 @@ function CollapsibleFilterSection({
           className={`h-4 w-4 text-slate-500 transition-transform ${isOpen ? 'rotate-180' : ''}`}
         />
       </button>
-      {isOpen && <div className="mt-2 space-y-1">{children}</div>}
+      {isOpen ? <div className="mt-2 space-y-1">{children}</div> : null}
     </div>
   )
 }
@@ -146,7 +121,13 @@ function SkeletonCard() {
   )
 }
 
-function BikeCard({ bike, viewMode }: Readonly<{ bike: FilteredBike; viewMode: 'grid' | 'list' }>) {
+function BikeCard({ bike, viewMode }: Readonly<{ bike: Product; viewMode: 'grid' | 'list' }>) {
+  const imageUrl = getPrimaryImage(bike)
+  const categoryLabel = bike.categoryName ?? bike.category ?? 'Xe đạp'
+  const brandLabel = bike.brandName ?? bike.brand ?? 'Chưa cập nhật'
+  const conditionLabel = getProductConditionLabel(bike.condition) ?? 'Chưa cập nhật'
+  const locationLabel = getProductLocation(bike)
+
   return (
     <Link
       to={buildRoute.bikeDetail(bike.id)}
@@ -159,9 +140,9 @@ function BikeCard({ bike, viewMode }: Readonly<{ bike: FilteredBike; viewMode: '
           viewMode === 'grid' ? 'aspect-[4/3]' : 'w-48 shrink-0'
         }`}
       >
-        {bike.images[0] ? (
+        {imageUrl ? (
           <img
-            src={bike.images[0]}
+            src={imageUrl}
             alt={bike.title}
             className="h-full w-full object-cover transition-transform duration-300 group-hover:scale-105"
           />
@@ -171,33 +152,33 @@ function BikeCard({ bike, viewMode }: Readonly<{ bike: FilteredBike; viewMode: '
           </div>
         )}
         <span className="absolute left-4 top-4 rounded-full bg-slate-950/80 px-3 py-1 text-xs font-semibold uppercase tracking-[0.2em] text-white">
-          {bike.category}
+          {categoryLabel}
         </span>
       </div>
       <div className="flex flex-1 flex-col space-y-4 p-6">
         <div>
-          <p className="text-xs text-slate-500">{bike.brand}</p>
+          <p className="text-xs text-slate-500">{brandLabel}</p>
           <h3 className="line-clamp-1 text-lg font-semibold text-slate-950 transition group-hover:text-sky-600">
             {bike.title}
           </h3>
-          <p className="mt-1 text-sm text-slate-600">{bike.location}</p>
+          <p className="mt-1 text-sm text-slate-600">{locationLabel}</p>
         </div>
         <div className="grid grid-cols-2 gap-2 text-sm">
           <div className="rounded-2xl bg-slate-50 p-2">
             <p className="font-medium text-slate-700">Tình trạng</p>
-            <p className="text-xs text-slate-600 mt-1">{conditions[bike.condition]}</p>
+            <p className="mt-1 text-xs text-slate-600">{conditionLabel}</p>
           </div>
           <div className="rounded-2xl bg-slate-50 p-2">
             <p className="font-medium text-slate-700">Kích thước</p>
-            <p className="text-xs text-slate-600 mt-1">{bike.wheelSize}</p>
+            <p className="mt-1 text-xs text-slate-600">{bike.wheelSize ?? bike.frameSize ?? 'Chưa cập nhật'}</p>
           </div>
         </div>
-        <div className="flex items-center justify-between gap-2 border-t border-slate-200 pt-3 mt-auto">
+        <div className="mt-auto flex items-center justify-between gap-2 border-t border-slate-200 pt-3">
           <p className="rounded-xl border border-sky-400 bg-sky-50 px-3 py-1 text-lg font-semibold text-sky-600">
-            {new Intl.NumberFormat('vi-VN', { style: 'currency', currency: 'VND' }).format(bike.price)}
+            {formatPriceDisplay(bike.price)}
           </p>
           <span className="text-xs font-semibold uppercase tracking-[0.2em] text-slate-600">
-            {bike.year}
+            {bike.createdAt ? new Intl.DateTimeFormat('vi-VN', { year: 'numeric' }).format(new Date(bike.createdAt)) : 'Mới'}
           </span>
         </div>
       </div>
@@ -206,6 +187,9 @@ function BikeCard({ bike, viewMode }: Readonly<{ bike: FilteredBike; viewMode: '
 }
 
 export default function MarketPage() {
+  const { isAuthenticated, user } = useAuth()
+  const [products, setProducts] = useState<Product[]>([])
+  const [categories, setCategories] = useState<Category[]>([])
   const [search, setSearch] = useState('')
   const [searchInput, setSearchInput] = useState('')
   const [category, setCategory] = useState('all')
@@ -215,7 +199,10 @@ export default function MarketPage() {
   const [minPriceInput, setMinPriceInput] = useState('')
   const [maxPriceInput, setMaxPriceInput] = useState('')
   const [page, setPage] = useState(0)
-  const isLoading = false
+  const [totalPages, setTotalPages] = useState(0)
+  const [totalElements, setTotalElements] = useState(0)
+  const [isLoading, setIsLoading] = useState(true)
+  const [error, setError] = useState<string | null>(null)
   const [viewMode, setViewMode] = useState<'grid' | 'list'>('grid')
 
   const minPrice = parseCurrencyInput(minPriceInput)
@@ -226,43 +213,74 @@ export default function MarketPage() {
   const isPriceFilterActive =
     normalizedPriceRange.min !== null || normalizedPriceRange.max !== null
 
-  const filteredBikes = useMemo(() => {
-    return bikes.filter((bike) => {
-      const searchStr = [
-        bike.title, 
-        bike.brand, 
-        bike.brandName, 
-        bike.category, 
-        bike.categoryName, 
-        bike.location, 
-        bike.province, 
-        bike.district
-      ]
-        .join(' ')
-        .toLowerCase()
+  useEffect(() => {
+    let ignore = false
 
-      const matchesSearch = searchStr.includes(search.toLowerCase())
+    async function loadCategories() {
+      try {
+        const result = await referenceDataApi.getCategories()
 
-      const matchesCategory = category === 'all' || 
-        bike.category === category || 
-        bike.categoryName === category || 
-        bike.categoryId === category
-      
-      const matchesCondition = condition === 'all' || bike.condition === condition
-      const matchesMinPrice = normalizedPriceRange.min === null || bike.price >= normalizedPriceRange.min
-      const matchesMaxPrice = normalizedPriceRange.max === null || bike.price <= normalizedPriceRange.max
+        if (!ignore) {
+          setCategories(result.filter((item) => !item.parentId))
+        }
+      } catch {
+        if (!ignore) {
+          setCategories([])
+        }
+      }
+    }
 
-      return matchesSearch && matchesCategory && matchesCondition && matchesMinPrice && matchesMaxPrice
-    })
-  }, [search, category, condition, normalizedPriceRange])
+    void loadCategories()
 
+    return () => {
+      ignore = true
+    }
+  }, [])
 
-  const paginatedBikes = useMemo(() => {
-    const start = page * PAGE_SIZE
-    return filteredBikes.slice(start, start + PAGE_SIZE)
-  }, [filteredBikes, page])
+  useEffect(() => {
+    let ignore = false
 
-  const totalPages = Math.ceil(filteredBikes.length / PAGE_SIZE)
+    async function loadProducts() {
+      setIsLoading(true)
+      setError(null)
+
+      try {
+        const result = await productsApi.search({
+          page,
+          size: PAGE_SIZE,
+          keyword: search || undefined,
+          categoryId: category === 'all' ? undefined : category,
+          condition: condition === 'all' ? undefined : condition,
+          minPrice: normalizedPriceRange.min ?? undefined,
+          maxPrice: normalizedPriceRange.max ?? undefined,
+          sortBy: 'createdAt,desc',
+        })
+
+        if (!ignore) {
+          setProducts(result.content)
+          setTotalPages(result.totalPages)
+          setTotalElements(result.totalElements)
+        }
+      } catch {
+        if (!ignore) {
+          setProducts([])
+          setTotalPages(0)
+          setTotalElements(0)
+          setError('Không thể tải danh sách xe từ API. Vui lòng kiểm tra backend rồi thử lại.')
+        }
+      } finally {
+        if (!ignore) {
+          setIsLoading(false)
+        }
+      }
+    }
+
+    void loadProducts()
+
+    return () => {
+      ignore = true
+    }
+  }, [category, condition, normalizedPriceRange.max, normalizedPriceRange.min, page, search])
 
   const handleSearchSubmit = () => {
     setPage(0)
@@ -324,8 +342,16 @@ export default function MarketPage() {
     [isPriceFilterActive, normalizedPriceRange],
   )
 
-  const selectedCategoryLabel = category === 'all' ? 'Tất cả' : category
-  const selectedConditionLabel = condition === 'all' ? 'Tất cả' : conditions[condition]
+  const selectedCategoryLabel = category === 'all'
+    ? 'Tất cả'
+    : categories.find((item) => item.id === category)?.name ?? category
+
+  const selectedConditionLabel = condition === 'all'
+    ? 'Tất cả'
+    : getProductConditionLabel(condition) ?? condition
+  const showSellerEntry = canAccessSellerEntry(user?.role, isAuthenticated)
+  const sellEntryHref = getSellEntryHref(user?.role, isAuthenticated)
+  const sellEntryLabel = isAuthenticated && user?.role === 'seller' ? 'Quản lý kênh bán' : 'Đăng tin bán xe'
 
   const filterContent = (
     <div className="space-y-4">
@@ -340,7 +366,7 @@ export default function MarketPage() {
           onClick={() => handleCategoryChange('all')}
           className={`w-full rounded-2xl border-2 px-3 py-2 text-left text-sm transition ${
             category === 'all'
-              ? 'border-black bg-sky-500/10 text-slate-900 font-medium'
+              ? 'border-black bg-sky-500/10 font-medium text-slate-900'
               : 'border-black bg-white text-slate-700 hover:border-black hover:bg-slate-50'
           }`}
         >
@@ -348,16 +374,16 @@ export default function MarketPage() {
         </button>
         {categories.map((option) => (
           <button
-            key={option}
+            key={option.id}
             type="button"
-            onClick={() => handleCategoryChange(option)}
+            onClick={() => handleCategoryChange(option.id)}
             className={`w-full rounded-2xl border-2 px-3 py-2 text-left text-sm transition ${
-              category === option
-                ? 'border-black bg-sky-500/10 text-slate-900 font-medium'
+              category === option.id
+                ? 'border-black bg-sky-500/10 font-medium text-slate-900'
                 : 'border-black bg-white text-slate-700 hover:border-black hover:bg-slate-50'
             }`}
           >
-            {option}
+            {option.name}
           </button>
         ))}
       </CollapsibleFilterSection>
@@ -376,11 +402,11 @@ export default function MarketPage() {
               onClick={() => handleConditionChange(option)}
               className={`w-full rounded-2xl border-2 px-3 py-2 text-left text-sm transition ${
                 condition === option
-                  ? 'border-black bg-sky-500/10 text-slate-900 font-medium'
+                  ? 'border-black bg-sky-500/10 font-medium text-slate-900'
                   : 'border-black bg-white text-slate-700 hover:border-black hover:bg-slate-50'
               }`}
             >
-              {option === 'all' ? 'Tất cả' : conditions[option]}
+              {option === 'all' ? 'Tất cả' : getProductConditionLabel(option) ?? option}
             </button>
           ))}
         </CollapsibleFilterSection>
@@ -443,7 +469,6 @@ export default function MarketPage() {
       <section className="mx-auto max-w-7xl">
         <div className="mb-8 flex flex-col gap-5 rounded-3xl border border-slate-200/80 bg-white p-8 shadow-sm shadow-slate-900/5 md:flex-row md:items-center md:justify-between">
           <div>
-            <p className="text-sm font-medium uppercase tracking-[0.2em] text-sky-600"></p>
             <h1 className="mt-3 text-3xl font-semibold tracking-tight text-slate-950 sm:text-4xl">
               Mua xe đạp thể thao đúng nhu cầu
             </h1>
@@ -452,9 +477,11 @@ export default function MarketPage() {
             </p>
           </div>
           <div className="flex flex-col gap-3 sm:flex-row">
-            <Button asChild className="bg-slate-950 text-white hover:bg-slate-800">
-              <Link to={ROUTES.SELL}>Đăng tin bán xe</Link>
-            </Button>
+            {showSellerEntry ? (
+              <Button asChild className="bg-slate-950 text-white hover:bg-slate-800">
+                <Link to={sellEntryHref}>{sellEntryLabel}</Link>
+              </Button>
+            ) : null}
             <Button asChild variant="outline" className="border-slate-300 text-slate-900 hover:bg-slate-100">
               <Link to={ROUTES.HOME}>Trở về trang chủ</Link>
             </Button>
@@ -462,17 +489,17 @@ export default function MarketPage() {
         </div>
 
         <div className="grid gap-6 lg:grid-cols-[280px_1fr]">
-          <aside className="hidden lg:block rounded-3xl border border-slate-200/80 bg-white p-6 shadow-sm shadow-slate-900/5 h-fit sticky top-6">
+          <aside className="sticky top-6 hidden h-fit rounded-3xl border border-slate-200/80 bg-white p-6 shadow-sm shadow-slate-900/5 lg:block">
             <div className="mb-4 flex items-center justify-between">
               <h2 className="text-lg font-semibold text-slate-900">Bộ lọc</h2>
-              {activeFiltersCount > 0 && (
+              {activeFiltersCount > 0 ? (
                 <button
                   onClick={clearFilters}
-                  className="text-xs font-medium text-sky-600 hover:text-sky-700 transition"
+                  className="text-xs font-medium text-sky-600 transition hover:text-sky-700"
                 >
                   Xóa tất cả
                 </button>
-              )}
+              ) : null}
             </div>
             {filterContent}
           </aside>
@@ -487,7 +514,7 @@ export default function MarketPage() {
                     value={searchInput}
                     onChange={(event) => setSearchInput(event.target.value)}
                     onKeyDown={(event) => event.key === 'Enter' && handleSearchSubmit()}
-                    className="w-full rounded-2xl border-2 border-black bg-white pl-10 pr-4 py-3 text-sm text-slate-900 outline-none transition focus:border-black focus:ring-2 focus:ring-black/20"
+                    className="w-full rounded-2xl border-2 border-black bg-white py-3 pl-10 pr-4 text-sm text-slate-900 outline-none transition focus:border-black focus:ring-2 focus:ring-black/20"
                   />
                 </div>
 
@@ -499,24 +526,24 @@ export default function MarketPage() {
                     >
                       Tìm kiếm
                     </Button>
-                    {activeFiltersCount > 0 && (
+                    {activeFiltersCount > 0 && !isLoading ? (
                       <span className="text-sm text-slate-600">
-                        {filteredBikes.length} kết quả
+                        {totalElements} kết quả
                       </span>
-                    )}
+                    ) : null}
                   </div>
 
                   <div className="flex gap-1 lg:hidden">
                     <button
                       onClick={clearFilters}
-                      className="inline-flex items-center gap-2 rounded-2xl border border-slate-200 bg-white px-3 py-2 text-sm font-medium text-slate-700 hover:bg-slate-50 transition lg:hidden"
+                      className="inline-flex items-center gap-2 rounded-2xl border border-slate-200 bg-white px-3 py-2 text-sm font-medium text-slate-700 transition hover:bg-slate-50 lg:hidden"
                     >
                       <SlidersHorizontal className="h-4 w-4" />
                       Bộ lọc
                     </button>
                   </div>
 
-                  <div className="hidden sm:flex gap-1 items-center rounded-2xl border border-slate-200">
+                  <div className="hidden items-center gap-1 rounded-2xl border border-slate-200 sm:flex">
                     <button
                       onClick={() => setViewMode('grid')}
                       className={`p-2 transition ${
@@ -542,9 +569,9 @@ export default function MarketPage() {
                   </div>
                 </div>
 
-                {activeFiltersCount > 0 && (
-                  <div className="flex flex-wrap gap-2 pt-2 border-t border-slate-200">
-                    {search && (
+                {activeFiltersCount > 0 ? (
+                  <div className="flex flex-wrap gap-2 border-t border-slate-200 pt-2">
+                    {search ? (
                       <div className="flex items-center gap-1 rounded-full bg-sky-100 px-3 py-1 text-xs font-medium text-sky-700">
                         <span>Từ khóa: {search}</span>
                         <button
@@ -558,10 +585,10 @@ export default function MarketPage() {
                           <X className="h-3 w-3" />
                         </button>
                       </div>
-                    )}
-                    {category !== 'all' && (
+                    ) : null}
+                    {category !== 'all' ? (
                       <div className="flex items-center gap-1 rounded-full bg-sky-100 px-3 py-1 text-xs font-medium text-sky-700">
-                        <span>Danh mục: {category}</span>
+                        <span>Danh mục: {selectedCategoryLabel}</span>
                         <button
                           onClick={() => handleCategoryChange('all')}
                           className="hover:text-sky-900"
@@ -569,10 +596,10 @@ export default function MarketPage() {
                           <X className="h-3 w-3" />
                         </button>
                       </div>
-                    )}
-                    {condition !== 'all' && (
+                    ) : null}
+                    {condition !== 'all' ? (
                       <div className="flex items-center gap-1 rounded-full bg-sky-100 px-3 py-1 text-xs font-medium text-sky-700">
-                        <span>Tình trạng: {conditions[condition]}</span>
+                        <span>Tình trạng: {selectedConditionLabel}</span>
                         <button
                           onClick={() => handleConditionChange('all')}
                           className="hover:text-sky-900"
@@ -580,8 +607,8 @@ export default function MarketPage() {
                           <X className="h-3 w-3" />
                         </button>
                       </div>
-                    )}
-                    {priceRangeLabel && (
+                    ) : null}
+                    {priceRangeLabel ? (
                       <div className="flex items-center gap-1 rounded-full bg-sky-100 px-3 py-1 text-xs font-medium text-sky-700">
                         <span>Giá: {priceRangeLabel}</span>
                         <button
@@ -595,13 +622,19 @@ export default function MarketPage() {
                           <X className="h-3 w-3" />
                         </button>
                       </div>
-                    )}
+                    ) : null}
                   </div>
-                )}
+                ) : null}
               </div>
             </div>
 
-            {filteredBikes.length === 0 ? (
+            {error ? (
+              <div className="rounded-3xl border border-destructive/30 bg-destructive/10 p-4 text-sm text-destructive">
+                {error}
+              </div>
+            ) : null}
+
+            {!isLoading && products.length === 0 ? (
               <div className="rounded-3xl border border-dashed border-slate-300 bg-white p-12 text-center shadow-sm shadow-slate-900/5">
                 <div className="mx-auto mb-4 flex h-24 w-24 items-center justify-center rounded-full bg-slate-100">
                   <Search className="h-10 w-10 text-slate-400" />
@@ -610,7 +643,7 @@ export default function MarketPage() {
                 <p className="mt-2 text-sm leading-6 text-slate-600">
                   Thử thay đổi từ khóa hoặc chọn mục khác để tìm thêm tin đăng.
                 </p>
-                {activeFiltersCount > 0 && (
+                {activeFiltersCount > 0 ? (
                   <Button
                     onClick={clearFilters}
                     variant="outline"
@@ -618,7 +651,7 @@ export default function MarketPage() {
                   >
                     Xóa bộ lọc
                   </Button>
-                )}
+                ) : null}
               </div>
             ) : (
               <>
@@ -631,23 +664,23 @@ export default function MarketPage() {
                 >
                   {isLoading
                     ? skeletonCardKeys.map((key) => <SkeletonCard key={key} />)
-                    : paginatedBikes.map((bike) => (
+                    : products.map((bike) => (
                         <BikeCard
                           key={bike.id}
-                          bike={bike as FilteredBike}
+                          bike={bike}
                           viewMode={viewMode}
                         />
                       ))}
                 </div>
 
-                {totalPages > 1 && (
+                {totalPages > 1 ? (
                   <div className="flex items-center justify-center gap-2 pt-6">
                     <Button
                       onClick={() => {
                         setPage((p) => Math.max(0, p - 1))
                         window.scrollTo({ top: 0, behavior: 'smooth' })
                       }}
-                      disabled={page === 0}
+                      disabled={page === 0 || isLoading}
                       variant="outline"
                       className="border-slate-300 text-slate-900 hover:bg-slate-100 disabled:opacity-50"
                     >
@@ -662,7 +695,7 @@ export default function MarketPage() {
                         setPage((p) => Math.min(totalPages - 1, p + 1))
                         window.scrollTo({ top: 0, behavior: 'smooth' })
                       }}
-                      disabled={page >= totalPages - 1}
+                      disabled={page >= totalPages - 1 || isLoading}
                       variant="outline"
                       className="border-slate-300 text-slate-900 hover:bg-slate-100 disabled:opacity-50"
                     >
@@ -670,7 +703,7 @@ export default function MarketPage() {
                       <ChevronRight className="ml-1 h-4 w-4" />
                     </Button>
                   </div>
-                )}
+                ) : null}
               </>
             )}
           </section>

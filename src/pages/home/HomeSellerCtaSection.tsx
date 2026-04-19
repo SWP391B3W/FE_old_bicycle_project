@@ -16,8 +16,7 @@ export function HomeSellerCtaSection({ sellerEntryHref }: HomeSellerCtaSectionPr
             Bạn muốn bán xe đạp của mình?
           </h2>
           <p className="mt-4 text-lg text-slate-200">
-            Tạo tin dễ dàng, chờ ban quản trị kiểm định chất lượng trước khi được đăng bán
-            công khai.
+            Tạo tin dễ dàng, chờ ban quản trị kiểm định chất lượng trước khi được đăng bán công khai.
           </p>
           <Button
             size="lg"
@@ -26,7 +25,7 @@ export function HomeSellerCtaSection({ sellerEntryHref }: HomeSellerCtaSectionPr
             className="mt-8 border-white bg-white text-slate-950 hover:bg-slate-100"
           >
             <Link to={sellerEntryHref}>
-              Đăng tin bán xe ngay <ArrowRight className="ml-2 h-4 w-4" />
+              Bắt đầu bán xe <ArrowRight className="ml-2 h-4 w-4" />
             </Link>
           </Button>
         </div>

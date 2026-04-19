@@ -56,18 +56,26 @@ export default function AppRouter() {
 
                     {/* Protected general routes */}
                     <Route element={<ProtectedRoute />}>
-                        <Route path={ROUTES.SELL} element={<SellBikePage />} />
                         <Route path={ROUTES.CHECKOUT} element={<CheckoutPage />} />
                         <Route path={ROUTES.PAYMENT} element={<PaymentPage />} />
                         <Route path={ROUTES.ORDER_CONFIRMATION} element={<OrderConfirmationPage />} />
                         <Route path={ROUTES.MESSAGES} element={<MessagesPage />} />
                     </Route>
+
+                    <Route
+                        path={ROUTES.SELL}
+                        element={
+                            <ProtectedRoute allowedRoles={['seller']}>
+                                <SellBikePage />
+                            </ProtectedRoute>
+                        }
+                    />
                 </Route>
 
                 {/* Inspector routes */}
                 <Route
                     element={
-                        <ProtectedRoute allowedRoles={['INSPECTOR']}>
+                        <ProtectedRoute allowedRoles={['inspector']}>
                             <InspectorLayout />
                         </ProtectedRoute>
                     }
@@ -81,7 +89,7 @@ export default function AppRouter() {
                 {/* Seller routes */}
                 <Route
                     element={
-                        <ProtectedRoute allowedRoles={['SELLER']}>
+                        <ProtectedRoute allowedRoles={['seller']}>
                             <SellerLayout />
                         </ProtectedRoute>
                     }
