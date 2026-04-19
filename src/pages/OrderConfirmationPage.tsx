@@ -1,33 +1,61 @@
 import { useEffect } from 'react'
 import { Link, useLocation, useNavigate } from 'react-router-dom'
+import { CheckCircle2, Copy, Printer } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { ROUTES } from '@/constants/routes'
-import { CheckCircle2, Copy, Printer } from 'lucide-react'
+import { getPaymentMethodLabel } from '@/lib/order-display'
+import type { CheckoutFormData, Order } from '@/types/order'
+import type { Product } from '@/types/product'
+
+interface OrderConfirmationState {
+  order?: Order
+  product?: Product
+  checkoutData?: CheckoutFormData
+}
+
+function toImageUrl(image: string | { url: string }) {
+  return typeof image === 'string' ? image : image.url
+}
+
+function getProductImage(product: Product) {
+  const images = product.images ?? []
+  for (const image of images) {
+    if (typeof image !== 'string' && image.isPrimary) {
+      return image.url
+    }
+  }
+
+  const fallbackImage = images[0]
+  return fallbackImage ? toImageUrl(fallbackImage) : ''
+}
+
+function formatCurrency(value: number) {
+  return new Intl.NumberFormat('vi-VN', { style: 'currency', currency: 'VND' }).format(value)
+}
 
 export default function OrderConfirmationPage() {
   const location = useLocation()
   const navigate = useNavigate()
-
-  const orderId = location.state?.orderId
-  const bike = location.state?.bike
-  const checkoutData = location.state?.checkoutData
-  const paymentMethod = location.state?.paymentMethod
+  const locationState = (location.state ?? {}) as OrderConfirmationState
+  const order = locationState.order
+  const product = locationState.product
+  const checkoutData = locationState.checkoutData
 
   useEffect(() => {
-    if (!orderId) {
-      navigate(ROUTES.MARKET)
+    if (!order?.id) {
+      navigate(ROUTES.MARKET, { replace: true })
     }
-  }, [orderId, navigate])
+  }, [navigate, order?.id])
 
   const handleCopyOrderId = () => {
-    if (orderId) {
-      navigator.clipboard.writeText(orderId)
+    if (order?.id) {
+      void navigator.clipboard.writeText(order.id)
       alert('Mã đơn hàng đã được sao chép')
     }
   }
 
-  if (!orderId || !bike || !checkoutData) {
+  if (!order || !product || !checkoutData) {
     return (
       <main className="min-h-screen bg-slate-50 px-6 py-10 sm:px-8 lg:px-10">
         <div className="mx-auto max-w-2xl rounded-3xl border border-slate-200/80 bg-white p-10 text-center shadow-sm shadow-slate-900/5">
@@ -37,37 +65,31 @@ export default function OrderConfirmationPage() {
     )
   }
 
-  const paymentMethodLabels: Record<string, string> = {
-    credit_card: 'Thẻ tín dụng/ghi nợ',
-    bank_transfer: 'Chuyển khoản ngân hàng',
-    cod: 'Thanh toán khi nhận hàng',
-  }
+  const productImage = getProductImage(product)
+  const paymentAmount = order.buyerChargeAmount ?? order.totalAmount ?? product.price
 
   return (
     <main className="min-h-screen bg-slate-50 px-6 py-10 sm:px-8 lg:px-10">
       <div className="mx-auto max-w-4xl">
-        {/* Success Message */}
         <div className="mb-8 rounded-3xl border border-green-200 bg-green-50 p-8 text-center">
           <div className="mx-auto mb-4 flex h-16 w-16 items-center justify-center rounded-full bg-green-100">
             <CheckCircle2 className="h-8 w-8 text-green-600" />
           </div>
-          <h1 className="text-3xl font-bold text-green-900">Đặt hàng thành công!</h1>
+          <h1 className="text-3xl font-bold text-green-900">Tạo đơn mua thành công</h1>
           <p className="mt-3 text-green-800">
-            Cảm ơn bạn đã mua xe đạp tại Market Bike. Đơn hàng của bạn đã được tạo thành công.
+            Yêu cầu mua đã được gửi vào hệ thống. Người bán cần duyệt trước khi bước thanh toán tiếp theo được mở.
           </p>
         </div>
 
-        {/* Order Details */}
         <div className="grid gap-8 lg:grid-cols-3">
-          <div className="lg:col-span-2 space-y-6">
-            {/* Order ID */}
+          <div className="space-y-6 lg:col-span-2">
             <Card className="border-slate-200/80 bg-white shadow-sm shadow-slate-900/5">
               <CardHeader>
                 <CardTitle className="text-lg text-slate-950">Mã đơn hàng</CardTitle>
               </CardHeader>
               <CardContent>
                 <div className="flex items-center gap-3 rounded-xl bg-slate-100 p-4">
-                  <code className="flex-1 font-mono text-sm font-semibold text-slate-900">{orderId}</code>
+                  <code className="flex-1 font-mono text-sm font-semibold text-slate-900">{order.id}</code>
                   <Button
                     variant="outline"
                     size="sm"
@@ -78,37 +100,37 @@ export default function OrderConfirmationPage() {
                   </Button>
                 </div>
                 <p className="mt-3 text-sm text-slate-600">
-                  Lưu mã đơn hàng này để theo dõi đơn hàng của bạn.
+                  Bạn có thể theo dõi đơn này trong mục đơn mua sau khi seller phản hồi.
                 </p>
               </CardContent>
             </Card>
 
-            {/* Bike Information */}
             <Card className="border-slate-200/80 bg-white shadow-sm shadow-slate-900/5">
               <CardHeader>
                 <CardTitle className="text-lg text-slate-950">Thông tin sản phẩm</CardTitle>
               </CardHeader>
               <CardContent>
                 <div className="flex gap-4">
-                  <img
-                    src={bike.images[0]}
-                    alt={bike.title}
-                    className="h-24 w-24 rounded-2xl object-cover"
-                  />
+                  {productImage ? (
+                    <img
+                      src={productImage}
+                      alt={product.title}
+                      className="h-24 w-24 rounded-2xl object-cover"
+                    />
+                  ) : (
+                    <div className="flex h-24 w-24 items-center justify-center rounded-2xl bg-slate-200 text-xs text-slate-500">
+                      No image
+                    </div>
+                  )}
                   <div className="flex-1">
-                    <h3 className="font-semibold text-slate-900">{bike.title}</h3>
-                    <p className="mt-1 text-sm text-slate-600">{bike.brand}</p>
-                    <p className="mt-3 text-lg font-bold text-sky-600">
-                      {new Intl.NumberFormat('vi-VN', { style: 'currency', currency: 'VND' }).format(
-                        bike.price,
-                      )}
-                    </p>
+                    <h3 className="font-semibold text-slate-900">{product.title}</h3>
+                    <p className="mt-1 text-sm text-slate-600">{product.brandName ?? product.brand ?? 'Chưa cập nhật'}</p>
+                    <p className="mt-3 text-lg font-bold text-sky-600">{formatCurrency(product.price)}</p>
                   </div>
                 </div>
               </CardContent>
             </Card>
 
-            {/* Delivery Information */}
             <Card className="border-slate-200/80 bg-white shadow-sm shadow-slate-900/5">
               <CardHeader>
                 <CardTitle className="text-lg text-slate-950">Thông tin giao hàng</CardTitle>
@@ -126,16 +148,15 @@ export default function OrderConfirmationPage() {
                   <p className="text-sm text-slate-600">Địa chỉ giao hàng</p>
                   <p className="mt-1 font-medium text-slate-900">{checkoutData.deliveryAddress}</p>
                 </div>
-                {checkoutData.notes && (
+                {checkoutData.notes ? (
                   <div>
                     <p className="text-sm text-slate-600">Ghi chú</p>
                     <p className="mt-1 font-medium text-slate-900">{checkoutData.notes}</p>
                   </div>
-                )}
+                ) : null}
               </CardContent>
             </Card>
 
-            {/* Payment Information */}
             <Card className="border-slate-200/80 bg-white shadow-sm shadow-slate-900/5">
               <CardHeader>
                 <CardTitle className="text-lg text-slate-950">Thông tin thanh toán</CardTitle>
@@ -143,23 +164,22 @@ export default function OrderConfirmationPage() {
               <CardContent className="space-y-4">
                 <div>
                   <p className="text-sm text-slate-600">Phương thức thanh toán</p>
-                  <p className="mt-1 font-medium text-slate-900">{paymentMethodLabels[paymentMethod]}</p>
+                  <p className="mt-1 font-medium text-slate-900">{getPaymentMethodLabel(order)}</p>
+                </div>
+                <div>
+                  <p className="text-sm text-slate-600">Trạng thái đơn</p>
+                  <p className="mt-1 font-medium text-slate-900">{order.status}</p>
                 </div>
                 <div className="flex justify-between rounded-xl bg-slate-100 p-4">
-                  <span className="font-semibold text-slate-900">Tổng tiền</span>
-                  <span className="text-lg font-bold text-sky-600">
-                    {new Intl.NumberFormat('vi-VN', { style: 'currency', currency: 'VND' }).format(
-                      bike.price,
-                    )}
-                  </span>
+                  <span className="font-semibold text-slate-900">Giá trị hiện tại của đơn</span>
+                  <span className="text-lg font-bold text-sky-600">{formatCurrency(paymentAmount)}</span>
                 </div>
               </CardContent>
             </Card>
           </div>
 
-          {/* Next Steps */}
           <aside>
-            <Card className="border-slate-200/80 bg-white shadow-sm shadow-slate-900/5 sticky top-10">
+            <Card className="sticky top-10 border-slate-200/80 bg-white shadow-sm shadow-slate-900/5">
               <CardHeader>
                 <CardTitle className="text-lg text-slate-950">Các bước tiếp theo</CardTitle>
               </CardHeader>
@@ -169,9 +189,9 @@ export default function OrderConfirmationPage() {
                     1
                   </div>
                   <div>
-                    <p className="font-medium text-slate-900">Xác nhận đơn hàng</p>
+                    <p className="font-medium text-slate-900">Chờ người bán duyệt đơn</p>
                     <p className="mt-1 text-sm text-slate-600">
-                      Chúng tôi sẽ gửi email xác nhận trong vòng 15 phút.
+                      Đơn vừa tạo đang ở trạng thái chờ người bán xem xét.
                     </p>
                   </div>
                 </div>
@@ -181,9 +201,9 @@ export default function OrderConfirmationPage() {
                     2
                   </div>
                   <div>
-                    <p className="font-medium text-slate-900">Chuẩn bị giao hàng</p>
+                    <p className="font-medium text-slate-900">Buyer thanh toán khi đơn được duyệt</p>
                     <p className="mt-1 text-sm text-slate-600">
-                      Người bán sẽ chuẩn bị xe đạp trong 2-3 ngày.
+                      Với chuyển khoản hoặc thanh toán trực tiếp, hệ thống sẽ mở bước tiếp theo sau khi seller chấp nhận đơn.
                     </p>
                   </div>
                 </div>
@@ -193,37 +213,17 @@ export default function OrderConfirmationPage() {
                     3
                   </div>
                   <div>
-                    <p className="font-medium text-slate-900">Giao hàng</p>
+                    <p className="font-medium text-slate-900">Hoàn tất giao dịch</p>
                     <p className="mt-1 text-sm text-slate-600">
-                      Xe đạp sẽ được giao tới địa chỉ của bạn.
+                      Hai bên tiếp tục theo flow đơn hàng thật ở dashboard của hệ thống.
                     </p>
                   </div>
-                </div>
-
-                <div className="flex gap-3">
-                  <div className="flex h-8 w-8 flex-shrink-0 items-center justify-center rounded-full bg-slate-200 font-semibold text-slate-600">
-                    4
-                  </div>
-                  <div>
-                    <p className="font-medium text-slate-900">Hoàn tất</p>
-                    <p className="mt-1 text-sm text-slate-600">
-                      Kiểm tra xe và hoàn tất giao dịch.
-                    </p>
-                  </div>
-                </div>
-
-                <div className="border-t border-slate-200/80 pt-4 mt-4">
-                  <p className="text-xs font-medium uppercase tracking-[0.1em] text-slate-600">Hỗ trợ</p>
-                  <p className="mt-2 text-sm text-slate-600">
-                    Nếu bạn có câu hỏi, hãy liên hệ với chúng tôi qua email hoặc hotline.
-                  </p>
                 </div>
               </CardContent>
             </Card>
           </aside>
         </div>
 
-        {/* Action Buttons */}
         <div className="mt-8 flex flex-col gap-3 sm:flex-row">
           <Button asChild className="flex-1 bg-sky-600 text-white hover:bg-sky-500">
             <Link to={ROUTES.HOME}>Về trang chủ</Link>

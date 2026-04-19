@@ -1,54 +1,129 @@
-import { useMemo, useState } from 'react'
+import { useEffect, useState } from 'react'
 import { Link, useNavigate, useParams } from 'react-router-dom'
+import { productsApi } from '@/api/products.api'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { Textarea } from '@/components/ui/textarea'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
-import { bikes, conditions } from '@/data/bikes'
 import { ROUTES } from '@/constants/routes'
 import { useAuth } from '@/contexts/AuthContext'
+import type { AppRole } from '@/types/auth'
 import type { CheckoutFormData } from '@/types/order'
+import type { Product } from '@/types/product'
 
 function toImageUrl(image: string | { url: string }) {
   return typeof image === 'string' ? image : image.url
 }
 
 function getConditionLabel(condition?: string | null) {
-  if (!condition) {
-    return 'Chua cap nhat'
+  switch (condition) {
+    case 'new':
+    case 'new_90':
+      return 'Như mới (90%+)'
+    case 'used':
+      return 'Đã qua sử dụng'
+    case 'need_repair':
+    case 'needs_repair':
+      return 'Cần sửa chữa'
+    default:
+      return 'Chưa cập nhật'
+  }
+}
+
+function getRoleRedirectEntry(role?: AppRole | null) {
+  switch (role) {
+    case 'seller':
+      return { href: ROUTES.SELLER, label: 'Về kênh người bán' }
+    case 'inspector':
+      return { href: ROUTES.INSPECTOR, label: 'Về kênh kiểm định' }
+    case 'admin':
+      return { href: ROUTES.ADMIN, label: 'Về trang quản trị' }
+    default:
+      return { href: ROUTES.MARKET, label: 'Quay lại thị trường' }
+  }
+}
+
+function formatCurrency(value: number) {
+  return new Intl.NumberFormat('vi-VN', { style: 'currency', currency: 'VND' }).format(value)
+}
+
+function getProductImage(product: Product) {
+  const images = product.images ?? []
+  for (const image of images) {
+    if (typeof image !== 'string' && image.isPrimary) {
+      return image.url
+    }
   }
 
-  if (condition in conditions) {
-    return conditions[condition as keyof typeof conditions]
-  }
-
-  if (condition === 'new_90') {
-    return conditions.new
-  }
-
-  if (condition === 'needs_repair') {
-    return conditions.need_repair
-  }
-
-  return 'Chua cap nhat'
+  const fallbackImage = images[0]
+  return fallbackImage ? toImageUrl(fallbackImage) : ''
 }
 
 export default function CheckoutPage() {
   const { id } = useParams<{ id: string }>()
-  const navigator = useNavigate()
+  const navigate = useNavigate()
   const { isAuthenticated, user } = useAuth()
-
-  const bike = useMemo(() => bikes.find((item) => item.id === id), [id])
-
+  const [product, setProduct] = useState<Product | null>(null)
+  const [isProductLoading, setIsProductLoading] = useState(true)
+  const [productError, setProductError] = useState<string | null>(null)
   const [formData, setFormData] = useState<CheckoutFormData>({
     deliveryName: user?.name || '',
-    deliveryPhone: '',
-    deliveryAddress: '',
+    deliveryPhone: user?.phone || '',
+    deliveryAddress: user?.defaultAddress || user?.address || '',
     notes: '',
   })
+  const [isSubmitting, setIsSubmitting] = useState(false)
 
-  const [isLoading, setIsLoading] = useState(false)
+  useEffect(() => {
+    setFormData((currentValue) => ({
+      ...currentValue,
+      deliveryName: currentValue.deliveryName || user?.name || '',
+      deliveryPhone: currentValue.deliveryPhone || user?.phone || '',
+      deliveryAddress: currentValue.deliveryAddress || user?.defaultAddress || user?.address || '',
+    }))
+  }, [user?.address, user?.defaultAddress, user?.name, user?.phone])
+
+  useEffect(() => {
+    if (!id) {
+      setProduct(null)
+      setProductError('Không tìm thấy mã sản phẩm hợp lệ.')
+      setIsProductLoading(false)
+      return
+    }
+
+    let ignore = false
+
+    const productId = id
+
+    async function loadProduct() {
+      setIsProductLoading(true)
+      setProductError(null)
+
+      try {
+        const result = await productsApi.getById(productId)
+
+        if (!ignore) {
+          setProduct(result)
+        }
+      } catch {
+        if (!ignore) {
+          setProduct(null)
+          setProductError('Không thể tải thông tin xe từ API. Vui lòng thử lại.')
+        }
+      } finally {
+        if (!ignore) {
+          setIsProductLoading(false)
+        }
+      }
+    }
+
+    void loadProduct()
+
+    return () => {
+      ignore = true
+    }
+  }, [id])
 
   if (!isAuthenticated) {
     return (
@@ -71,13 +146,46 @@ export default function CheckoutPage() {
     )
   }
 
-  if (!bike) {
+  if (user?.role !== 'buyer') {
+    const redirectEntry = getRoleRedirectEntry(user?.role)
+
+    return (
+      <main className="min-h-screen bg-slate-50 px-6 py-10 sm:px-8 lg:px-10">
+        <div className="mx-auto max-w-2xl rounded-3xl border border-slate-200/80 bg-white p-10 text-center shadow-sm shadow-slate-900/5">
+          <h1 className="text-2xl font-semibold text-slate-950">Chỉ tài khoản người mua mới được đặt hàng</h1>
+          <p className="mt-4 text-sm leading-6 text-slate-600">
+            Luồng thanh toán đang dành riêng cho người mua. Tài khoản hiện tại của bạn nên dùng khu vực chức năng tương ứng thay vì tạo đơn mua.
+          </p>
+          <div className="mt-6 flex gap-3">
+            <Button asChild variant="outline" className="flex-1">
+              <Link to={ROUTES.MARKET}>Xem xe đang bán</Link>
+            </Button>
+            <Button asChild className="flex-1 bg-sky-600 text-white hover:bg-sky-500">
+              <Link to={redirectEntry.href}>{redirectEntry.label}</Link>
+            </Button>
+          </div>
+        </div>
+      </main>
+    )
+  }
+
+  if (isProductLoading) {
+    return (
+      <main className="min-h-screen bg-slate-50 px-6 py-10 sm:px-8 lg:px-10">
+        <div className="mx-auto max-w-2xl rounded-3xl border border-slate-200/80 bg-white p-10 text-center shadow-sm shadow-slate-900/5">
+          <h1 className="text-2xl font-semibold text-slate-950">Đang tải thông tin xe</h1>
+        </div>
+      </main>
+    )
+  }
+
+  if (!product || productError) {
     return (
       <main className="min-h-screen bg-slate-50 px-6 py-10 sm:px-8 lg:px-10">
         <div className="mx-auto max-w-2xl rounded-3xl border border-slate-200/80 bg-white p-10 text-center shadow-sm shadow-slate-900/5">
           <h1 className="text-2xl font-semibold text-slate-950">Xe không tồn tại</h1>
           <p className="mt-4 text-sm leading-6 text-slate-600">
-            Xe mà bạn đang tìm kiếm không còn khả dụng.
+            {productError ?? 'Xe bạn đang tìm kiếm không còn khả dụng.'}
           </p>
           <Button asChild className="mt-6 bg-sky-600 text-white hover:bg-sky-500">
             <Link to={ROUTES.MARKET}>Quay lại thị trường</Link>
@@ -87,44 +195,41 @@ export default function CheckoutPage() {
     )
   }
 
-  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
-    const { name, value } = e.target
-    setFormData((prev) => ({ ...prev, [name]: value }))
+  const productImage = getProductImage(product)
+  const productBrand = product.brandName ?? product.brand ?? 'Chưa cập nhật'
+
+  const handleInputChange = (event: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
+    const { name, value } = event.target
+    setFormData((currentValue) => ({ ...currentValue, [name]: value }))
   }
 
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault()
+  const handleSubmit = (event: React.FormEvent) => {
+    event.preventDefault()
 
     if (!formData.deliveryName || !formData.deliveryPhone || !formData.deliveryAddress) {
       alert('Vui lòng điền đầy đủ thông tin giao hàng')
       return
     }
 
-    setIsLoading(true)
-    // Simulate API call
-    setTimeout(() => {
-      // Navigate to payment page with checkout data
-      navigator(`/thanh-toan/${bike.id}`, {
-        state: { checkoutData: formData, bike },
-      })
-      setIsLoading(false)
-    }, 500)
+    setIsSubmitting(true)
+    navigate(`/thanh-toan/${product.id}`, {
+      state: { checkoutData: formData, product },
+    })
   }
 
   return (
     <main className="min-h-screen bg-slate-50 px-6 py-10 sm:px-8 lg:px-10">
       <div className="mx-auto max-w-7xl">
         <div className="mb-6">
-          <Link to={`/bikes/${bike.id}`} className="text-sm font-medium text-sky-600 hover:text-sky-500">
+          <Link to={`/bikes/${product.id}`} className="text-sm font-medium text-sky-600 hover:text-sky-500">
             ← Quay lại chi tiết sản phẩm
           </Link>
         </div>
 
         <div className="grid gap-8 lg:grid-cols-[1.5fr_1fr]">
-          {/* Checkout Form */}
           <section className="space-y-6">
             <div className="rounded-3xl border border-slate-200/80 bg-white p-8 shadow-sm shadow-slate-900/5">
-              <h1 className="text-2xl font-semibold text-slate-950">Thong tin giao hang</h1>
+              <h1 className="text-2xl font-semibold text-slate-950">Thông tin giao hàng</h1>
               <form onSubmit={handleSubmit} className="mt-6 space-y-5">
                 <div>
                   <Label htmlFor="deliveryName" className="text-sm font-medium text-slate-900">
@@ -165,7 +270,7 @@ export default function CheckoutPage() {
                     name="deliveryAddress"
                     value={formData.deliveryAddress}
                     onChange={handleInputChange}
-                    placeholder="Nhập địa chỉ giao hàng (số nhà, đường, phường, quận, thành phố)"
+                    placeholder="Nhập địa chỉ giao hàng"
                     className="mt-2 border-slate-300 bg-slate-50 focus:border-sky-400 focus:ring-sky-400/30"
                     rows={3}
                   />
@@ -173,14 +278,14 @@ export default function CheckoutPage() {
 
                 <div>
                   <Label htmlFor="notes" className="text-sm font-medium text-slate-900">
-                    Ghi chú (tùy chỉnh)
+                    Ghi chú
                   </Label>
                   <Textarea
                     id="notes"
                     name="notes"
                     value={formData.notes}
                     onChange={handleInputChange}
-                    placeholder="Ghi chú thêm cho người bán (ví dụ: thời gian giao hàng ưa thích)"
+                    placeholder="Ghi chú thêm cho người bán"
                     className="mt-2 border-slate-300 bg-slate-50 focus:border-sky-400 focus:ring-sky-400/30"
                     rows={2}
                   />
@@ -188,91 +293,78 @@ export default function CheckoutPage() {
 
                 <Button
                   type="submit"
-                  disabled={isLoading}
+                  disabled={isSubmitting}
                   className="w-full bg-sky-600 text-white hover:bg-sky-500 disabled:opacity-50"
                 >
-                  {isLoading ? 'Đang xử lý...' : 'Tiếp tục thanh toán'}
+                  {isSubmitting ? 'Đang chuyển sang bước thanh toán...' : 'Tiếp tục thanh toán'}
                 </Button>
               </form>
             </div>
           </section>
 
-          {/* Order Summary */}
           <aside className="space-y-6">
             <Card className="border-slate-200/80 bg-white shadow-sm shadow-slate-900/5">
               <CardHeader>
                 <CardTitle className="text-lg text-slate-950">Tóm tắt đơn hàng</CardTitle>
               </CardHeader>
               <CardContent className="space-y-6">
-                {/* Bike Info */}
                 <div className="rounded-2xl border border-slate-200/80 bg-slate-50 p-4">
                   <div className="flex gap-4">
-                    <img
-                      src={bike.images?.[0] ? toImageUrl(bike.images[0]) : ''}
-                      alt={bike.title}
-                      className="h-20 w-20 rounded-xl object-cover"
-                    />
+                    {productImage ? (
+                      <img
+                        src={productImage}
+                        alt={product.title}
+                        className="h-20 w-20 rounded-xl object-cover"
+                      />
+                    ) : (
+                      <div className="flex h-20 w-20 items-center justify-center rounded-xl bg-slate-200 text-xs text-slate-500">
+                        No image
+                      </div>
+                    )}
                     <div className="flex-1">
-                      <h3 className="text-sm font-semibold text-slate-900">{bike.title}</h3>
-                      <p className="mt-1 text-xs text-slate-600">{bike.brand}</p>
-                      <p className="mt-2 text-sm font-medium text-slate-900">
-                        {new Intl.NumberFormat('vi-VN', { style: 'currency', currency: 'VND' }).format(
-                          bike.price,
-                        )}
-                      </p>
+                      <h3 className="text-sm font-semibold text-slate-900">{product.title}</h3>
+                      <p className="mt-1 text-xs text-slate-600">{productBrand}</p>
+                      <p className="mt-2 text-sm font-medium text-slate-900">{formatCurrency(product.price)}</p>
                     </div>
                   </div>
                 </div>
 
-                {/* Price Breakdown */}
                 <div className="space-y-3 border-t border-slate-200/80 pt-4">
                   <div className="flex justify-between text-sm">
                     <span className="text-slate-600">Giá sản phẩm</span>
-                    <span className="font-medium text-slate-900">
-                      {new Intl.NumberFormat('vi-VN', { style: 'currency', currency: 'VND' }).format(
-                        bike.price,
-                      )}
-                    </span>
+                    <span className="font-medium text-slate-900">{formatCurrency(product.price)}</span>
                   </div>
                   <div className="flex justify-between text-sm">
                     <span className="text-slate-600">Phí giao hàng</span>
-                    <span className="font-medium text-slate-900">
-                      {new Intl.NumberFormat('vi-VN', { style: 'currency', currency: 'VND' }).format(0)}
-                    </span>
+                    <span className="font-medium text-slate-900">{formatCurrency(0)}</span>
                   </div>
                   <div className="flex justify-between text-sm">
                     <span className="text-slate-600">Phí dịch vụ</span>
-                    <span className="font-medium text-slate-900">
-                      {new Intl.NumberFormat('vi-VN', { style: 'currency', currency: 'VND' }).format(0)}
-                    </span>
+                    <span className="font-medium text-slate-900">{formatCurrency(0)}</span>
                   </div>
                 </div>
 
-                {/* Total */}
                 <div className="border-t border-slate-200/80 pt-4">
                   <div className="flex justify-between rounded-xl bg-sky-50 p-4">
                     <span className="font-semibold text-slate-900">Tổng cộng</span>
-                    <span className="text-lg font-bold text-sky-600">
-                      {new Intl.NumberFormat('vi-VN', { style: 'currency', currency: 'VND' }).format(
-                        bike.price,
-                      )}
-                    </span>
+                    <span className="text-lg font-bold text-sky-600">{formatCurrency(product.price)}</span>
                   </div>
                 </div>
 
-                {/* Bike Details */}
                 <div className="space-y-2 border-t border-slate-200/80 pt-4 text-sm">
                   <div className="flex justify-between">
                     <span className="text-slate-600">Tình trạng</span>
-                    <span className="font-medium text-slate-900">{getConditionLabel(bike.condition)}</span>
-                  </div>
-                  <div className="flex justify-between">
-                    <span className="text-slate-600">Năm sản xuất</span>
-                    <span className="font-medium text-slate-900">{bike.year}</span>
+                    <span className="font-medium text-slate-900">{getConditionLabel(product.condition)}</span>
                   </div>
                   <div className="flex justify-between">
                     <span className="text-slate-600">Kích thước bánh</span>
-                    <span className="font-medium text-slate-900">{bike.wheelSize}</span>
+                    <span className="font-medium text-slate-900">{product.wheelSize ?? 'Chưa cập nhật'}</span>
+                  </div>
+                  <div className="flex justify-between">
+                    <span className="text-slate-600">Địa điểm</span>
+                    <span className="font-medium text-slate-900">
+                      {[product.district, product.province].filter(Boolean).join(', ') || 'Chưa cập nhật'}
+                    </span>
                   </div>
                 </div>
               </CardContent>

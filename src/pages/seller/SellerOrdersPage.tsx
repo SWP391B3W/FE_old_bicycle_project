@@ -312,11 +312,11 @@ export default function SellerOrdersPage() {
                         </p>
                         <p>
                           Ứng trước:{' '}
-                          <span className="font-medium text-foreground">{formatOrderCurrency(order.requiredUpfrontAmount)}</span>
+                          <span className="font-medium text-foreground">{formatOrderCurrency(order.requiredUpfrontAmount ?? 0)}</span>
                         </p>
                         <p>
                           Đã thanh toán:{' '}
-                          <span className="font-medium text-foreground">{formatOrderCurrency(order.paidAmount)}</span>
+                          <span className="font-medium text-foreground">{formatOrderCurrency(order.paidAmount ?? 0)}</span>
                         </p>
                       </div>
 
