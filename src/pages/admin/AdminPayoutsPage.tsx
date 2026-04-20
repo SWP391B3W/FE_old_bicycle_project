@@ -32,19 +32,22 @@ type StatusFilter = 'all' | PayoutStatus
 
 const PAGE_SIZE = 10
 
-const typeOptions: Array<{ value: TypeFilter; label: string }> = [
-  { value: 'all', label: 'Tất cả payout' },
-  { value: 'refund', label: 'Hoàn tiền buyer' },
-  { value: 'seller_release', label: 'Giải ngân seller' },
-]
+const TYPE_FILTER_MAP: Record<string, string> = {
+  'Tất cả payout': 'all',
+  'Hoàn tiền buyer': 'refund',
+  'Giải ngân seller': 'seller_release',
+}
 
-const statusOptions: Array<{ value: StatusFilter; label: string }> = [
-  { value: 'all', label: 'Tất cả trạng thái' },
-  { value: 'profile_required', label: 'Thiếu payout profile' },
-  { value: 'pending_transfer', label: 'Chờ chuyển khoản' },
-  { value: 'completed', label: 'Đã chuyển khoản' },
-  { value: 'cancelled', label: 'Đã hủy' },
-]
+const STATUS_FILTER_MAP: Record<string, string> = {
+  'Tất cả trạng thái': 'all',
+  'Thiếu payout profile': 'profile_required',
+  'Chờ chuyển khoản': 'pending_transfer',
+  'Đã chuyển khoản': 'completed',
+  'Đã hủy': 'cancelled',
+}
+
+const typeOptions = Object.keys(TYPE_FILTER_MAP)
+const statusOptions = Object.keys(STATUS_FILTER_MAP)
 
 const statusLabelMap: Record<PayoutStatus, string> = {
   profile_required: 'Thiếu payout profile',
@@ -128,8 +131,8 @@ function getStatusTone(status: PayoutStatus) {
 export default function AdminPayoutsPage() {
   const [searchQuery, setSearchQuery] = useState('')
   const deferredSearchQuery = useDeferredValue(searchQuery.trim())
-  const [typeFilter, setTypeFilter] = useState<TypeFilter>('all')
-  const [statusFilter, setStatusFilter] = useState<StatusFilter>('all')
+  const [typeFilter, setTypeFilter] = useState<string>('Tất cả payout')
+  const [statusFilter, setStatusFilter] = useState<string>('Tất cả trạng thái')
   const [payouts, setPayouts] = useState<AdminPayout[]>([])
   const [page, setPage] = useState(0)
   const [totalPages, setTotalPages] = useState(0)
@@ -163,10 +166,13 @@ export default function AdminPayoutsPage() {
       setLoading(true)
 
       try {
+        const technicalType = TYPE_FILTER_MAP[typeFilter] || 'all'
+        const technicalStatus = STATUS_FILTER_MAP[statusFilter] || 'all'
+
         const result = await payoutsApi.getAdminPayouts({
           keyword: deferredSearchQuery || undefined,
-          type: typeFilter === 'all' ? undefined : typeFilter,
-          status: statusFilter === 'all' ? undefined : statusFilter,
+          type: technicalType === 'all' ? undefined : (technicalType as PayoutType),
+          status: technicalStatus === 'all' ? undefined : (technicalStatus as PayoutStatus),
           page,
           size: PAGE_SIZE,
         })
@@ -203,10 +209,13 @@ export default function AdminPayoutsPage() {
   }, [deferredSearchQuery, page, statusFilter, typeFilter])
 
   async function reloadPayouts() {
+    const technicalType = TYPE_FILTER_MAP[typeFilter] || 'all'
+    const technicalStatus = STATUS_FILTER_MAP[statusFilter] || 'all'
+
     const result = await payoutsApi.getAdminPayouts({
       keyword: deferredSearchQuery || undefined,
-      type: typeFilter === 'all' ? undefined : typeFilter,
-      status: statusFilter === 'all' ? undefined : statusFilter,
+      type: technicalType === 'all' ? undefined : (technicalType as PayoutType),
+      status: technicalStatus === 'all' ? undefined : (technicalStatus as PayoutStatus),
       page,
       size: PAGE_SIZE,
     })
@@ -260,7 +269,7 @@ export default function AdminPayoutsPage() {
   }
 
   const emptyMessage = useMemo(() => {
-    if (deferredSearchQuery || typeFilter !== 'all' || statusFilter !== 'all') {
+    if (deferredSearchQuery || typeFilter !== 'Tất cả payout' || statusFilter !== 'Tất cả trạng thái') {
       return 'Không tìm thấy payout phù hợp.'
     }
 
@@ -413,8 +422,8 @@ export default function AdminPayoutsPage() {
             </SelectTrigger>
             <SelectContent>
               {typeOptions.map((option) => (
-                <SelectItem key={option.value} value={option.value}>
-                  {option.label}
+                <SelectItem key={option} value={option}>
+                  {option}
                 </SelectItem>
               ))}
             </SelectContent>
@@ -434,8 +443,8 @@ export default function AdminPayoutsPage() {
             </SelectTrigger>
             <SelectContent>
               {statusOptions.map((option) => (
-                <SelectItem key={option.value} value={option.value}>
-                  {option.label}
+                <SelectItem key={option} value={option}>
+                  {option}
                 </SelectItem>
               ))}
             </SelectContent>
@@ -458,7 +467,7 @@ export default function AdminPayoutsPage() {
       <div className="space-y-4">
         <div className="flex flex-col gap-2 text-sm text-muted-foreground md:flex-row md:items-center md:justify-between">
           <p>{loading ? 'Đang tải danh sách payout...' : `Tìm thấy ${totalElements} payout`}</p>
-          <p>{typeFilter === 'all' ? 'Đang xem tất cả loại payout' : `Đang lọc: ${typeLabelMap[typeFilter]}`}</p>
+          <p>{typeFilter === 'Tất cả payout' ? 'Đang xem tất cả loại payout' : `Đang lọc: ${typeFilter}`}</p>
         </div>
 
         <DataTable

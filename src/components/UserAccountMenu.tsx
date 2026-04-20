@@ -17,6 +17,7 @@ import { cn } from '@/lib/utils'
 interface UserAccountMenuProps {
   triggerClassName?: string
   contentClassName?: string
+  isDarkHeader?: boolean
 }
 
 function getEntryIcon(label: string) {
@@ -35,7 +36,7 @@ function getEntryIcon(label: string) {
   return LayoutDashboard
 }
 
-export function UserAccountMenu({ triggerClassName, contentClassName }: Readonly<UserAccountMenuProps>) {
+export function UserAccountMenu({ triggerClassName, contentClassName, isDarkHeader = true }: Readonly<UserAccountMenuProps>) {
   const { user, logout } = useAuth()
   const navigate = useNavigate()
   const workspaceEntries = getRoleWorkspaceEntries(user?.role)
@@ -53,20 +54,21 @@ export function UserAccountMenu({ triggerClassName, contentClassName }: Readonly
         <button
           type="button"
           className={cn(
-            'flex items-center gap-2 rounded-full border border-white/12 bg-white/5 px-2 py-1 shadow-sm shadow-slate-950/20 transition-colors hover:bg-white/8',
+            'flex items-center gap-2 rounded-full border border-slate-200 bg-white px-2 py-1 shadow-sm transition-colors hover:bg-slate-50',
+            isDarkHeader && 'border-white/12 bg-white/5 shadow-slate-950/20 hover:bg-white/8',
             triggerClassName,
           )}
         >
-          <Avatar className="h-9 w-9 border border-white/15">
+          <Avatar className={cn('h-9 w-9 border border-slate-200', isDarkHeader && 'border-white/15')}>
             <AvatarImage src={user?.avatar ?? user?.avatarUrl ?? undefined} />
-            <AvatarFallback className="bg-white/10 text-sm font-semibold text-white">
+            <AvatarFallback className={cn('bg-slate-100 text-sm font-semibold text-slate-600', isDarkHeader && 'bg-white/10 text-white')}>
               {(displayName || user?.email || 'U')[0]?.toUpperCase()}
             </AvatarFallback>
           </Avatar>
 
           <div className="hidden min-w-0 text-left md:block">
-            <p className="truncate text-sm font-semibold text-white">{displayName}</p>
-            <p className="truncate text-xs text-white">{roleLabel}</p>
+            <p className={cn('truncate text-sm font-semibold text-slate-900', isDarkHeader && 'text-white')}>{displayName}</p>
+            <p className={cn('truncate text-xs text-slate-500', isDarkHeader && 'text-white/70')}>{roleLabel}</p>
           </div>
         </button>
       </DropdownMenuTrigger>

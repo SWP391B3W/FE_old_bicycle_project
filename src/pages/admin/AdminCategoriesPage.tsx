@@ -1,7 +1,7 @@
 import { useState, useEffect, useCallback } from 'react'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
-import { Plus, Pencil, Trash2, Check, X, Loader2, AlertCircle, Tags, Award, Disc, Layers, Ruler } from 'lucide-react'
+import { Plus, Pencil, Trash2, Check, X, Loader2, AlertCircle, Tags, Award, Disc, Layers, Ruler, ChevronLeft, ChevronRight } from 'lucide-react'
 import { referenceDataApi } from '@/api/reference-data.api'
 import type { Brand, Category, ReferenceValue, SizeChart } from '@/types/reference-data'
 import AdminSizeChartsPanel from './AdminSizeChartsPanel'
@@ -30,6 +30,26 @@ interface RefValuePanelProps {
   onDelete: (id: string) => Promise<void>
 }
 
+const PAGE_SIZE = 10
+
+function Pagination({ page, totalPages, onPageChange }: { page: number; totalPages: number; onPageChange: (p: number) => void }) {
+  return (
+    <div className="flex items-center justify-between border-t border-border pt-4 mt-4">
+      <p className="text-sm text-muted-foreground">
+        Trang {totalPages === 0 ? 0 : page + 1} / {totalPages}
+      </p>
+      <div className="flex items-center gap-2">
+        <Button variant="outline" size="sm" disabled={page === 0} onClick={() => onPageChange(page - 1)}>
+          <ChevronLeft className="h-4 w-4" />
+        </Button>
+        <Button variant="outline" size="sm" disabled={totalPages === 0 || page >= totalPages - 1} onClick={() => onPageChange(page + 1)}>
+          <ChevronRight className="h-4 w-4" />
+        </Button>
+      </div>
+    </div>
+  )
+}
+
 function RefValuePanel({ items, loading, error, onAdd, onUpdate, onDelete }: RefValuePanelProps) {
   const [addName, setAddName] = useState('')
   const [addDesc, setAddDesc] = useState('')
@@ -40,6 +60,14 @@ function RefValuePanel({ items, loading, error, onAdd, onUpdate, onDelete }: Ref
   const [editDesc, setEditDesc] = useState('')
   const [actionId, setActionId] = useState<string | null>(null)
   const [deleteError, setDeleteError] = useState<string | null>(null)
+  const [page, setPage] = useState(0)
+
+  const totalPages = Math.ceil(items.length / PAGE_SIZE)
+  const paginatedItems = items.slice(page * PAGE_SIZE, (page + 1) * PAGE_SIZE)
+
+  useEffect(() => {
+    setPage(0)
+  }, [items.length])
 
   const handleAdd = async () => {
     if (!addName.trim()) return
@@ -105,7 +133,7 @@ function RefValuePanel({ items, loading, error, onAdd, onUpdate, onDelete }: Ref
         <p className="text-center text-muted-foreground text-sm py-8">Chưa có dữ liệu. Nhấn "Thêm mới" để bắt đầu.</p>
       ) : (
         <div className="divide-y divide-border border rounded-lg overflow-hidden">
-          {items.map((item) => (
+          {paginatedItems.map((item) => (
             <div key={item.id} className="p-4 flex items-center justify-between gap-4 hover:bg-muted/20 transition-colors">
               {editId === item.id ? (
                 <>
@@ -138,6 +166,7 @@ function RefValuePanel({ items, loading, error, onAdd, onUpdate, onDelete }: Ref
           ))}
         </div>
       )}
+      <Pagination page={page} totalPages={totalPages} onPageChange={setPage} />
     </div>
   )
 }
@@ -156,6 +185,14 @@ function BrandsPanel({ brands, loading, error, onRefresh }: BrandsPanelProps) {
   const [editLogo, setEditLogo] = useState('')
   const [actionId, setActionId] = useState<string | null>(null)
   const [deleteError, setDeleteError] = useState<string | null>(null)
+  const [page, setPage] = useState(0)
+
+  const totalPages = Math.ceil(brands.length / PAGE_SIZE)
+  const paginatedBrands = brands.slice(page * PAGE_SIZE, (page + 1) * PAGE_SIZE)
+
+  useEffect(() => {
+    setPage(0)
+  }, [brands.length])
 
   const handleAdd = async () => {
     if (!addName.trim()) return
@@ -210,7 +247,7 @@ function BrandsPanel({ brands, loading, error, onRefresh }: BrandsPanelProps) {
         <p className="text-center text-muted-foreground text-sm py-8">Chưa có thương hiệu nào.</p>
       ) : (
         <div className="divide-y divide-border border rounded-lg overflow-hidden">
-          {brands.map((brand) => (
+          {paginatedBrands.map((brand) => (
             <div key={brand.id} className="p-4 flex items-center gap-4 hover:bg-muted/20 transition-colors">
               {editId === brand.id ? (
                 <>
@@ -247,6 +284,7 @@ function BrandsPanel({ brands, loading, error, onRefresh }: BrandsPanelProps) {
           ))}
         </div>
       )}
+      <Pagination page={page} totalPages={totalPages} onPageChange={setPage} />
     </div>
   )
 }
@@ -265,6 +303,14 @@ function CategoriesPanel({ categories, loading, error, onRefresh }: CategoriesPa
   const [editSlug, setEditSlug] = useState('')
   const [actionId, setActionId] = useState<string | null>(null)
   const [deleteError, setDeleteError] = useState<string | null>(null)
+  const [page, setPage] = useState(0)
+
+  const totalPages = Math.ceil(categories.length / PAGE_SIZE)
+  const paginatedCategories = categories.slice(page * PAGE_SIZE, (page + 1) * PAGE_SIZE)
+
+  useEffect(() => {
+    setPage(0)
+  }, [categories.length])
 
   const handleAdd = async () => {
     if (!addName.trim() || !addSlug.trim()) return
@@ -319,7 +365,7 @@ function CategoriesPanel({ categories, loading, error, onRefresh }: CategoriesPa
         <p className="text-center text-muted-foreground text-sm py-8">Chưa có danh mục nào.</p>
       ) : (
         <div className="divide-y divide-border border rounded-lg overflow-hidden">
-          {categories.map((cat) => (
+          {paginatedCategories.map((cat) => (
             <div key={cat.id} className="p-4 flex items-center gap-4 hover:bg-muted/20 transition-colors">
               {editId === cat.id ? (
                 <>
@@ -352,6 +398,7 @@ function CategoriesPanel({ categories, loading, error, onRefresh }: CategoriesPa
           ))}
         </div>
       )}
+      <Pagination page={page} totalPages={totalPages} onPageChange={setPage} />
     </div>
   )
 }

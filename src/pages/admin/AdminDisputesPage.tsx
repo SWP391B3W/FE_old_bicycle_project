@@ -32,13 +32,15 @@ type StatusFilter = 'all' | RefundStatus
 
 const PAGE_SIZE = 10
 
-const statusOptions: Array<{ value: StatusFilter; label: string }> = [
-  { value: 'all', label: 'Tất cả trạng thái' },
-  { value: 'pending', label: 'Chờ xử lý' },
-  { value: 'approved', label: 'Đã duyệt hoàn tiền' },
-  { value: 'rejected', label: 'Đã từ chối' },
-  { value: 'completed', label: 'Đã hoàn tiền' },
-]
+const STATUS_FILTER_MAP: Record<string, string> = {
+  'Tất cả trạng thái': 'all',
+  'Chờ xử lý': 'pending',
+  'Đã duyệt hoàn tiền': 'approved',
+  'Đã từ chối': 'rejected',
+  'Đã hoàn tiền': 'completed',
+}
+
+const statusOptions = Object.keys(STATUS_FILTER_MAP)
 
 const reviewLabels: Record<RefundStatus, string> = {
   pending: 'Chờ xử lý',
@@ -92,7 +94,7 @@ function getErrorMessage(error: unknown, fallback: string) {
 export default function AdminDisputesPage() {
   const [searchQuery, setSearchQuery] = useState('')
   const deferredSearchQuery = useDeferredValue(searchQuery.trim())
-  const [statusFilter, setStatusFilter] = useState<StatusFilter>('all')
+  const [statusFilter, setStatusFilter] = useState<string>('Tất cả trạng thái')
   const [refunds, setRefunds] = useState<AdminRefund[]>([])
   const [page, setPage] = useState(0)
   const [totalPages, setTotalPages] = useState(0)
@@ -126,9 +128,10 @@ export default function AdminDisputesPage() {
       setLoading(true)
 
       try {
+        const technicalStatus = STATUS_FILTER_MAP[statusFilter] || 'all'
         const result = await refundsApi.getAll({
           keyword: deferredSearchQuery || undefined,
-          status: statusFilter === 'all' ? undefined : statusFilter,
+          status: technicalStatus === 'all' ? undefined : (technicalStatus as RefundStatus),
           page,
           size: PAGE_SIZE,
         })
@@ -167,7 +170,7 @@ export default function AdminDisputesPage() {
   const reviewDialogTitle = useMemo(() => reviewLabels[reviewDialog.nextStatus], [reviewDialog.nextStatus])
 
   const emptyMessage = useMemo(() => {
-    if (deferredSearchQuery || statusFilter !== 'all') {
+    if (deferredSearchQuery || statusFilter !== 'Tất cả trạng thái') {
       return 'Không tìm thấy yêu cầu tranh chấp phù hợp.'
     }
 
@@ -186,9 +189,10 @@ export default function AdminDisputesPage() {
   }
 
   async function reloadRefunds() {
+    const technicalStatus = STATUS_FILTER_MAP[statusFilter] || 'all'
     const result = await refundsApi.getAll({
       keyword: deferredSearchQuery || undefined,
-      status: statusFilter === 'all' ? undefined : statusFilter,
+      status: technicalStatus === 'all' ? undefined : (technicalStatus as RefundStatus),
       page,
       size: PAGE_SIZE,
     })
@@ -357,8 +361,8 @@ export default function AdminDisputesPage() {
             </SelectTrigger>
             <SelectContent>
               {statusOptions.map((option) => (
-                <SelectItem key={option.value} value={option.value}>
-                  {option.label}
+                <SelectItem key={option} value={option}>
+                  {option}
                 </SelectItem>
               ))}
             </SelectContent>
@@ -376,9 +380,9 @@ export default function AdminDisputesPage() {
         <div className="flex flex-col gap-2 text-sm text-muted-foreground md:flex-row md:items-center md:justify-between">
           <p>{loading ? 'Đang tải dữ liệu tranh chấp...' : `Tìm thấy ${totalElements} yêu cầu tranh chấp`}</p>
           <p>
-            {statusFilter === 'all'
+            {statusFilter === 'Tất cả trạng thái'
               ? 'Đang xem tất cả trạng thái'
-              : `Đang lọc: ${statusOptions.find((option) => option.value === statusFilter)?.label}`}
+              : `Đang lọc: ${statusFilter}`}
           </p>
         </div>
 

@@ -1,7 +1,7 @@
 import { useDeferredValue, useEffect, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { type ColumnDef } from '@tanstack/react-table'
-import { ClipboardCheck, Eye, EyeOff, MoreHorizontal, Search } from 'lucide-react'
+import { ChevronLeft, ChevronRight, ClipboardCheck, Eye, EyeOff, MoreHorizontal, Search } from 'lucide-react'
 import { adminProductsApi } from '@/api/admin-products.api'
 import { StatusBadge } from '@/components/dashboard/StatusBadge'
 import { ConfirmDialog } from '@/components/dashboard/ConfirmDialog'
@@ -37,16 +37,18 @@ const initialDialogState: {
   action: ListingAction
 } = { open: false, product: null, action: 'route_to_inspection' }
 
-const statusOptions: Array<{ value: StatusFilter; label: string }> = [
-  { value: 'all', label: 'Tất cả trạng thái' },
-  { value: 'pending', label: 'Chờ kiểm duyệt ban đầu' },
-  { value: 'active', label: 'Đang hiển thị công khai' },
-  { value: 'hidden', label: 'Đã ẩn' },
-  { value: 'pending_inspection', label: 'Chờ inspector kiểm định' },
-  { value: 'inspected_passed', label: 'Đã kiểm định đạt (legacy)' },
-  { value: 'inspected_failed', label: 'Kiểm định không đạt' },
-  { value: 'sold', label: 'Đã bán' },
-]
+const STATUS_FILTER_MAP: Record<string, StatusFilter> = {
+  'Tất cả trạng thái': 'all',
+  'Chờ kiểm duyệt ban đầu': 'pending',
+  'Đang hiển thị công khai': 'active',
+  'Đã ẩn': 'hidden',
+  'Chờ inspector kiểm định': 'pending_inspection',
+  'Đã kiểm định đạt (legacy)': 'inspected_passed',
+  'Kiểm định không đạt': 'inspected_failed',
+  'Đã bán': 'sold',
+}
+
+const statusOptions = Object.keys(STATUS_FILTER_MAP)
 
 function formatPrice(price: number) {
   return formatPriceDisplay(price)
@@ -104,7 +106,7 @@ export default function AdminListingsPage() {
   const navigate = useNavigate()
   const [searchQuery, setSearchQuery] = useState('')
   const deferredSearchQuery = useDeferredValue(searchQuery.trim())
-  const [statusFilter, setStatusFilter] = useState<StatusFilter>('all')
+  const [statusFilter, setStatusFilter] = useState<string>('Tất cả trạng thái')
   const [products, setProducts] = useState<Product[]>([])
   const [page, setPage] = useState(0)
   const [totalPages, setTotalPages] = useState(0)
@@ -122,9 +124,10 @@ export default function AdminListingsPage() {
       setLoading(true)
 
       try {
+        const technicalStatus = STATUS_FILTER_MAP[statusFilter] || 'all'
         const result = await adminProductsApi.getAll({
           keyword: deferredSearchQuery || undefined,
-          status: statusFilter === 'all' ? undefined : statusFilter,
+          status: technicalStatus === 'all' ? undefined : (technicalStatus as ProductStatus),
           page,
           size: PAGE_SIZE,
         })
@@ -211,11 +214,10 @@ export default function AdminListingsPage() {
             {timelineEntries.map((entry) => (
               <p
                 key={`${row.original.id}-${entry.label}`}
-                className={`mt-1 text-xs ${
-                  entry.tone === 'warning'
+                className={`mt-1 text-xs ${entry.tone === 'warning'
                     ? 'text-amber-700 dark:text-amber-300'
                     : 'text-muted-foreground'
-                }`}
+                  }`}
               >
                 <span className="font-medium">{entry.label}:</span> {entry.value}
               </p>
@@ -337,8 +339,8 @@ export default function AdminListingsPage() {
             </SelectTrigger>
             <SelectContent>
               {statusOptions.map((option) => (
-                <SelectItem key={option.value} value={option.value}>
-                  {option.label}
+                <SelectItem key={option} value={option}>
+                  {option}
                 </SelectItem>
               ))}
             </SelectContent>
@@ -356,9 +358,9 @@ export default function AdminListingsPage() {
         <div className="flex flex-col gap-2 text-sm text-muted-foreground md:flex-row md:items-center md:justify-between">
           <p>{loading ? 'Đang tải danh sách...' : `Tìm thấy ${totalElements} tin đăng`}</p>
           <p>
-            {statusFilter === 'all'
+            {statusFilter === 'Tất cả trạng thái'
               ? 'Đang xem tất cả trạng thái'
-              : `Đang lọc: ${statusOptions.find((option) => option.value === statusFilter)?.label}`}
+              : `Đang lọc: ${statusFilter}`}
           </p>
         </div>
 
@@ -384,7 +386,7 @@ export default function AdminListingsPage() {
               onClick={() => setPage((currentPage) => Math.max(0, currentPage - 1))}
               disabled={loading || page === 0}
             >
-              Trước
+              <ChevronLeft className="h-4 w-4" />
             </Button>
             <Button
               variant="outline"
@@ -392,7 +394,7 @@ export default function AdminListingsPage() {
               onClick={() => setPage((currentPage) => currentPage + 1)}
               disabled={loading || totalPages === 0 || page >= totalPages - 1}
             >
-              Tiếp
+              <ChevronRight className="h-4 w-4" />
             </Button>
           </div>
         </div>

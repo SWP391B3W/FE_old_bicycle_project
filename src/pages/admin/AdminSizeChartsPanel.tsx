@@ -1,5 +1,5 @@
 import { useState } from 'react'
-import { AlertCircle, Loader2, Pencil, Plus, Trash2 } from 'lucide-react'
+import { AlertCircle, Loader2, Pencil, Plus, Trash2, ChevronLeft, ChevronRight } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import type { Category, SizeChart, SizeChartRowUpsertRequest, SizeChartUpsertRequest } from '@/types/reference-data'
@@ -42,6 +42,26 @@ interface AdminSizeChartsPanelProps {
   onDelete: (id: string) => Promise<void>
 }
 
+const PAGE_SIZE = 5
+
+function Pagination({ page, totalPages, onPageChange }: { page: number; totalPages: number; onPageChange: (p: number) => void }) {
+  return (
+    <div className="flex items-center justify-between border-t border-border pt-4 mt-4">
+      <p className="text-sm text-muted-foreground">
+        Trang {totalPages === 0 ? 0 : page + 1} / {totalPages}
+      </p>
+      <div className="flex items-center gap-2">
+        <Button variant="outline" size="sm" disabled={page === 0} onClick={() => onPageChange(page - 1)}>
+          <ChevronLeft className="h-4 w-4" />
+        </Button>
+        <Button variant="outline" size="sm" disabled={totalPages === 0 || page >= totalPages - 1} onClick={() => onPageChange(page + 1)}>
+          <ChevronRight className="h-4 w-4" />
+        </Button>
+      </div>
+    </div>
+  )
+}
+
 function ErrorBanner({ message }: { message: string }) {
   return (
     <div className="flex gap-2 rounded-md bg-destructive/10 p-3 text-sm text-destructive">
@@ -67,6 +87,10 @@ export default function AdminSizeChartsPanel({
   const [actionId, setActionId] = useState<string | null>(null)
   const [submitError, setSubmitError] = useState<string | null>(null)
   const [deleteError, setDeleteError] = useState<string | null>(null)
+  const [page, setPage] = useState(0)
+
+  const totalPages = Math.ceil(charts.length / PAGE_SIZE)
+  const paginatedCharts = charts.slice(page * PAGE_SIZE, (page + 1) * PAGE_SIZE)
 
   const updateRow = (
     rows: EditableSizeChartRow[],
@@ -298,7 +322,7 @@ export default function AdminSizeChartsPanel({
         <p className="py-8 text-center text-sm text-muted-foreground">Chưa có size chart nào.</p>
       ) : (
         <div className="space-y-4">
-          {charts.map((chart) => (
+          {paginatedCharts.map((chart) => (
             <div key={chart.id} className="space-y-3 rounded-xl border p-4">
               {editId === chart.id
                 ? renderForm(
@@ -357,6 +381,7 @@ export default function AdminSizeChartsPanel({
                   )}
             </div>
           ))}
+          <Pagination page={page} totalPages={totalPages} onPageChange={setPage} />
         </div>
       )}
     </div>

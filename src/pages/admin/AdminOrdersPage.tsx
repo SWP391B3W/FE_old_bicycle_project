@@ -1,5 +1,6 @@
 import { useDeferredValue, useEffect, useMemo, useState } from 'react'
-import { ClipboardList, Loader2, Search, ShoppingBag, Wallet } from 'lucide-react'
+import { ChevronLeft, ChevronRight, ClipboardList, Loader2, Search, ShoppingBag, Wallet } from 'lucide-react'
+import { Button } from '@/components/ui/button'
 import { ordersApi } from '@/api/orders.api'
 import { Input } from '@/components/ui/input'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
@@ -105,6 +106,8 @@ export default function AdminOrdersPage() {
   const deferredSearchQuery = useDeferredValue(searchQuery.trim().toLowerCase())
   const [statusFilter, setStatusFilter] = useState<StatusFilter>('Tất cả trạng thái đơn')
   const [fundingFilter, setFundingFilter] = useState<FundingFilter>('Tất cả trạng thái tiền')
+  const [page, setPage] = useState(0)
+  const PAGE_SIZE = 5
 
   useEffect(() => {
     let ignore = false
@@ -172,11 +175,19 @@ export default function AdminOrdersPage() {
     })
   }, [deferredSearchQuery, fundingFilter, orders, statusFilter])
 
-  const pendingOrders = filteredOrders.filter((order) => order.status === 'pending').length
-  const completedOrders = filteredOrders.filter((order) => order.status === 'completed').length
-  const payoutPendingAmount = filteredOrders
+  const totalPages = Math.ceil(filteredOrders.length / PAGE_SIZE)
+  const paginatedOrders = filteredOrders.slice(page * PAGE_SIZE, (page + 1) * PAGE_SIZE)
+
+  const pendingOrders = orders.filter((order) => order.status === 'pending').length
+  const completedOrders = orders.filter((order) => order.status === 'completed').length
+  const payoutPendingAmount = orders
     .filter((order) => order.fundingStatus === 'seller_payout_pending')
     .reduce((sum, order) => sum + (order.sellerNetPayoutAmount ?? 0), 0)
+
+  // Reset page when filters change
+  useEffect(() => {
+    setPage(0)
+  }, [statusFilter, fundingFilter, deferredSearchQuery])
 
   return (
     <div className="space-y-6">
@@ -268,75 +279,101 @@ export default function AdminOrdersPage() {
             Đang tải danh sách đơn hàng...
           </div>
         </div>
-      ) : filteredOrders.length === 0 ? (
-        <div className="rounded-xl border border-dashed border-border bg-card px-6 py-10 text-center">
-          <p className="text-base font-medium text-foreground">Không có đơn hàng phù hợp.</p>
-          <p className="mt-2 text-sm text-muted-foreground">
-            Thử đổi bộ lọc hoặc từ khóa để xem lại toàn bộ đơn trong hệ thống.
-          </p>
-        </div>
       ) : (
-        <div className="space-y-4">
-          {filteredOrders.map((order) => {
-            const statusMeta = getOrderStatusMeta(order)
-
-            return (
-              <div key={order.id} className="rounded-xl border bg-card p-5 shadow-sm">
-                <div className="flex flex-col gap-4 lg:flex-row lg:items-start lg:justify-between">
-                  <div className="space-y-2">
-                    <div className="flex flex-wrap items-center gap-2">
-                      <h3 className="font-semibold text-foreground">{order.productTitle}</h3>
-                      <span className="rounded-full border px-2 py-0.5 text-xs text-muted-foreground">
-                        Mã: {order.id}
-                      </span>
-                    </div>
-
-                    <div className="flex flex-wrap gap-x-4 gap-y-1 text-sm text-muted-foreground">
-                      <span>
-                        Buyer: <span className="font-medium text-foreground">{order.buyerName}</span>
-                      </span>
-                      <span>
-                        Seller: <span className="font-medium text-foreground">{order.sellerName}</span>
-                      </span>
-                      <span>Tạo lúc: {formatOrderDate(order.createdAt)}</span>
-                    </div>
-
-                    <div className={`text-sm font-medium ${getOrderToneClass(statusMeta.tone)}`}>
-                      {statusMeta.label}
-                    </div>
-                    <p className="max-w-3xl text-sm text-muted-foreground">{statusMeta.helperText}</p>
-
-                    <div className="grid gap-2 text-sm text-muted-foreground sm:grid-cols-2 lg:grid-cols-4">
-                      <p>
-                        Phương thức: <span className="font-medium text-foreground">{getPaymentMethodLabel(order)}</span>
-                      </p>
-                      <p>
-                        Hình thức: <span className="font-medium text-foreground">{getPaymentOptionLabel(order)}</span>
-                      </p>
-                      <p>
-                        Trạng thái đơn: <span className="font-medium text-foreground">{order.status}</span>
-                      </p>
-                      <p>
-                        Trạng thái tiền: <span className="font-medium text-foreground">{order.fundingStatus}</span>
-                      </p>
-                    </div>
-                  </div>
-
-                  <div className="grid gap-1 text-left lg:min-w-64 lg:text-right">
-                    <p className="text-sm text-muted-foreground">Tổng giá trị</p>
-                    <p className="text-2xl font-bold text-primary">{formatOrderCurrency(order.totalAmount)}</p>
-                    <p className="text-sm text-muted-foreground">
-                      Buyer trả hiện tại: {formatOrderCurrency(order.buyerChargeAmount ?? order.paidAmount ?? 0)}
-                    </p>
-                    <p className="text-sm text-muted-foreground">
-                      Seller net: {formatOrderCurrency(order.sellerNetPayoutAmount ?? 0)}
-                    </p>
-                  </div>
-                </div>
+        <>
+          {filteredOrders.length === 0 ? (
+            <div className="rounded-xl border border-dashed border-border bg-card px-6 py-10 text-center">
+              <p className="text-base font-medium text-foreground">Không có đơn hàng phù hợp.</p>
+              <p className="mt-2 text-sm text-muted-foreground">
+                Thử đổi bộ lọc hoặc từ khóa để xem lại toàn bộ đơn trong hệ thống.
+              </p>
+            </div>
+          ) : (
+            <div className="space-y-4">
+              <div className="flex items-center justify-between text-sm text-muted-foreground">
+                <p>Tìm thấy {filteredOrders.length} đơn hàng</p>
               </div>
-            )
-          })}
-        </div>
+              
+              <div className="grid gap-4">
+                {paginatedOrders.map((order) => {
+                  const statusMeta = getOrderStatusMeta(order)
+
+                  return (
+                    <div key={order.id} className="rounded-xl border bg-card p-5 shadow-sm">
+                      <div className="flex flex-col gap-4 lg:flex-row lg:items-start lg:justify-between">
+                        <div className="space-y-2">
+                          <div className="flex flex-wrap items-center gap-2">
+                            <h3 className="font-semibold text-foreground">{order.productTitle}</h3>
+                            <span className="rounded-full border px-2 py-0.5 text-xs text-muted-foreground">
+                              Mã: {order.id}
+                            </span>
+                          </div>
+
+                          <div className="flex flex-wrap gap-x-4 gap-y-1 text-sm text-muted-foreground">
+                            <span>
+                              Buyer: <span className="font-medium text-foreground">{order.buyerName}</span>
+                            </span>
+                            <span>
+                              Seller: <span className="font-medium text-foreground">{order.sellerName}</span>
+                            </span>
+                            <span>Tạo lúc: {formatOrderDate(order.createdAt)}</span>
+                          </div>
+
+                          <div className={`text-sm font-medium ${getOrderToneClass(statusMeta.tone)}`}>
+                            {statusMeta.label}
+                          </div>
+                          <p className="max-w-3xl text-sm text-muted-foreground">{statusMeta.helperText}</p>
+
+                          <div className="grid gap-2 text-sm text-muted-foreground sm:grid-cols-2 lg:grid-cols-4">
+                            <p>
+                              Phương thức: <span className="font-medium text-foreground">{getPaymentMethodLabel(order)}</span>
+                            </p>
+                            <p>
+                              Hình thức: <span className="font-medium text-foreground">{getPaymentOptionLabel(order)}</span>
+                            </p>
+                            <p>
+                              Trạng thái đơn: <span className="font-medium text-foreground">{order.status}</span>
+                            </p>
+                            <p>
+                              Trạng thái tiền: <span className="font-medium text-foreground">{order.fundingStatus}</span>
+                            </p>
+                          </div>
+                        </div>
+
+                        <div className="grid gap-1 text-left lg:min-w-64 lg:text-right">
+                          <p className="text-sm text-muted-foreground">Tổng giá trị</p>
+                          <p className="text-2xl font-bold text-primary">{formatOrderCurrency(order.totalAmount)}</p>
+                          <p className="text-sm text-muted-foreground">
+                            Buyer trả hiện tại: {formatOrderCurrency(order.buyerChargeAmount ?? order.paidAmount ?? 0)}
+                          </p>
+                          <p className="text-sm text-muted-foreground">
+                            Seller net: {formatOrderCurrency(order.sellerNetPayoutAmount ?? 0)}
+                          </p>
+                        </div>
+                      </div>
+                    </div>
+                  )
+                })}
+              </div>
+            </div>
+          )}
+
+          {/* Pagination */}
+          <div className="mt-6 flex items-center justify-between border-t border-border pt-4">
+            <p className="text-sm text-muted-foreground">
+              Trang {totalPages === 0 ? 0 : page + 1} / {totalPages}
+            </p>
+
+            <div className="flex items-center gap-2">
+              <Button variant="outline" size="sm" disabled={page === 0} onClick={() => setPage((p) => p - 1)}>
+                <ChevronLeft className="h-4 w-4" />
+              </Button>
+              <Button variant="outline" size="sm" disabled={totalPages === 0 || page >= totalPages - 1} onClick={() => setPage((p) => p + 1)}>
+                <ChevronRight className="h-4 w-4" />
+              </Button>
+            </div>
+          </div>
+        </>
       )}
     </div>
   )

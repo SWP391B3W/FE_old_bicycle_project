@@ -25,6 +25,20 @@ const targetTypeLabels: Record<string, string> = {
   USER: 'Người dùng',
 }
 
+const STATUS_FILTER_MAP: Record<string, string> = {
+  'Tất cả trạng thái': 'all',
+  'Chờ xử lý': 'pending',
+  'Đang điều tra': 'investigating',
+  'Xác nhận vi phạm': 'resolved_upheld',
+  'Bác bỏ báo cáo': 'resolved_dismissed',
+}
+
+const TARGET_TYPE_FILTER_MAP: Record<string, string> = {
+  'Tất cả loại': 'all',
+  'Tin đăng': 'PRODUCT',
+  'Người dùng': 'USER',
+}
+
 const statusLabels: Record<ReportStatus, string> = {
   pending: 'Chờ xử lý',
   investigating: 'Đang điều tra',
@@ -43,8 +57,8 @@ export default function AdminReportsPage() {
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
   const [searchQuery, setSearchQuery] = useState('')
-  const [statusFilter, setStatusFilter] = useState<string>('all')
-  const [targetTypeFilter, setTargetTypeFilter] = useState<string>('all')
+  const [statusFilter, setStatusFilter] = useState<string>('Tất cả trạng thái')
+  const [targetTypeFilter, setTargetTypeFilter] = useState<string>('Tất cả loại')
   const [page, setPage] = useState(0)
   const [totalPages, setTotalPages] = useState(0)
   const [totalElements, setTotalElements] = useState(0)
@@ -73,9 +87,12 @@ export default function AdminReportsPage() {
     setError(null)
 
     try {
+      const mappedStatus = STATUS_FILTER_MAP[statusFilter] || 'all'
+      const mappedTargetType = TARGET_TYPE_FILTER_MAP[targetTypeFilter] || 'all'
+
       const result = await reportsApi.getAdminReports({
-        status: statusFilter !== 'all' ? (statusFilter as ReportStatus) : undefined,
-        targetType: targetTypeFilter !== 'all' ? targetTypeFilter : undefined,
+        status: mappedStatus !== 'all' ? (mappedStatus as ReportStatus) : undefined,
+        targetType: mappedTargetType !== 'all' ? mappedTargetType : undefined,
         page,
         size: 10,
       })
@@ -233,7 +250,7 @@ export default function AdminReportsPage() {
         <Select
           value={statusFilter}
           onValueChange={(value) => {
-            setStatusFilter(value ?? 'all')
+            setStatusFilter(value ?? 'Tất cả trạng thái')
             setPage(0)
           }}
         >
@@ -241,18 +258,18 @@ export default function AdminReportsPage() {
             <SelectValue placeholder="Trạng thái" />
           </SelectTrigger>
           <SelectContent>
-            <SelectItem value="all">Tất cả</SelectItem>
-            <SelectItem value="pending">Chờ xử lý</SelectItem>
-            <SelectItem value="investigating">Đang điều tra</SelectItem>
-            <SelectItem value="resolved_upheld">Xác nhận vi phạm</SelectItem>
-            <SelectItem value="resolved_dismissed">Bác bỏ báo cáo</SelectItem>
+            {Object.keys(STATUS_FILTER_MAP).map((label) => (
+              <SelectItem key={label} value={label}>
+                {label}
+              </SelectItem>
+            ))}
           </SelectContent>
         </Select>
 
         <Select
           value={targetTypeFilter}
           onValueChange={(value) => {
-            setTargetTypeFilter(value ?? 'all')
+            setTargetTypeFilter(value ?? 'Tất cả loại')
             setPage(0)
           }}
         >
@@ -260,9 +277,11 @@ export default function AdminReportsPage() {
             <SelectValue placeholder="Loại" />
           </SelectTrigger>
           <SelectContent>
-            <SelectItem value="all">Tất cả loại</SelectItem>
-            <SelectItem value="PRODUCT">Tin đăng</SelectItem>
-            <SelectItem value="USER">Người dùng</SelectItem>
+            {Object.keys(TARGET_TYPE_FILTER_MAP).map((label) => (
+              <SelectItem key={label} value={label}>
+                {label}
+              </SelectItem>
+            ))}
           </SelectContent>
         </Select>
       </div>
