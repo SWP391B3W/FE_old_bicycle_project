@@ -1,8 +1,9 @@
+import { useEffect } from 'react'
 import { Outlet, useNavigate } from 'react-router-dom'
 import { Home, LogOut, User } from 'lucide-react'
 import { Sidebar, inspectorNavItems } from '@/components/dashboard/Sidebar'
-import { ThemeToggle } from '@/components/theme-toggle'
 import { useAuth } from '@/contexts/AuthContext'
+import { useTheme } from '@/components/theme-provider'
 import { ROUTES } from '@/constants/routes'
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
 import { NotificationDropdown } from '@/components/notifications/NotificationDropdown'
@@ -18,8 +19,14 @@ import {
 
 export default function InspectorLayout() {
   const { user, logout } = useAuth()
+  const { setTheme } = useTheme()
   const navigate = useNavigate()
   const unreadCount = useNotificationUnreadCount()
+
+  // Force light mode for inspector
+  useEffect(() => {
+    setTheme('light')
+  }, [setTheme])
 
   const handleLogout = async () => {
     await logout()
@@ -35,7 +42,6 @@ export default function InspectorLayout() {
           <h1 className="text-lg font-semibold text-foreground">Trung tâm kiểm định</h1>
 
           <div className="flex items-center gap-3">
-            <ThemeToggle />
             <NotificationDropdown unreadCount={unreadCount} />
 
             <DropdownMenu>
