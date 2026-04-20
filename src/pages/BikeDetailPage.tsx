@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useState } from 'react'
 import { Link, useParams } from 'react-router-dom'
-import { Loader2 } from 'lucide-react'
+import { ChevronLeft, ChevronRight, Loader2 } from 'lucide-react'
 import { adminProductsApi } from '@/api/admin-products.api'
 import { productsApi } from '@/api/products.api'
 import { Button } from '@/components/ui/button'
@@ -103,6 +103,28 @@ export default function BikeDetailPage() {
       ? `${bike.seller.firstName} ${bike.seller.lastName}`.trim() || bike.seller.phone || 'Người bán'
       : 'Người bán'
 
+  function handlePreviousImage() {
+    if (bikeImages.length < 2) {
+      return
+    }
+
+    const currentIndex = bikeImages.indexOf(currentImage)
+    const safeIndex = currentIndex >= 0 ? currentIndex : 0
+    const previousIndex = (safeIndex - 1 + bikeImages.length) % bikeImages.length
+    setSelectedImage(bikeImages[previousIndex])
+  }
+
+  function handleNextImage() {
+    if (bikeImages.length < 2) {
+      return
+    }
+
+    const currentIndex = bikeImages.indexOf(currentImage)
+    const safeIndex = currentIndex >= 0 ? currentIndex : 0
+    const nextIndex = (safeIndex + 1) % bikeImages.length
+    setSelectedImage(bikeImages[nextIndex])
+  }
+
   if (isLoading) {
     return (
       <main className="flex min-h-screen items-center justify-center bg-slate-50 px-6 py-10 sm:px-8 lg:px-10">
@@ -129,7 +151,7 @@ export default function BikeDetailPage() {
 
   return (
     <main className="min-h-screen bg-slate-50 px-6 py-10 sm:px-8 lg:px-10">
-      <div className="mx-auto grid gap-8 xl:grid-cols-[1.5fr_0.8fr]">
+      <div className="mx-auto max-w-[1320px]">
         <section className="space-y-6 rounded-3xl border border-slate-200/80 bg-white p-8 shadow-sm shadow-slate-900/5">
           <div className="space-y-4">
             <div className="flex flex-wrap items-center justify-between gap-4">
@@ -143,21 +165,49 @@ export default function BikeDetailPage() {
             <h1 className="text-3xl font-semibold tracking-tight text-slate-950">{bike.title}</h1>
             <p className="text-sm text-slate-600">
               {locationLabel}
-              {bike.createdAt ? ` • ${new Intl.DateTimeFormat('vi-VN', { dateStyle: 'medium' }).format(new Date(bike.createdAt))}` : ''}
+              {bike.createdAt
+                ? ` • ${new Intl.DateTimeFormat('vi-VN', { dateStyle: 'medium' }).format(new Date(bike.createdAt))}`
+                : ''}
             </p>
           </div>
 
-          <div className="grid gap-4 lg:grid-cols-[1.5fr_0.8fr]">
+          <div className="grid gap-6 xl:grid-cols-[1.9fr_0.85fr]">
             <div className="space-y-4">
-              <div className="overflow-hidden rounded-3xl bg-slate-100">
+              <div className="relative overflow-hidden rounded-3xl bg-slate-100">
                 {currentImage ? (
-                  <img src={currentImage} alt={bike.title} className="h-full min-h-[360px] w-full object-cover" />
+                  <img
+                    src={currentImage}
+                    alt={bike.title}
+                    className="h-full min-h-[520px] w-full object-cover"
+                  />
                 ) : (
-                  <div className="flex min-h-[360px] items-center justify-center text-sm text-slate-500">
+                  <div className="flex min-h-[520px] items-center justify-center text-sm text-slate-500">
                     Chưa có ảnh sản phẩm
                   </div>
                 )}
+
+                {bikeImages.length > 1 ? (
+                  <>
+                    <button
+                      type="button"
+                      aria-label="Ảnh trước"
+                      onClick={handlePreviousImage}
+                      className="absolute left-4 top-1/2 flex h-10 w-10 -translate-y-1/2 items-center justify-center rounded-full bg-black/45 text-white transition hover:bg-black/65"
+                    >
+                      <ChevronLeft className="h-5 w-5" />
+                    </button>
+                    <button
+                      type="button"
+                      aria-label="Ảnh tiếp theo"
+                      onClick={handleNextImage}
+                      className="absolute right-4 top-1/2 flex h-10 w-10 -translate-y-1/2 items-center justify-center rounded-full bg-black/45 text-white transition hover:bg-black/65"
+                    >
+                      <ChevronRight className="h-5 w-5" />
+                    </button>
+                  </>
+                ) : null}
               </div>
+
               {bikeImages.length > 0 ? (
                 <div className="grid grid-cols-2 gap-3 sm:grid-cols-4">
                   {bikeImages.map((image, index) => (
@@ -166,7 +216,9 @@ export default function BikeDetailPage() {
                       type="button"
                       onClick={() => setSelectedImage(image)}
                       className={`overflow-hidden rounded-2xl border-2 transition ${
-                        currentImage === image ? 'border-black' : 'border-slate-200 hover:border-slate-400'
+                        currentImage === image
+                          ? 'border-black'
+                          : 'border-slate-200 hover:border-slate-400'
                       }`}
                     >
                       <img
@@ -179,6 +231,7 @@ export default function BikeDetailPage() {
                 </div>
               ) : null}
             </div>
+
             <div className="space-y-4 rounded-3xl border border-slate-200/80 bg-slate-50 p-6">
               <div>
                 <p className="text-sm font-medium uppercase tracking-[0.2em] text-slate-600">Giá</p>
@@ -203,7 +256,11 @@ export default function BikeDetailPage() {
                   </Button>
                 ) : null}
                 {showSellerButton ? (
-                  <Button asChild variant={isSeller ? 'default' : 'outline'} className="h-11 w-full border-slate-300">
+                  <Button
+                    asChild
+                    variant={isSeller ? 'default' : 'outline'}
+                    className="h-11 w-full border-slate-300"
+                  >
                     <Link to={sellerActionHref}>
                       {isSeller ? 'Đăng tin bán xe' : 'Trở thành người bán'}
                     </Link>
@@ -223,16 +280,24 @@ export default function BikeDetailPage() {
             <div className="mt-6 grid gap-4 sm:grid-cols-2">
               <div className="rounded-2xl bg-slate-50 p-4">
                 <p className="text-sm text-slate-600">Thương hiệu</p>
-                <p className="mt-2 text-sm font-semibold text-slate-900">{bike.brandName ?? bike.brand ?? 'Chưa cập nhật'}</p>
+                <p className="mt-2 text-sm font-semibold text-slate-900">
+                  {bike.brandName ?? bike.brand ?? 'Chưa cập nhật'}
+                </p>
               </div>
               <div className="rounded-2xl bg-slate-50 p-4">
                 <p className="text-sm text-slate-600">Loại xe</p>
-                <p className="mt-2 text-sm font-semibold text-slate-900">{bike.categoryName ?? bike.category ?? 'Chưa cập nhật'}</p>
+                <p className="mt-2 text-sm font-semibold text-slate-900">
+                  {bike.categoryName ?? bike.category ?? 'Chưa cập nhật'}
+                </p>
               </div>
               <div className="rounded-2xl bg-slate-50 p-4">
                 <p className="text-sm text-slate-600">Năm đăng</p>
                 <p className="mt-2 text-sm font-semibold text-slate-900">
-                  {bike.createdAt ? new Intl.DateTimeFormat('vi-VN', { year: 'numeric' }).format(new Date(bike.createdAt)) : 'Chưa cập nhật'}
+                  {bike.createdAt
+                    ? new Intl.DateTimeFormat('vi-VN', { year: 'numeric' }).format(
+                        new Date(bike.createdAt),
+                      )
+                    : 'Chưa cập nhật'}
                 </p>
               </div>
               <div className="rounded-2xl bg-slate-50 p-4">
@@ -241,12 +306,10 @@ export default function BikeDetailPage() {
               </div>
             </div>
           </article>
-        </section>
 
-        <aside className="space-y-6 rounded-3xl border border-slate-200/80 bg-white p-8 shadow-sm shadow-slate-900/5">
-          <div>
+          <article className="rounded-3xl border border-slate-200/80 bg-white p-8">
             <h2 className="text-xl font-semibold text-slate-950">Thông tin người bán</h2>
-            <div className="mt-5 space-y-4">
+            <div className="mt-5 grid gap-4 md:grid-cols-3">
               <div className="rounded-3xl bg-slate-50 p-5">
                 <p className="text-sm text-slate-600">Người đăng</p>
                 <p className="mt-2 text-lg font-semibold text-slate-950">{sellerName}</p>
@@ -254,7 +317,11 @@ export default function BikeDetailPage() {
               <div className="rounded-3xl bg-slate-50 p-5">
                 <p className="text-sm text-slate-600">Được đăng từ</p>
                 <p className="mt-2 text-lg font-semibold text-slate-950">
-                  {bike.createdAt ? new Intl.DateTimeFormat('vi-VN', { dateStyle: 'medium' }).format(new Date(bike.createdAt)) : 'Chưa cập nhật'}
+                  {bike.createdAt
+                    ? new Intl.DateTimeFormat('vi-VN', { dateStyle: 'medium' }).format(
+                        new Date(bike.createdAt),
+                      )
+                    : 'Chưa cập nhật'}
                 </p>
               </div>
               <div className="rounded-3xl bg-slate-50 p-5">
@@ -262,8 +329,8 @@ export default function BikeDetailPage() {
                 <p className="mt-2 text-lg font-semibold text-slate-950">{conditionLabel}</p>
               </div>
             </div>
-          </div>
-        </aside>
+          </article>
+        </section>
       </div>
     </main>
   )
