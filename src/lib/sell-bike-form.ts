@@ -7,6 +7,10 @@ export type SellBikeValidationErrorKey =
   | 'categoryId'
   | 'brandId'
   | 'condition'
+  | 'brakeTypeId'
+  | 'frameMaterialId'
+  | 'frameSize'
+  | 'wheelSize'
   | 'images'
   | 'price'
   | 'originalPrice'
@@ -19,6 +23,10 @@ export interface SellBikeValidationState {
   categoryId: string
   brandId: string
   condition: string
+  brakeTypeId: string
+  frameMaterialId: string
+  frameSize: string
+  wheelSize: string
   price: string
   originalPrice: string
   province: string
@@ -60,6 +68,24 @@ export function validateSellBikeStep(
     }
   }
 
+  if (step === 2) {
+    if (!formData.brakeTypeId.trim()) {
+      errors.brakeTypeId = 'Vui lòng chọn loại phanh.'
+    }
+
+    if (!formData.frameMaterialId.trim()) {
+      errors.frameMaterialId = 'Vui lòng chọn chất liệu khung.'
+    }
+
+    if (!formData.frameSize.trim()) {
+      errors.frameSize = 'Vui lòng chọn size khung.'
+    }
+
+    if (!formData.wheelSize.trim()) {
+      errors.wheelSize = 'Vui lòng chọn size bánh.'
+    }
+  }
+
   if (step === 3 && getMissingRequiredImageTypes(formData.images).length > 0) {
     errors.images = 'Vui lòng tải đủ 3 ảnh bắt buộc: toàn thân xe, bộ truyền động và số khung.'
   }
@@ -97,7 +123,7 @@ export function validateSellBikeStep(
 }
 
 export function validateSellBikeForm(formData: SellBikeValidationState) {
-  const stepOrder: SellBikeStep[] = [1, 3, 4]
+  const stepOrder: SellBikeStep[] = [1, 2, 3, 4]
 
   for (const step of stepOrder) {
     const errors = validateSellBikeStep(step, formData)

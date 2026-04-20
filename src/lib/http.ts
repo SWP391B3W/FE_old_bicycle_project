@@ -1,11 +1,10 @@
-import axios, { type AxiosRequestConfig, type InternalAxiosRequestConfig } from 'axios'
+import axios, { AxiosHeaders, type AxiosRequestConfig, type InternalAxiosRequestConfig } from 'axios'
 import type { ApiResponse } from '@/types/api'
 import { clearAuthSession, getAccessToken, getRefreshToken, setAuthSession } from '@/lib/auth-storage'
 
 const apiBaseUrl = import.meta.env.VITE_API_BASE_URL?.trim() ?? ''
 
 const sharedHeaders = {
-  'Content-Type': 'application/json',
   'ngrok-skip-browser-warning': 'true',
 }
 
@@ -40,6 +39,16 @@ function applyAuthorizationHeader(config: { headers?: unknown }, token: string) 
 
   const headers = config.headers as Record<string, string>
   headers.Authorization = `Bearer ${token}`
+}
+
+function normalizeRequestHeaders(config: InternalAxiosRequestConfig) {
+  const headers = AxiosHeaders.from(config.headers)
+
+  if (config.data instanceof FormData) {
+    headers.delete('Content-Type')
+  }
+
+  config.headers = headers
 }
 
 async function requestNewAccessToken(): Promise<string> {
@@ -93,6 +102,8 @@ const refreshClient = axios.create({
 })
 
 http.interceptors.request.use((config) => {
+  normalizeRequestHeaders(config)
+
   const accessToken = getAccessToken()
 
   if (accessToken) {

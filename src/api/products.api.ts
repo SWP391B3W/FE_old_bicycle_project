@@ -137,13 +137,21 @@ export const productsApi = {
   },
 
   async create(payload: ProductMutationInput) {
-    const response = await http.post('/api/products', buildProductCreateFormData(payload))
+    const response = await http.post('/api/products', buildProductCreateFormData(payload), {
+      headers: {
+        'Content-Type': undefined,
+      },
+    })
 
     return normalizeProduct(response.data.result as RawProduct)
   },
 
   async update(productId: string, payload: ProductMutationInput) {
-    const response = await http.put(`/api/products/${productId}`, buildProductFormData(payload))
+    const response = await http.put(`/api/products/${productId}`, buildProductFormData(payload), {
+      headers: {
+        'Content-Type': undefined,
+      },
+    })
 
     return normalizeProduct(response.data.result as RawProduct)
   },
