@@ -20,7 +20,7 @@ export default function AdminLayout() {
 
       <div className="flex flex-1 flex-col overflow-hidden">
         <header className="flex h-16 items-center justify-between border-b border-slate-200 bg-white px-6 shadow-sm shadow-slate-900/5">
-          <h1 className="text-lg font-semibold text-slate-900">Quan tri he thong</h1>
+          <h1 className="text-lg font-semibold text-slate-900">Quản trị hệ thống</h1>
 
           <div className="flex items-center gap-2">
             <Button
@@ -30,11 +30,11 @@ export default function AdminLayout() {
               className="border-sky-200 bg-sky-50 text-sky-700 hover:bg-sky-100 hover:text-sky-800"
             >
               <Home className="mr-2 h-4 w-4" />
-              Ve trang mua ban
+              Trang chủ
             </Button>
             <Button variant="destructive" size="sm" onClick={handleLogout}>
               <LogOut className="mr-2 h-4 w-4" />
-              Dang xuat
+              Đăng xuất
             </Button>
           </div>
         </header>

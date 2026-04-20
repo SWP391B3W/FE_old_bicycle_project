@@ -277,25 +277,26 @@ export default function AdminReportsPage() {
         </div>
       ) : (
         <>
-          <DataTable columns={columns} data={reports} />
-          {totalPages > 1 && (
-            <div className="flex items-center justify-center gap-2">
+          <DataTable columns={columns} data={reports} showPagination={false} />
+          <div className="flex items-center justify-between">
+            <p className="text-sm text-muted-foreground">
+              Trang {totalPages === 0 ? 0 : page + 1} / {totalPages}
+            </p>
+
+            <div className="flex items-center gap-2">
               <Button variant="outline" size="sm" disabled={page === 0} onClick={() => setPage((current) => current - 1)}>
                 <ChevronLeft className="h-4 w-4" />
               </Button>
-              <span className="text-sm text-muted-foreground">
-                Trang {page + 1} / {totalPages}
-              </span>
               <Button
                 variant="outline"
                 size="sm"
-                disabled={page >= totalPages - 1}
+                disabled={totalPages === 0 || page >= totalPages - 1}
                 onClick={() => setPage((current) => current + 1)}
               >
                 <ChevronRight className="h-4 w-4" />
               </Button>
             </div>
-          )}
+          </div>
         </>
       )}
 

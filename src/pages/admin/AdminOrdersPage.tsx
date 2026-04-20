@@ -13,28 +13,65 @@ import {
 } from '@/lib/order-display'
 import type { Order, OrderFundingStatus, OrderStatus } from '@/types/order'
 
-type StatusFilter = 'all' | OrderStatus
-type FundingFilter = 'all' | OrderFundingStatus
+type StatusFilter =
+  | 'Tất cả trạng thái đơn'
+  | 'Chờ xử lý'
+  | 'Đã đặt cọc'
+  | 'Chờ người mua xác nhận'
+  | 'Hoàn tất'
+  | 'Đã hủy'
+
+type FundingFilter =
+  | 'Tất cả trạng thái tiền'
+  | 'Chưa thanh toán'
+  | 'Chờ thanh toán'
+  | 'Đang tạm giữ'
+  | 'Chờ quyết toán người bán'
+  | 'Đã giải ngân'
+  | 'Chờ hoàn tiền'
+  | 'Chờ chuyển khoản hoàn tiền'
+  | 'Đã hoàn tiền'
+
+const STATUS_MAP: Record<StatusFilter, string> = {
+  'Tất cả trạng thái đơn': 'all',
+  'Chờ xử lý': 'pending',
+  'Đã đặt cọc': 'deposited',
+  'Chờ người mua xác nhận': 'awaiting_buyer_confirmation',
+  'Hoàn tất': 'completed',
+  'Đã hủy': 'cancelled',
+}
+
+const FUNDING_MAP: Record<FundingFilter, string> = {
+  'Tất cả trạng thái tiền': 'all',
+  'Chưa thanh toán': 'unpaid',
+  'Chờ thanh toán': 'awaiting_payment',
+  'Đang tạm giữ': 'held',
+  'Chờ quyết toán người bán': 'seller_payout_pending',
+  'Đã giải ngân': 'released',
+  'Chờ hoàn tiền': 'refund_pending',
+  'Chờ chuyển khoản hoàn tiền': 'refund_pending_transfer',
+  'Đã hoàn tiền': 'refunded',
+}
 
 const statusOptions: Array<{ value: StatusFilter; label: string }> = [
-  { value: 'all', label: 'Tất cả trạng thái đơn' },
-  { value: 'pending', label: 'Pending' },
-  { value: 'deposited', label: 'Deposited' },
-  { value: 'awaiting_buyer_confirmation', label: 'Chờ buyer xác nhận' },
-  { value: 'completed', label: 'Completed' },
-  { value: 'cancelled', label: 'Cancelled' },
+  { value: 'Tất cả trạng thái đơn', label: 'Tất cả trạng thái đơn' },
+  { value: 'Chờ xử lý', label: 'Chờ xử lý' },
+  { value: 'Đã đặt cọc', label: 'Đã đặt cọc' },
+  { value: 'Chờ người mua xác nhận', label: 'Chờ người mua xác nhận' },
+  { value: 'Hoàn tất', label: 'Hoàn tất' },
+  { value: 'Đã hủy', label: 'Đã hủy' },
 ]
 
 const fundingOptions: Array<{ value: FundingFilter; label: string }> = [
-  { value: 'all', label: 'Tất cả trạng thái tiền' },
-  { value: 'unpaid', label: 'Unpaid' },
-  { value: 'awaiting_payment', label: 'Awaiting payment' },
-  { value: 'held', label: 'Held' },
-  { value: 'seller_payout_pending', label: 'Seller payout pending' },
-  { value: 'released', label: 'Released' },
-  { value: 'refund_pending', label: 'Refund pending' },
-  { value: 'refund_pending_transfer', label: 'Refund pending transfer' },
-  { value: 'refunded', label: 'Refunded' },
+  { value: 'Tất cả trạng thái tiền', label: 'Tất cả trạng thái tiền' },
+  { value: 'Chưa thanh toán', label: 'Chưa thanh toán' },
+  { value: 'Chờ thanh toán', label: 'Chờ thanh toán' },
+  { value: 'Đang tạm giữ', label: 'Đang tạm giữ' },
+  { value: 'Chờ quyết toán người bán', label: 'Chờ quyết toán người bán' },
+  { value: 'Đã giải ngân', label: 'Đã giải ngân' },
+  { value: 'Chờ hoàn tiền', label: 'Chờ hoàn tiền' },
+  { value: 'Chờ chuyển khoản hoàn tiền', label: 'Chờ chuyển khoản hoàn tiền' },
+  { value: 'Đã hoàn tiền', label: 'Đã hoàn tiền' },
 ]
 
 function getErrorMessage(error: unknown, fallback: string) {
@@ -66,8 +103,8 @@ export default function AdminOrdersPage() {
   const [error, setError] = useState<string | null>(null)
   const [searchQuery, setSearchQuery] = useState('')
   const deferredSearchQuery = useDeferredValue(searchQuery.trim().toLowerCase())
-  const [statusFilter, setStatusFilter] = useState<StatusFilter>('all')
-  const [fundingFilter, setFundingFilter] = useState<FundingFilter>('all')
+  const [statusFilter, setStatusFilter] = useState<StatusFilter>('Tất cả trạng thái đơn')
+  const [fundingFilter, setFundingFilter] = useState<FundingFilter>('Tất cả trạng thái tiền')
 
   useEffect(() => {
     let ignore = false
@@ -107,8 +144,11 @@ export default function AdminOrdersPage() {
 
   const filteredOrders = useMemo(() => {
     return orders.filter((order) => {
-      const matchesStatus = statusFilter === 'all' || order.status === statusFilter
-      const matchesFunding = fundingFilter === 'all' || order.fundingStatus === fundingFilter
+      const targetStatus = STATUS_MAP[statusFilter]
+      const targetFunding = FUNDING_MAP[fundingFilter]
+
+      const matchesStatus = targetStatus === 'all' || order.status === targetStatus
+      const matchesFunding = targetFunding === 'all' || order.fundingStatus === targetFunding
 
       if (!matchesStatus || !matchesFunding) {
         return false

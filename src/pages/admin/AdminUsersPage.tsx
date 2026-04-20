@@ -23,10 +23,26 @@ const roleLabels: Record<string, string> = {
     seller: 'Người bán',
     inspector: 'Kiểm định viên',
     admin: 'Admin',
+    guest: 'Khách',
     BUYER: 'Người mua',
     SELLER: 'Người bán',
     INSPECTOR: 'Kiểm định viên',
     ADMIN: 'Admin',
+};
+
+const ROLE_FILTER_MAP: Record<string, string> = {
+    'Tất cả vai trò': 'all',
+    'Người mua': 'buyer',
+    'Người bán': 'seller',
+    'Kiểm định viên': 'inspector',
+    'Admin': 'admin',
+};
+
+const STATUS_FILTER_MAP: Record<string, string> = {
+    'Tất cả': 'all',
+    'Hoạt động': 'active',
+    'Bị khóa': 'banned',
+    'Chưa kích hoạt': 'unactive',
 };
 
 export default function AdminUsersPage() {
@@ -34,8 +50,8 @@ export default function AdminUsersPage() {
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState<string | null>(null);
     const [searchQuery, setSearchQuery] = useState('');
-    const [roleFilter, setRoleFilter] = useState<string>('all');
-    const [statusFilter, setStatusFilter] = useState<string>('all');
+    const [roleFilter, setRoleFilter] = useState<string>('Tất cả vai trò');
+    const [statusFilter, setStatusFilter] = useState<string>('Tất cả');
     const [page, setPage] = useState(0);
     const [totalPages, setTotalPages] = useState(0);
     const [totalElements, setTotalElements] = useState(0);
@@ -67,10 +83,13 @@ export default function AdminUsersPage() {
         setLoading(true);
         setError(null);
         try {
+            const mappedRole = ROLE_FILTER_MAP[roleFilter] || roleFilter;
+            const mappedStatus = STATUS_FILTER_MAP[statusFilter] || statusFilter;
+
             const result = await adminUsersApi.getAll({
                 keyword: searchQuery || undefined,
-                role: roleFilter !== 'all' ? (roleFilter as AppRole) : undefined,
-                status: statusFilter !== 'all' ? (statusFilter as UserStatus) : undefined,
+                role: mappedRole !== 'all' ? (mappedRole as AppRole) : undefined,
+                status: mappedStatus !== 'all' ? (mappedStatus as UserStatus) : undefined,
                 page,
                 size: 10,
             });
@@ -78,6 +97,7 @@ export default function AdminUsersPage() {
             setTotalPages(result.totalPages);
             setTotalElements(result.totalElements);
         } catch {
+            setUsers([]);
             setError('Không thể tải danh sách người dùng.');
         } finally {
             setLoading(false);
@@ -223,11 +243,11 @@ export default function AdminUsersPage() {
                         <SelectValue placeholder="Vai trò" />
                     </SelectTrigger>
                     <SelectContent>
-                        <SelectItem value="all">Tất cả vai trò</SelectItem>
-                        <SelectItem value="BUYER">Người mua</SelectItem>
-                        <SelectItem value="SELLER">Người bán</SelectItem>
-                        <SelectItem value="INSPECTOR">Kiểm định viên</SelectItem>
-                        <SelectItem value="ADMIN">Admin</SelectItem>
+                        <SelectItem value="Tất cả vai trò">Tất cả vai trò</SelectItem>
+                        <SelectItem value="Người mua">Người mua</SelectItem>
+                        <SelectItem value="Người bán">Người bán</SelectItem>
+                        <SelectItem value="Kiểm định viên">Kiểm định viên</SelectItem>
+                        <SelectItem value="Admin">Admin</SelectItem>
                     </SelectContent>
                 </Select>
                 <Select value={statusFilter} onValueChange={(v) => { setStatusFilter(v ?? 'all'); setPage(0); }}>
@@ -235,10 +255,10 @@ export default function AdminUsersPage() {
                         <SelectValue placeholder="Trạng thái" />
                     </SelectTrigger>
                     <SelectContent>
-                        <SelectItem value="all">Tất cả</SelectItem>
-                        <SelectItem value="active">Hoạt động</SelectItem>
-                        <SelectItem value="banned">Bị khóa</SelectItem>
-                        <SelectItem value="unactive">Chưa kích hoạt</SelectItem>
+                        <SelectItem value="Tất cả">Tất cả</SelectItem>
+                        <SelectItem value="Hoạt động">Hoạt động</SelectItem>
+                        <SelectItem value="Bị khóa">Bị khóa</SelectItem>
+                        <SelectItem value="Chưa kích hoạt">Chưa kích hoạt</SelectItem>
                     </SelectContent>
                 </Select>
             </div>
@@ -255,19 +275,22 @@ export default function AdminUsersPage() {
                 </div>
             ) : (
                 <>
-                    <DataTable columns={columns} data={users} />
+                    <DataTable columns={columns} data={users} showPagination={false} />
                     {/* Pagination */}
-                    {totalPages > 1 && (
-                        <div className="flex items-center justify-center gap-2">
+                    <div className="flex items-center justify-between">
+                        <p className="text-sm text-muted-foreground">
+                            Trang {totalPages === 0 ? 0 : page + 1} / {totalPages}
+                        </p>
+
+                        <div className="flex items-center gap-2">
                             <Button variant="outline" size="sm" disabled={page === 0} onClick={() => setPage(p => p - 1)}>
                                 <ChevronLeft className="h-4 w-4" />
                             </Button>
-                            <span className="text-sm text-muted-foreground">Trang {page + 1} / {totalPages}</span>
-                            <Button variant="outline" size="sm" disabled={page >= totalPages - 1} onClick={() => setPage(p => p + 1)}>
+                            <Button variant="outline" size="sm" disabled={totalPages === 0 || page >= totalPages - 1} onClick={() => setPage(p => p + 1)}>
                                 <ChevronRight className="h-4 w-4" />
                             </Button>
                         </div>
-                    )}
+                    </div>
                 </>
             )}
 
