@@ -2,6 +2,7 @@ import { Award, Shield, Users, type LucideIcon } from 'lucide-react'
 import type { Category } from '@/types/reference-data'
 
 export const ALL_LOCATION_VALUE = '__all__'
+export const ALL_LOCATION_LABEL = 'Địa chỉ'
 
 const CATEGORY_ICONS: Record<string, string> = {
   bicycles: '🚲',
@@ -41,7 +42,7 @@ export const TRUST_FEATURES: HomeTrustFeature[] = [
 export function getCategoryIcon(category: Category) {
   return (
     CATEGORY_ICONS[category.slug] ??
-    CATEGORY_ICONS[category.name.toLowerCase().replace(/\s+/g, '-')] ??
+    CATEGORY_ICONS[category.name.toLowerCase().replaceAll(' ', '-')] ??
     '🚲'
   )
 }

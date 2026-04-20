@@ -18,6 +18,8 @@ import {
     CheckoutPage,
     PaymentPage,
     OrderConfirmationPage,
+    ProfilePage,
+    PayoutPage,
     AdminDashboardPage,
     AdminUsersPage,
     AdminOrdersPage,
@@ -59,6 +61,8 @@ export default function AppRouter() {
                         <Route path={ROUTES.CHECKOUT} element={<CheckoutPage />} />
                         <Route path={ROUTES.PAYMENT} element={<PaymentPage />} />
                         <Route path={ROUTES.ORDER_CONFIRMATION} element={<OrderConfirmationPage />} />
+                        <Route path={ROUTES.PROFILE} element={<ProfilePage />} />
+                        <Route path={ROUTES.PAYOUT} element={<PayoutPage />} />
                         <Route path={ROUTES.MESSAGES} element={<MessagesPage />} />
                     </Route>
 

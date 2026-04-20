@@ -7,6 +7,7 @@ import { OrderEvidenceDialog } from '@/components/profile/OrderEvidenceDialog'
 import { OrderEvidenceSection } from '@/components/profile/OrderEvidenceSection'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
+import { ROUTES } from '@/constants/routes'
 import { useAuth } from '@/contexts/AuthContext'
 import {
   canCancelOpenOrder,
@@ -229,7 +230,7 @@ export default function SellerOrdersPage() {
           Người bán cần hoàn tất payout profile trước khi chấp nhận đơn mới để hệ thống có thể giải ngân khoản cọc về sau.
           <div className="mt-3">
             <Button variant="outline" size="sm" asChild>
-              <Link to="/profile?tab=payout">Cập nhật tài khoản nhận tiền</Link>
+              <Link to={ROUTES.PAYOUT}>Cập nhật tài khoản nhận tiền</Link>
             </Button>
           </div>
         </div>
@@ -366,7 +367,7 @@ export default function SellerOrdersPage() {
 
                       {canSellerAcceptOrder(order) && !payoutProfileReady && (
                         <Button variant="outline" asChild>
-                          <Link to="/profile?tab=payout">Cần payout profile để chấp nhận đơn</Link>
+                          <Link to={ROUTES.PAYOUT}>Cần payout profile để chấp nhận đơn</Link>
                         </Button>
                       )}
 
@@ -440,7 +441,7 @@ export default function SellerOrdersPage() {
 
                       {order.fundingStatus === 'seller_payout_pending' && (
                         <Button variant="outline" asChild>
-                          <Link to="/profile?tab=payout">Cập nhật tài khoản nhận tiền</Link>
+                          <Link to={ROUTES.PAYOUT}>Cập nhật tài khoản nhận tiền</Link>
                         </Button>
                       )}
                     </div>
