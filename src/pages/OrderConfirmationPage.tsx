@@ -14,6 +14,8 @@ interface OrderConfirmationState {
   checkoutData?: CheckoutFormData
 }
 
+const SHIPPING_FEE_PENDING_LABEL = 'Đang tính toán...'
+
 function toImageUrl(image: string | { url: string }) {
   return typeof image === 'string' ? image : image.url
 }
@@ -66,7 +68,6 @@ export default function OrderConfirmationPage() {
   }
 
   const productImage = getProductImage(product)
-  const paymentAmount = order.buyerChargeAmount ?? order.totalAmount ?? product.price
 
   return (
     <main className="min-h-screen bg-slate-50 px-6 py-10 sm:px-8 lg:px-10">
@@ -77,7 +78,7 @@ export default function OrderConfirmationPage() {
           </div>
           <h1 className="text-3xl font-bold text-green-900">Tạo đơn mua thành công</h1>
           <p className="mt-3 text-green-800">
-            Yêu cầu mua đã được gửi vào hệ thống. Người bán cần duyệt trước khi bước thanh toán tiếp theo được mở.
+            Yêu cầu mua đã được gửi vào hệ thống. Người bán cần duyệt trước khi bước thanh toán online được mở.
           </p>
         </div>
 
@@ -90,17 +91,12 @@ export default function OrderConfirmationPage() {
               <CardContent>
                 <div className="flex items-center gap-3 rounded-xl bg-slate-100 p-4">
                   <code className="flex-1 font-mono text-sm font-semibold text-slate-900">{order.id}</code>
-                  <Button
-                    variant="outline"
-                    size="sm"
-                    onClick={handleCopyOrderId}
-                    className="border-slate-300"
-                  >
+                  <Button variant="outline" size="sm" onClick={handleCopyOrderId} className="border-slate-300">
                     <Copy className="h-4 w-4" />
                   </Button>
                 </div>
                 <p className="mt-3 text-sm text-slate-600">
-                  Bạn có thể theo dõi đơn này trong mục đơn mua sau khi seller phản hồi.
+                  Bạn có thể theo dõi đơn này trong mục đơn mua sau khi người bán phản hồi.
                 </p>
               </CardContent>
             </Card>
@@ -112,11 +108,7 @@ export default function OrderConfirmationPage() {
               <CardContent>
                 <div className="flex gap-4">
                   {productImage ? (
-                    <img
-                      src={productImage}
-                      alt={product.title}
-                      className="h-24 w-24 rounded-2xl object-cover"
-                    />
+                    <img src={productImage} alt={product.title} className="h-24 w-24 rounded-2xl object-cover" />
                   ) : (
                     <div className="flex h-24 w-24 items-center justify-center rounded-2xl bg-slate-200 text-xs text-slate-500">
                       No image
@@ -170,9 +162,13 @@ export default function OrderConfirmationPage() {
                   <p className="text-sm text-slate-600">Trạng thái đơn</p>
                   <p className="mt-1 font-medium text-slate-900">{order.status}</p>
                 </div>
+                <div>
+                  <p className="text-sm text-slate-600">Phí vận chuyển</p>
+                  <p className="mt-1 font-medium text-slate-900">{SHIPPING_FEE_PENDING_LABEL}</p>
+                </div>
                 <div className="flex justify-between rounded-xl bg-slate-100 p-4">
-                  <span className="font-semibold text-slate-900">Giá trị hiện tại của đơn</span>
-                  <span className="text-lg font-bold text-sky-600">{formatCurrency(paymentAmount)}</span>
+                  <span className="font-semibold text-slate-900">Tổng thanh toán qua SePay</span>
+                  <span className="text-lg font-bold text-sky-600">{SHIPPING_FEE_PENDING_LABEL}</span>
                 </div>
               </CardContent>
             </Card>
@@ -190,9 +186,7 @@ export default function OrderConfirmationPage() {
                   </div>
                   <div>
                     <p className="font-medium text-slate-900">Chờ người bán duyệt đơn</p>
-                    <p className="mt-1 text-sm text-slate-600">
-                      Đơn vừa tạo đang ở trạng thái chờ người bán xem xét.
-                    </p>
+                    <p className="mt-1 text-sm text-slate-600">Đơn vừa tạo đang ở trạng thái chờ người bán xem xét.</p>
                   </div>
                 </div>
 
@@ -201,9 +195,10 @@ export default function OrderConfirmationPage() {
                     2
                   </div>
                   <div>
-                    <p className="font-medium text-slate-900">Buyer thanh toán khi đơn được duyệt</p>
+                    <p className="font-medium text-slate-900">Buyer thanh toán online</p>
                     <p className="mt-1 text-sm text-slate-600">
-                      Với chuyển khoản hoặc thanh toán trực tiếp, hệ thống sẽ mở bước tiếp theo sau khi seller chấp nhận đơn.
+                      Sau khi người bán duyệt đơn, hệ thống sẽ mở bước tạo QR SePay và cập nhật tổng thanh toán gồm giá xe
+                      cùng phí vận chuyển.
                     </p>
                   </div>
                 </div>
@@ -213,9 +208,9 @@ export default function OrderConfirmationPage() {
                     3
                   </div>
                   <div>
-                    <p className="font-medium text-slate-900">Hoàn tất giao dịch</p>
+                    <p className="font-medium text-slate-900">Theo dõi giao hàng và xác nhận</p>
                     <p className="mt-1 text-sm text-slate-600">
-                      Hai bên tiếp tục theo flow đơn hàng thật ở dashboard của hệ thống.
+                      Người bán sẽ tải bằng chứng gửi hàng. Buyer có 5 ngày để test xe trước khi đơn tự hoàn tất.
                     </p>
                   </div>
                 </div>

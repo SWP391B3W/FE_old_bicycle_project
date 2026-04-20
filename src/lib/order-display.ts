@@ -39,8 +39,8 @@ export function getPaymentMethodLabel(order: Order) {
   return order.paymentMethod === 'cash'
     ? 'Tiền mặt'
     : order.paymentMethod === 'transfer'
-      ? 'Chuyển khoản'
-      : 'Online'
+      ? 'Thanh toán online qua SePay'
+      : 'Thanh toán online'
 }
 
 export function getPaymentOptionLabel(order: Order) {
@@ -125,7 +125,7 @@ export function getOrderStatusMeta(order: Order, nowMs = Date.now()): OrderStatu
     return {
       label: 'Chờ giải ngân cho người bán',
       helperText:
-        'Người mua đã xác nhận nhận xe. Hệ thống đang chờ admin chuyển khoản thủ công khoản tiền đang được giữ cho người bán. Nếu người bán chưa khai tài khoản nhận tiền, họ cần cập nhật payout profile.',
+        'Đơn hàng đã hoàn tất. Hệ thống đang chờ admin chuyển khoản thủ công số tiền bán xe sau khi trừ phí sàn cho người bán.',
       tone: 'warning',
     }
   }
@@ -133,17 +133,21 @@ export function getOrderStatusMeta(order: Order, nowMs = Date.now()): OrderStatu
   if (order.status === 'completed') {
     return {
       label: 'Hoàn tất',
-      helperText:
-        'Giao dịch đã hoàn tất và khoản tiền sàn giữ trung gian đã được giải ngân cho người bán.',
+      helperText: 'Giao dịch đã hoàn tất.',
       tone: 'success',
     }
   }
 
   if (order.status === 'awaiting_buyer_confirmation' && order.fundingStatus === 'held') {
+    const deadlineText = order.buyerConfirmationDeadline
+      ? ` Hết hạn xác nhận vào ${formatOrderDate(order.buyerConfirmationDeadline)}.`
+      : ''
+
     return {
       label: 'Chờ người mua xác nhận',
       helperText:
-        'Người bán đã báo giao xe. Người mua cần xác nhận đã nhận xe để hệ thống chuyển sang bước giải ngân.',
+        'Người bán đã xác nhận gửi hàng và tải bằng chứng. Người mua có 5 ngày để test xe, xác nhận đã nhận hoặc khiếu nại trước khi hệ thống tự hoàn tất đơn.' +
+        deadlineText,
       tone: 'warning',
     }
   }
@@ -154,8 +158,7 @@ export function getOrderStatusMeta(order: Order, nowMs = Date.now()): OrderStatu
   ) {
     return {
       label: 'Chờ admin duyệt hoàn tiền',
-      helperText:
-        'Người mua đã gửi yêu cầu hoàn tiền. Đơn hàng tạm dừng ở bước tranh chấp cho đến khi admin xem xét yêu cầu này.',
+      helperText: 'Người mua đã gửi yêu cầu hoàn tiền. Đơn hàng đang tạm dừng để admin xem xét.',
       tone: 'warning',
     }
   }
@@ -166,8 +169,7 @@ export function getOrderStatusMeta(order: Order, nowMs = Date.now()): OrderStatu
   ) {
     return {
       label: 'Chờ chuyển khoản hoàn tiền',
-      helperText:
-        'Admin đã duyệt yêu cầu hoàn tiền. Hệ thống đang chờ chuyển khoản thủ công lại cho người mua. Nếu chưa khai tài khoản nhận hoàn tiền, hãy cập nhật payout profile.',
+      helperText: 'Admin đã duyệt hoàn tiền và đang chờ chuyển khoản thủ công lại cho người mua.',
       tone: 'warning',
     }
   }
@@ -175,8 +177,7 @@ export function getOrderStatusMeta(order: Order, nowMs = Date.now()): OrderStatu
   if (order.status === 'cancelled' && order.fundingStatus === 'refund_pending_transfer') {
     return {
       label: 'Chờ chuyển khoản hoàn tiền',
-      helperText:
-        'Hệ thống đã nhận được thanh toán sau khi đơn bị hủy hoặc hết hạn. Khoản tiền này đang chờ hoàn thủ công cho người mua.',
+      helperText: 'Khoản thanh toán đến sau khi đơn bị hủy đang chờ hoàn thủ công cho người mua.',
       tone: 'warning',
     }
   }
@@ -192,8 +193,7 @@ export function getOrderStatusMeta(order: Order, nowMs = Date.now()): OrderStatu
   if (order.status === 'cancelled' && order.fundingStatus === 'refunded') {
     return {
       label: 'Đã hoàn tiền',
-      helperText:
-        'Khoản thanh toán đã được hoàn lại và đơn hàng đã đóng. Tin đăng liên quan đã bị ẩn; nếu người bán muốn bán lại thì phải cập nhật, duyệt lại và kiểm định lại.',
+      helperText: 'Khoản thanh toán đã được hoàn lại và đơn hàng đã đóng.',
       tone: 'success',
     }
   }
@@ -226,7 +226,7 @@ export function getOrderStatusMeta(order: Order, nowMs = Date.now()): OrderStatu
   if (order.status === 'deposited' && order.fundingStatus === 'held') {
     return {
       label: 'Đã đặt cọc',
-      helperText: 'Hệ thống đã giữ khoản thanh toán hiện tại và đang chờ người bán hoàn tất giao dịch.',
+      helperText: 'Hệ thống đã giữ khoản thanh toán hiện tại và đang chờ người bán xác nhận gửi hàng.',
       tone: 'info',
     }
   }
@@ -234,18 +234,16 @@ export function getOrderStatusMeta(order: Order, nowMs = Date.now()): OrderStatu
   if (order.status === 'pending' && order.fundingStatus === 'awaiting_payment' && isPaymentDeadlineExpired(order, nowMs)) {
     return {
       label: 'Đã hết hạn thanh toán',
-      helperText: 'Đơn hàng đã quá hạn thanh toán. Hệ thống sẽ tự hủy hoặc đang đồng bộ trạng thái hủy.',
+      helperText: 'Đơn hàng đã quá hạn thanh toán và sẽ tự hủy hoặc đang đồng bộ trạng thái hủy.',
       tone: 'danger',
     }
   }
 
   if (order.status === 'pending' && order.fundingStatus === 'awaiting_payment') {
     return {
-      label: order.paymentMethod === 'cash' ? 'Chờ thanh toán trực tiếp' : 'Chờ thanh toán',
+      label: 'Chờ thanh toán',
       helperText:
-        order.paymentMethod === 'cash'
-          ? 'Người bán đã duyệt đơn, hai bên cần thanh toán trực tiếp để tiếp tục.'
-          : 'Người bán đã duyệt đơn, người mua cần hoàn tất khoản thanh toán hiện tại theo breakdown được hiển thị.',
+        'Người bán đã duyệt đơn, người mua cần hoàn tất khoản thanh toán online hiện tại theo breakdown được hiển thị.',
       tone: 'warning',
     }
   }
@@ -270,13 +268,8 @@ export function canSellerAcceptOrder(order: Order) {
   return order.status === 'pending' && order.fundingStatus === 'unpaid'
 }
 
-export function canSellerConfirmCashDeposit(order: Order, nowMs = Date.now()) {
-  return (
-    order.status === 'pending' &&
-    order.fundingStatus === 'awaiting_payment' &&
-    order.paymentMethod === 'cash' &&
-    !isPaymentDeadlineExpired(order, nowMs)
-  )
+export function canSellerConfirmCashDeposit(_order: Order, _nowMs = Date.now()) {
+  return false
 }
 
 export function canSellerCompleteOrder(order: Order) {

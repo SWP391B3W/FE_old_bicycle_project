@@ -327,12 +327,6 @@ export function BuyerOrdersSection({ buyerId }: BuyerOrdersSectionProps) {
                             </Button>
                           )}
 
-                          {order.status === 'pending' && order.fundingStatus === 'awaiting_payment' && order.paymentMethod === 'cash' && (
-                            <Button variant="outline" asChild>
-                              <Link to={ROUTES.MESSAGES}>Liên hệ người bán để thanh toán trực tiếp</Link>
-                            </Button>
-                          )}
-
                           {canBuyerConfirmReceived(order) && (
                             <Button
                               variant="outline"
@@ -434,7 +428,7 @@ export function BuyerOrdersSection({ buyerId }: BuyerOrdersSectionProps) {
 
                     <div className="grid gap-3 lg:grid-cols-2">
                       <OrderEvidenceSection
-                        title="Chứng cứ bàn giao từ người bán"
+                        title="Chứng cứ gửi hàng từ người bán"
                         evidence={order.sellerHandoverEvidence}
                       />
                       <OrderEvidenceSection

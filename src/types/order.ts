@@ -105,6 +105,7 @@ export interface Order {
   buyerReceiptEvidence?: OrderEvidenceSubmission | null
   acceptedAt?: string | null
   paymentDeadline?: string | null
+  buyerConfirmationDeadline?: string | null
   cancelReason?: OrderCancelReason | null
   cancelledAt?: string | null
   status: OrderStatus

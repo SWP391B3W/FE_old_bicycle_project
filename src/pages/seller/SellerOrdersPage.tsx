@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react'
 import { Link } from 'react-router-dom'
-import { CheckCircle, Loader2, ShoppingBag, Truck, Wallet, XCircle } from 'lucide-react'
+import { CheckCircle, Loader2, ShoppingBag, Truck, XCircle } from 'lucide-react'
 import { ordersApi } from '@/api/orders.api'
 import { payoutsApi } from '@/api/payouts.api'
 import { OrderEvidenceDialog } from '@/components/profile/OrderEvidenceDialog'
@@ -13,16 +13,15 @@ import {
   canCancelOpenOrder,
   canSellerAcceptOrder,
   canSellerCompleteOrder,
-  canSellerConfirmCashDeposit,
   formatOrderCurrency,
   formatOrderDate,
-  getPaymentCountdownText,
   getOrderPlatformFeeTotal,
   getOrderSellerFeeAmount,
   getOrderSellerGrossPayoutAmount,
   getOrderSellerNetPayoutAmount,
   getOrderStatusMeta,
   getOrderToneClass,
+  getPaymentCountdownText,
   getPaymentMethodLabel,
   getPaymentOptionLabel,
   isPaymentDeadlineExpired,
@@ -158,16 +157,13 @@ export default function SellerOrdersPage() {
     setOrders(result.filter((order) => order.sellerId === sellerId))
   }
 
-  async function runOrderAction(order: Order, action: 'accept' | 'confirmDeposit' | 'cancel') {
+  async function runOrderAction(order: Order, action: 'accept' | 'cancel') {
     setActionLoadingKey(`${action}:${order.id}`)
 
     try {
-      const updatedOrder =
-        action === 'accept'
-          ? await ordersApi.accept(order.id)
-          : action === 'confirmDeposit'
-            ? await ordersApi.confirmDeposit(order.id)
-            : await ordersApi.cancel(order.id)
+      const updatedOrder = action === 'accept'
+        ? await ordersApi.accept(order.id)
+        : await ordersApi.cancel(order.id)
 
       if (action === 'accept') {
         await refreshSellerOrders()
@@ -181,9 +177,7 @@ export default function SellerOrdersPage() {
           requestError,
           action === 'accept'
             ? 'Không thể chấp nhận đơn hàng lúc này.'
-            : action === 'confirmDeposit'
-              ? 'Không thể xác nhận thanh toán trực tiếp lúc này.'
-              : 'Không thể hủy đơn hàng lúc này.',
+            : 'Không thể hủy đơn hàng lúc này.',
         ),
       )
     } finally {
@@ -201,7 +195,7 @@ export default function SellerOrdersPage() {
       setDeliveryError(null)
       setError(null)
     } catch (requestError) {
-      const message = getErrorMessage(requestError, 'Không thể báo đã giao xe lúc này.')
+      const message = getErrorMessage(requestError, 'Không thể xác nhận đã gửi hàng lúc này.')
       setDeliveryError(message)
       setError(message)
     } finally {
@@ -214,8 +208,7 @@ export default function SellerOrdersPage() {
       <div>
         <h2 className="text-2xl font-bold tracking-tight">Quản lý đơn cọc / mua</h2>
         <p className="text-muted-foreground">
-          Theo dõi đơn hàng của người mua, chấp nhận giao dịch, xác nhận thanh toán trực tiếp và báo đã giao xe để
-          người mua xác nhận nhận hàng.
+          Theo dõi đơn hàng của người mua, chấp nhận giao dịch online và xác nhận đã gửi hàng để người mua kiểm tra xe.
         </p>
       </div>
 
@@ -227,7 +220,7 @@ export default function SellerOrdersPage() {
 
       {!payoutProfileReady && (
         <div className="rounded-lg border border-amber-300 bg-amber-50 px-4 py-3 text-sm text-amber-900 dark:border-amber-900/50 dark:bg-amber-950/30 dark:text-amber-100">
-          Người bán cần hoàn tất payout profile trước khi chấp nhận đơn mới để hệ thống có thể giải ngân khoản cọc về sau.
+          Người bán cần hoàn tất payout profile trước khi chấp nhận đơn mới để hệ thống có thể giải ngân tiền bán xe sau này.
           <div className="mt-3">
             <Button variant="outline" size="sm" asChild>
               <Link to={ROUTES.PAYOUT}>Cập nhật tài khoản nhận tiền</Link>
@@ -292,10 +285,11 @@ export default function SellerOrdersPage() {
 
                       {order.fundingStatus === 'awaiting_payment' && order.paymentDeadline && (
                         <div
-                          className={`rounded-lg border px-3 py-2 text-sm ${paymentDeadlineExpired
-                            ? 'border-destructive/30 bg-destructive/5 text-destructive'
-                            : 'border-primary/20 bg-primary/5 text-primary'
-                            }`}
+                          className={`rounded-lg border px-3 py-2 text-sm ${
+                            paymentDeadlineExpired
+                              ? 'border-destructive/30 bg-destructive/5 text-destructive'
+                              : 'border-primary/20 bg-primary/5 text-primary'
+                          }`}
                         >
                           <p className="font-medium">Hạn thanh toán: {formatOrderDate(order.paymentDeadline)}</p>
                           <p className={paymentDeadlineExpired ? 'text-destructive/90' : 'text-primary/90'}>
@@ -333,7 +327,7 @@ export default function SellerOrdersPage() {
                               <span className="font-medium text-foreground">{formatOrderCurrency(sellerFeeAmount)}</span>
                             </p>
                             <p>
-                              Tổng số tiền:{' '}
+                              Tổng số tiền giữ:{' '}
                               <span className="font-medium text-foreground">{formatOrderCurrency(sellerGrossPayoutAmount)}</span>
                             </p>
                             <p>
@@ -371,22 +365,6 @@ export default function SellerOrdersPage() {
                         </Button>
                       )}
 
-                      {canSellerConfirmCashDeposit(order, nowMs) && (
-                        <Button
-                          variant="outline"
-                          className="gap-1.5"
-                          onClick={() => void runOrderAction(order, 'confirmDeposit')}
-                          disabled={actionLoadingKey === `confirmDeposit:${order.id}`}
-                        >
-                          {actionLoadingKey === `confirmDeposit:${order.id}` ? (
-                            <Loader2 className="h-4 w-4 animate-spin" />
-                          ) : (
-                            <Wallet className="h-4 w-4" />
-                          )}
-                          Xác nhận đã nhận tiền
-                        </Button>
-                      )}
-
                       {canSellerCompleteOrder(order) && (
                         <Button
                           variant="outline"
@@ -402,7 +380,7 @@ export default function SellerOrdersPage() {
                           ) : (
                             <Truck className="h-4 w-4" />
                           )}
-                          Báo đã giao xe
+                          Xác nhận đã gửi hàng
                         </Button>
                       )}
 
@@ -431,7 +409,6 @@ export default function SellerOrdersPage() {
                         )}
 
                       {!canSellerAcceptOrder(order) &&
-                        !canSellerConfirmCashDeposit(order, nowMs) &&
                         !canSellerCompleteOrder(order) &&
                         !canCancelOpenOrder(order, nowMs) && (
                           <Button variant="ghost" className="cursor-default hover:bg-transparent" disabled>
@@ -450,7 +427,7 @@ export default function SellerOrdersPage() {
 
                 <div className="grid gap-3 lg:grid-cols-2">
                   <OrderEvidenceSection
-                    title="Chứng cứ bàn giao từ người bán"
+                    title="Chứng cứ gửi hàng từ người bán"
                     evidence={order.sellerHandoverEvidence}
                   />
                   <OrderEvidenceSection
@@ -466,14 +443,14 @@ export default function SellerOrdersPage() {
 
       <OrderEvidenceDialog
         open={Boolean(selectedOrderForDelivery)}
-        title="Xác nhận đã bàn giao xe"
-        description="Tải ảnh bàn giao để buyer và admin có thể đối chiếu lại tình trạng xe cho đơn hàng"
-        noteLabel="Ghi chú bàn giao"
-        notePlaceholder="Ví dụ: đã bàn giao xe và phụ kiện tại cửa hàng, buyer đã kiểm tra ngoại quan."
-        submitLabel="Báo đã giao xe"
+        title="Xác nhận đã gửi hàng"
+        description="Tải ảnh biên lai bưu điện, phiếu gửi hàng hoặc ảnh đóng thùng gửi xe để buyer và admin đối chiếu khi cần"
+        noteLabel="Ghi chú gửi hàng"
+        notePlaceholder="Ví dụ: đã gửi xe qua chành xe, kèm biên lai vận chuyển và ảnh đóng thùng nguyên kiện."
+        submitLabel="Xác nhận đã gửi hàng"
         orderTitle={selectedOrderForDelivery?.productTitle ?? ''}
         requireFiles
-        helperText="Vui lòng chụp rõ xe, phụ kiện đi kèm hoặc tình trạng đóng gói. Không chụp thông tin cá nhân không cần thiết."
+        helperText="Ưu tiên chụp biên lai bưu điện, phiếu gửi hàng hoặc ảnh đóng thùng gửi xe. Không chỉ chụp riêng mỗi chiếc xe."
         loading={Boolean(selectedOrderForDelivery) && actionLoadingKey === `complete:${selectedOrderForDelivery?.id}`}
         error={deliveryError}
         onClose={() => {
