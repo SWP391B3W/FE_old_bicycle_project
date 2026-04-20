@@ -4,7 +4,6 @@ import { ArrowLeft, Camera, Info, Loader2, Upload, X } from 'lucide-react'
 import { productsApi } from '@/api/products.api'
 import { referenceDataApi } from '@/api/reference-data.api'
 import { AdministrativeLocationFields } from '@/components/AdministrativeLocationFields'
-import Logo from '@/components/Logo'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { Input } from '@/components/ui/input'
@@ -408,13 +407,11 @@ export default function SellBikePage() {
     <div className="min-h-screen bg-muted/40 py-8">
       <div className="container mx-auto max-w-3xl px-4">
         <div className="mb-8 space-y-4">
-          <div className="flex items-center justify-between">
+          <div className="flex items-center">
             <Button variant="ghost" className="gap-2 px-0" onClick={handleBackToPreviousPage}>
               <ArrowLeft className="h-4 w-4" />
               {isSellerDashboardFlow ? 'Quay lại quản lý tin đăng' : 'Quay lại'}
             </Button>
-
-            <Logo className="h-8 w-8" showText />
           </div>
 
           <div className="text-center">

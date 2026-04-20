@@ -22,19 +22,22 @@ export function AdministrativeLocationFields({
   onDistrictChange,
   provinceRequired = false,
   provinceError,
-}: AdministrativeLocationFieldsProps) {
+}: Readonly<AdministrativeLocationFieldsProps>) {
   const [provinceOptions, setProvinceOptions] = useState<AdministrativeOption[]>([])
   const [districtOptions, setDistrictOptions] = useState<AdministrativeOption[]>([])
   const [provinceOptionsLoading, setProvinceOptionsLoading] = useState(true)
   const [districtOptionsLoading, setDistrictOptionsLoading] = useState(false)
 
+  const normalizedProvince = province === EMPTY_LOCATION_VALUE ? '' : province
+  const normalizedDistrict = district === EMPTY_LOCATION_VALUE ? '' : district
+
   const selectedProvinceOption = useMemo(
-    () => findAdministrativeOptionByName(provinceOptions, province),
-    [province, provinceOptions],
+    () => findAdministrativeOptionByName(provinceOptions, normalizedProvince),
+    [normalizedProvince, provinceOptions],
   )
   const selectedDistrictOption = useMemo(
-    () => findAdministrativeOptionByName(districtOptions, district),
-    [district, districtOptions],
+    () => findAdministrativeOptionByName(districtOptions, normalizedDistrict),
+    [normalizedDistrict, districtOptions],
   )
 
   useEffect(() => {
@@ -104,13 +107,18 @@ export function AdministrativeLocationFields({
     }
   }, [selectedProvinceOption])
 
-  const provinceSelectValue = (selectedProvinceOption?.name ?? province) || EMPTY_LOCATION_VALUE
-  const districtSelectValue = (selectedDistrictOption?.name ?? district) || EMPTY_LOCATION_VALUE
+  const provinceSelectValue = (selectedProvinceOption?.name ?? normalizedProvince) || null
+  const districtSelectValue = (selectedDistrictOption?.name ?? normalizedDistrict) || null
+  const hasProvince = normalizedProvince.length > 0
+  let districtPlaceholder = 'Quận / huyện'
+  if (hasProvince) {
+    districtPlaceholder = districtOptionsLoading ? 'Đang tải quận / huyện...' : 'Quận / huyện'
+  }
 
   return (
     <div className="grid gap-4 sm:grid-cols-2">
       <div className="space-y-2">
-        <label className="text-sm font-medium">
+        <label htmlFor="sellbike-province" className="text-sm font-medium">
           Tỉnh / thành phố {provinceRequired && <span className="text-red-500">*</span>}
         </label>
         <Select
@@ -122,15 +130,15 @@ export function AdministrativeLocationFields({
           }}
           disabled={provinceOptionsLoading}
         >
-          <SelectTrigger className={cn('h-10 text-left', provinceError && 'border-destructive')}>
+          <SelectTrigger id="sellbike-province" className={cn('h-10 text-left', provinceError && 'border-destructive')}>
             <SelectValue
-              placeholder={provinceOptionsLoading ? 'Đang tải tỉnh / thành phố...' : 'Chọn tỉnh / thành phố'}
+              placeholder={provinceOptionsLoading ? 'Đang tải tỉnh / thành phố...' : 'Tỉnh / thành phố'}
             />
           </SelectTrigger>
           <SelectContent className="max-h-72">
-            <SelectItem value={EMPTY_LOCATION_VALUE}>Chọn tỉnh / thành phố</SelectItem>
-            {province && !selectedProvinceOption ? (
-              <SelectItem value={province}>{province}</SelectItem>
+            <SelectItem value={EMPTY_LOCATION_VALUE}>Tỉnh / thành phố</SelectItem>
+            {normalizedProvince && !selectedProvinceOption ? (
+              <SelectItem value={normalizedProvince}>{normalizedProvince}</SelectItem>
             ) : null}
             {provinceOptions.map((option) => (
               <SelectItem key={option.code} value={option.name}>
@@ -143,29 +151,21 @@ export function AdministrativeLocationFields({
       </div>
 
       <div className="space-y-2">
-        <label className="text-sm font-medium">Quận / huyện</label>
+        <label htmlFor="sellbike-district" className="text-sm font-medium">Quận / huyện</label>
         <Select
           value={districtSelectValue}
           onValueChange={(value) => {
             onDistrictChange(value === EMPTY_LOCATION_VALUE ? '' : value)
           }}
-          disabled={!province || districtOptionsLoading}
+          disabled={!hasProvince || districtOptionsLoading}
         >
-          <SelectTrigger className="h-10 text-left">
-            <SelectValue
-              placeholder={
-                !province
-                  ? 'Chọn tỉnh / thành trước'
-                  : districtOptionsLoading
-                    ? 'Đang tải quận / huyện...'
-                    : 'Chọn quận / huyện'
-              }
-            />
+          <SelectTrigger id="sellbike-district" className="h-10 text-left">
+            <SelectValue placeholder={districtPlaceholder} />
           </SelectTrigger>
           <SelectContent className="max-h-72">
-            <SelectItem value={EMPTY_LOCATION_VALUE}>Không chọn quận / huyện</SelectItem>
-            {district && !selectedDistrictOption ? (
-              <SelectItem value={district}>{district}</SelectItem>
+            <SelectItem value={EMPTY_LOCATION_VALUE}>Quận / huyện</SelectItem>
+            {normalizedDistrict && !selectedDistrictOption ? (
+              <SelectItem value={normalizedDistrict}>{normalizedDistrict}</SelectItem>
             ) : null}
             {districtOptions.map((option) => (
               <SelectItem key={option.code} value={option.name}>

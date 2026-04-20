@@ -8,7 +8,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select'
-import { ALL_LOCATION_LABEL, ALL_LOCATION_VALUE } from './home.constants'
+import { ALL_LOCATION_VALUE } from './home.constants'
 import type { HomeLocationState, HomeSearchActions, HomeSearchState } from './useHomePageData'
 
 interface HomeHeroSectionProps {
@@ -20,7 +20,7 @@ interface HomeHeroSectionProps {
 
 function getDistrictPlaceholder(province: string, districtOptionsLoading: boolean) {
   if (!province) {
-    return 'Chọn quận / huyện'
+    return 'Quận / huyện'
   }
 
   if (districtOptionsLoading) {
@@ -30,36 +30,23 @@ function getDistrictPlaceholder(province: string, districtOptionsLoading: boolea
   return 'Quận / huyện'
 }
 
-function getWardPlaceholder(district: string, wardOptionsLoading: boolean) {
-  if (!district) {
-    return 'Chọn phường / xã'
-  }
-
-  if (wardOptionsLoading) {
-    return 'Đang tải phường / xã...'
-  }
-
-  return 'Phường / xã'
-}
-
 export function HomeHeroSection({
   searchState,
   locationState,
   searchActions,
   onSearch,
 }: Readonly<HomeHeroSectionProps>) {
-  const { keyword, province, district, ward } = searchState
+  const { keyword, province, district } = searchState
   const {
     provinceOptions,
     districtOptions,
-    wardOptions,
     provinceOptionsLoading,
     districtOptionsLoading,
-    wardOptionsLoading,
   } = locationState
 
+  const provinceSelectValue = province || null
+  const districtSelectValue = district || null
   const districtPlaceholder = getDistrictPlaceholder(province, districtOptionsLoading)
-  const wardPlaceholder = getWardPlaceholder(district, wardOptionsLoading)
 
   return (
     <section className="relative overflow-hidden bg-sky-950 px-6 py-8 sm:px-8 lg:px-10">
@@ -75,7 +62,7 @@ export function HomeHeroSection({
           </p>
 
           <div className="mt-10 overflow-hidden rounded-[1.75rem] bg-white shadow-xl shadow-slate-950/10 ring-1 ring-slate-200/80 sm:p-5">
-            <div className="grid gap-3 items-center sm:grid-cols-[2fr_1fr_1fr_1fr_auto]">
+            <div className="grid gap-3 items-center sm:grid-cols-[2fr_1fr_1fr_auto]">
               <div className="relative min-w-0">
                 <Search className="pointer-events-none absolute left-4 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-400" />
                 <Input
@@ -90,12 +77,12 @@ export function HomeHeroSection({
               <div className="relative min-w-0">
                 <MapPin className="pointer-events-none absolute left-4 top-1/2 z-10 h-4 w-4 -translate-y-1/2 text-slate-400" />
                 <Select
-                  value={province || ALL_LOCATION_VALUE}
+                  value={provinceSelectValue}
                   onValueChange={(value) =>
                     searchActions.setProvince(value === ALL_LOCATION_VALUE ? '' : value || '')
                   }
                 >
-                  <SelectTrigger className="h-12 w-full rounded-xl border-2 border-black bg-white py-0 pl-12 pr-3 text-left text-slate-900 shadow-sm focus:border-black focus:ring-2 focus:ring-black/20 flex items-center">
+                  <SelectTrigger className="h-12 w-full rounded-xl border-2 border-black bg-white py-0 pl-12 pr-10 text-left text-slate-900 shadow-sm focus:border-black focus:ring-2 focus:ring-black/20 flex items-center">
                     <SelectValue
                       placeholder={
                         provinceOptionsLoading
@@ -105,7 +92,7 @@ export function HomeHeroSection({
                     />
                   </SelectTrigger>
                   <SelectContent className="max-h-72 bg-white border border-slate-200 text-slate-900">
-                    <SelectItem value={ALL_LOCATION_VALUE} className="text-slate-900">{ALL_LOCATION_LABEL}</SelectItem>
+                    <SelectItem value={ALL_LOCATION_VALUE} className="text-slate-900">Tỉnh / thành phố</SelectItem>
                     {provinceOptions.map((option) => (
                       <SelectItem key={option.code} value={option.name} className="text-slate-900">
                         {option.name}
@@ -118,41 +105,18 @@ export function HomeHeroSection({
               <div className="relative min-w-0">
                 <MapPin className="pointer-events-none absolute left-4 top-1/2 z-10 h-4 w-4 -translate-y-1/2 text-slate-400" />
                 <Select
-                  value={district || ALL_LOCATION_VALUE}
+                  value={districtSelectValue}
                   onValueChange={(value) =>
                     searchActions.setDistrict(value === ALL_LOCATION_VALUE ? '' : value || '')
                   }
                   disabled={!province || districtOptionsLoading}
                 >
-                  <SelectTrigger className="h-12 w-full rounded-xl border-2 border-black bg-white py-0 pl-12 pr-3 text-left text-slate-900 shadow-sm focus:border-black focus:ring-2 focus:ring-black/20 flex items-center">
+                  <SelectTrigger className="h-12 w-full rounded-xl border-2 border-black bg-white py-0 pl-12 pr-10 text-left text-slate-900 shadow-sm focus:border-black focus:ring-2 focus:ring-black/20 flex items-center">
                     <SelectValue placeholder={districtPlaceholder} />
                   </SelectTrigger>
                   <SelectContent className="max-h-72 bg-white border border-slate-200 text-slate-900">
-                    <SelectItem value={ALL_LOCATION_VALUE} className="text-slate-900">{ALL_LOCATION_LABEL}</SelectItem>
+                    <SelectItem value={ALL_LOCATION_VALUE} className="text-slate-900">Quận / huyện</SelectItem>
                     {districtOptions.map((option) => (
-                      <SelectItem key={option.code} value={option.name} className="text-slate-900">
-                        {option.name}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-              </div>
-
-              <div className="relative min-w-0">
-                <MapPin className="pointer-events-none absolute left-4 top-1/2 z-10 h-4 w-4 -translate-y-1/2 text-slate-400" />
-                <Select
-                  value={ward || ALL_LOCATION_VALUE}
-                  onValueChange={(value) =>
-                    searchActions.setWard(value === ALL_LOCATION_VALUE ? '' : value || '')
-                  }
-                  disabled={!district || wardOptionsLoading}
-                >
-                  <SelectTrigger className="h-12 w-full rounded-xl border-2 border-black bg-white py-0 pl-12 pr-3 text-left text-slate-900 shadow-sm focus:border-black focus:ring-2 focus:ring-black/20 flex items-center">
-                    <SelectValue placeholder={wardPlaceholder} />
-                  </SelectTrigger>
-                  <SelectContent className="max-h-72 bg-white border border-slate-200 text-slate-900">
-                    <SelectItem value={ALL_LOCATION_VALUE} className="text-slate-900">{ALL_LOCATION_LABEL}</SelectItem>
-                    {wardOptions.map((option) => (
                       <SelectItem key={option.code} value={option.name} className="text-slate-900">
                         {option.name}
                       </SelectItem>
