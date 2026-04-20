@@ -1,41 +1,28 @@
-import { Outlet, useNavigate } from 'react-router-dom'
-import { Home, LogOut } from 'lucide-react'
+import { Outlet } from 'react-router-dom'
 import { Sidebar, adminNavItems } from '@/components/dashboard/Sidebar'
-import { useAuth } from '@/contexts/AuthContext'
-import { ROUTES } from '@/constants/routes'
-import { Button } from '@/components/ui/button'
+import { NotificationDropdown } from '@/components/notifications/NotificationDropdown'
+import { ThemeToggle } from '@/components/theme-toggle'
+import { UserAccountMenu } from '@/components/UserAccountMenu'
+import { useNotificationUnreadCount } from '@/lib/use-notification-unread-count'
 
 export default function AdminLayout() {
-  const { logout } = useAuth()
-  const navigate = useNavigate()
-
-  const handleLogout = async () => {
-    await logout()
-    navigate(ROUTES.HOME)
-  }
+  const unreadCount = useNotificationUnreadCount()
 
   return (
     <div className="flex h-screen bg-slate-50 text-slate-900">
       <Sidebar items={adminNavItems} />
 
       <div className="flex flex-1 flex-col overflow-hidden">
-        <header className="flex h-16 items-center justify-between border-b border-slate-200 bg-white px-6 shadow-sm shadow-slate-900/5">
-          <h1 className="text-lg font-semibold text-slate-900">Quan tri he thong</h1>
+        <header className="flex h-16 items-center justify-between border-b border-white/5 bg-[#0b1120] px-6 shadow-sm shadow-black/30">
+          <h1 className="text-lg font-semibold text-white">Quan tri he thong</h1>
 
-          <div className="flex items-center gap-2">
-            <Button
-              variant="outline"
-              size="sm"
-              onClick={() => navigate(ROUTES.HOME)}
-              className="border-sky-200 bg-sky-50 text-sky-700 hover:bg-sky-100 hover:text-sky-800"
-            >
-              <Home className="mr-2 h-4 w-4" />
-              Ve trang mua ban
-            </Button>
-            <Button variant="destructive" size="sm" onClick={handleLogout}>
-              <LogOut className="mr-2 h-4 w-4" />
-              Dang xuat
-            </Button>
+          <div className="flex items-center gap-3">
+            <ThemeToggle className="rounded-full text-white hover:bg-white/8 hover:text-white" />
+            <NotificationDropdown
+              unreadCount={unreadCount}
+              className="rounded-full text-white hover:bg-white/8 hover:text-white"
+            />
+            <UserAccountMenu />
           </div>
         </header>
 

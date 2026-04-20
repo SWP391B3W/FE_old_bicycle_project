@@ -8,7 +8,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select'
-import { ALL_LOCATION_VALUE } from './home.constants'
+import { ALL_LOCATION_LABEL, ALL_LOCATION_VALUE } from './home.constants'
 import type { HomeLocationState, HomeSearchActions, HomeSearchState } from './useHomePageData'
 
 interface HomeHeroSectionProps {
@@ -18,12 +18,36 @@ interface HomeHeroSectionProps {
   onSearch: () => void
 }
 
+function getDistrictPlaceholder(province: string, districtOptionsLoading: boolean) {
+  if (!province) {
+    return 'Chọn quận / huyện'
+  }
+
+  if (districtOptionsLoading) {
+    return 'Đang tải quận / huyện...'
+  }
+
+  return 'Quận / huyện'
+}
+
+function getWardPlaceholder(district: string, wardOptionsLoading: boolean) {
+  if (!district) {
+    return 'Chọn phường / xã'
+  }
+
+  if (wardOptionsLoading) {
+    return 'Đang tải phường / xã...'
+  }
+
+  return 'Phường / xã'
+}
+
 export function HomeHeroSection({
   searchState,
   locationState,
   searchActions,
   onSearch,
-}: HomeHeroSectionProps) {
+}: Readonly<HomeHeroSectionProps>) {
   const { keyword, province, district, ward } = searchState
   const {
     provinceOptions,
@@ -33,6 +57,9 @@ export function HomeHeroSection({
     districtOptionsLoading,
     wardOptionsLoading,
   } = locationState
+
+  const districtPlaceholder = getDistrictPlaceholder(province, districtOptionsLoading)
+  const wardPlaceholder = getWardPlaceholder(district, wardOptionsLoading)
 
   return (
     <section className="relative overflow-hidden bg-sky-950 px-6 py-8 sm:px-8 lg:px-10">
@@ -78,7 +105,7 @@ export function HomeHeroSection({
                     />
                   </SelectTrigger>
                   <SelectContent className="max-h-72 bg-white border border-slate-200 text-slate-900">
-                    <SelectItem value={ALL_LOCATION_VALUE} className="text-slate-900">Tất cả tỉnh / thành</SelectItem>
+                    <SelectItem value={ALL_LOCATION_VALUE} className="text-slate-900">{ALL_LOCATION_LABEL}</SelectItem>
                     {provinceOptions.map((option) => (
                       <SelectItem key={option.code} value={option.name} className="text-slate-900">
                         {option.name}
@@ -98,18 +125,10 @@ export function HomeHeroSection({
                   disabled={!province || districtOptionsLoading}
                 >
                   <SelectTrigger className="h-12 w-full rounded-xl border-2 border-black bg-white py-0 pl-12 pr-3 text-left text-slate-900 shadow-sm focus:border-black focus:ring-2 focus:ring-black/20 flex items-center">
-                    <SelectValue
-                      placeholder={
-                        !province
-                          ? 'Chọn quận / huyện'
-                          : districtOptionsLoading
-                            ? 'Đang tải quận / huyện...'
-                            : 'Quận / huyện'
-                      }
-                    />
+                    <SelectValue placeholder={districtPlaceholder} />
                   </SelectTrigger>
                   <SelectContent className="max-h-72 bg-white border border-slate-200 text-slate-900">
-                    <SelectItem value={ALL_LOCATION_VALUE} className="text-slate-900">Tất cả quận / huyện</SelectItem>
+                    <SelectItem value={ALL_LOCATION_VALUE} className="text-slate-900">{ALL_LOCATION_LABEL}</SelectItem>
                     {districtOptions.map((option) => (
                       <SelectItem key={option.code} value={option.name} className="text-slate-900">
                         {option.name}
@@ -129,18 +148,10 @@ export function HomeHeroSection({
                   disabled={!district || wardOptionsLoading}
                 >
                   <SelectTrigger className="h-12 w-full rounded-xl border-2 border-black bg-white py-0 pl-12 pr-3 text-left text-slate-900 shadow-sm focus:border-black focus:ring-2 focus:ring-black/20 flex items-center">
-                    <SelectValue
-                      placeholder={
-                        !district
-                          ? 'Chọn phường / xã'
-                          : wardOptionsLoading
-                            ? 'Đang tải phường / xã...'
-                            : 'Phường / xã'
-                      }
-                    />
+                    <SelectValue placeholder={wardPlaceholder} />
                   </SelectTrigger>
                   <SelectContent className="max-h-72 bg-white border border-slate-200 text-slate-900">
-                    <SelectItem value={ALL_LOCATION_VALUE} className="text-slate-900">Tất cả phường / xã</SelectItem>
+                    <SelectItem value={ALL_LOCATION_VALUE} className="text-slate-900">{ALL_LOCATION_LABEL}</SelectItem>
                     {wardOptions.map((option) => (
                       <SelectItem key={option.code} value={option.name} className="text-slate-900">
                         {option.name}

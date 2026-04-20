@@ -12,6 +12,11 @@ export interface RoleDashboardEntry {
   label: string
 }
 
+export interface RoleWorkspaceEntry {
+  href: string
+  label: string
+}
+
 const baseNavigation: AppHeaderNavigationItem[] = [
   { label: 'Trang chủ', to: ROUTES.HOME, match: (pathname) => pathname === ROUTES.HOME },
   { label: 'Mua xe', to: ROUTES.MARKET, match: (pathname) => pathname === ROUTES.MARKET || pathname.startsWith('/bikes/') },
@@ -57,6 +62,22 @@ export function getRoleDashboardEntry(role?: AppRole | null): RoleDashboardEntry
     default:
       return null
   }
+}
+
+export function getRoleWorkspaceEntries(role?: AppRole | null): RoleWorkspaceEntry[] {
+  const entries: RoleWorkspaceEntry[] = []
+
+  const dashboardEntry = getRoleDashboardEntry(role)
+
+  if (dashboardEntry) {
+    entries.push(dashboardEntry)
+  }
+
+  if (role === 'buyer' || role === 'seller') {
+    entries.push({ href: ROUTES.PAYOUT, label: 'Tài khoản nhận tiền' })
+  }
+
+  return entries
 }
 
 export function getAppHeaderNavigation(role?: AppRole | null, isAuthenticated = false) {
