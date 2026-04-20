@@ -1,5 +1,5 @@
 import { getResult, http, patchResult, postResult } from '@/lib/http'
-import type { Order, OrderCreateRequest, OrderEvidenceInput } from '@/types/order'
+import type { Order, OrderCreateRequest, OrderEvidenceInput, PaymentRequest } from '@/types/order'
 
 function buildOrderEvidenceFormData(input?: OrderEvidenceInput) {
   const formData = new FormData()
@@ -30,6 +30,10 @@ export const ordersApi = {
 
   confirmDeposit(orderId: string) {
     return patchResult<Order>(`/api/orders/${orderId}/confirm-deposit`)
+  },
+
+  async pay(orderId: string) {
+    return postResult<PaymentRequest>(`/api/payments/orders/${orderId}/upfront-request`)
   },
 
   async complete(orderId: string, input: OrderEvidenceInput) {

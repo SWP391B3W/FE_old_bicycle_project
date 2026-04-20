@@ -134,3 +134,24 @@ export interface PaymentFormData {
   expiryDate?: string
   cvv?: string
 }
+
+export interface PaymentRequest {
+  paymentId: string
+  orderId: string
+  gateway?: string
+  phase?: string
+  status?: string
+  amount?: number | null
+  protectedAmount?: number | null
+  buyerFeeAmount?: number | null
+  gatewayOrderCode?: string | null
+  checkoutUrl?: string | null
+  qrCodeUrl?: string | null
+  transferContent?: string | null
+  bankBin?: string | null
+  bankAccountNumber?: string | null
+  bankAccountName?: string | null
+  mockMode?: boolean
+  instructions?: string | null
+  expiresAt?: string | null
+}

@@ -2,7 +2,7 @@ import axios, { AxiosHeaders, type AxiosRequestConfig, type InternalAxiosRequest
 import type { ApiResponse } from '@/types/api'
 import { clearAuthSession, getAccessToken, getRefreshToken, setAuthSession } from '@/lib/auth-storage'
 
-const apiBaseUrl = import.meta.env.VITE_API_BASE_URL?.trim() ?? ''
+const apiBaseUrl = import.meta.env.VITE_API_BASE_URL?.trim() ?? 'https://bemarket.run.place'
 
 const sharedHeaders = {
   'ngrok-skip-browser-warning': 'true',

@@ -10,6 +10,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { ROUTES } from '@/constants/routes'
 import {
   canBuyerConfirmReceived,
+  canBuyerRequestPayment,
   canCancelOpenOrder,
   formatOrderCurrency,
   formatOrderDate,
@@ -21,13 +22,14 @@ import {
   getPaymentOptionLabel,
   isPaymentDeadlineExpired,
 } from '@/lib/order-display'
-import type { Order, OrderEvidenceInput } from '@/types/order'
+import type { Order, OrderEvidenceInput, PaymentRequest } from '@/types/order'
 
 interface BuyerOrdersSectionProps {
   buyerId: string
 }
 
 function getErrorMessage(error: unknown, fallback: string) {
+  const statusCode = (error as { response?: { status?: number } })?.response?.status
   if (
     error &&
     typeof error === 'object' &&
@@ -40,11 +42,27 @@ function getErrorMessage(error: unknown, fallback: string) {
     'message' in error.response.data &&
     typeof error.response.data.message === 'string'
   ) {
-    return error.response.data.message
+    const backendMessage = error.response.data.message
+    if (backendMessage && backendMessage.trim().toLowerCase() !== 'lỗi không xác định') {
+      return backendMessage
+    }
+
+    if (statusCode) {
+      return `${fallback} (HTTP ${statusCode})`
+    }
+
+    return fallback
   }
 
   if (error instanceof Error && error.message) {
+    if (statusCode) {
+      return `${fallback} (HTTP ${statusCode})`
+    }
     return error.message
+  }
+
+  if (statusCode) {
+    return `${fallback} (HTTP ${statusCode})`
   }
 
   return fallback
@@ -52,12 +70,27 @@ function getErrorMessage(error: unknown, fallback: string) {
 
 export function BuyerOrdersSection({ buyerId }: BuyerOrdersSectionProps) {
   const [orders, setOrders] = useState<Order[]>([])
+  const [paymentRequestsByOrderId, setPaymentRequestsByOrderId] = useState<Record<string, PaymentRequest>>({})
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
+  const [success, setSuccess] = useState<string | null>(null)
   const [actionLoadingKey, setActionLoadingKey] = useState<string | null>(null)
   const [deliveryError, setDeliveryError] = useState<string | null>(null)
   const [selectedOrderForReceiveConfirm, setSelectedOrderForReceiveConfirm] = useState<Order | null>(null)
   const [nowMs, setNowMs] = useState(() => Date.now())
+
+  async function refreshBuyerOrders(maxAttempts = 1, delayMs = 0) {
+    for (let attempt = 0; attempt < maxAttempts; attempt += 1) {
+      const refreshedOrders = await ordersApi.getMine()
+      setOrders(refreshedOrders.filter((item) => item.buyerId === buyerId))
+
+      if (attempt < maxAttempts - 1 && delayMs > 0) {
+        await new Promise<void>((resolve) => {
+          window.setTimeout(() => resolve(), delayMs)
+        })
+      }
+    }
+  }
 
   useEffect(() => {
     const intervalId = window.setInterval(() => {
@@ -81,6 +114,7 @@ export function BuyerOrdersSection({ buyerId }: BuyerOrdersSectionProps) {
         if (!cancelled) {
           setOrders(result.filter((order) => order.buyerId === buyerId))
           setError(null)
+          setSuccess(null)
         }
       } catch (requestError) {
         if (!cancelled) {
@@ -107,15 +141,43 @@ export function BuyerOrdersSection({ buyerId }: BuyerOrdersSectionProps) {
     )
   }
 
-  async function runOrderAction(order: Order, action: 'cancel') {
+  async function runOrderAction(order: Order, action: 'cancel' | 'pay') {
     setActionLoadingKey(`${action}:${order.id}`)
+    setSuccess(null)
 
     try {
-      const updatedOrder = await ordersApi.cancel(order.id)
-      replaceOrder(updatedOrder)
+      const result =
+        action === 'pay'
+          ? await ordersApi.pay(order.id)
+          : await ordersApi.cancel(order.id)
+
+      if (action === 'pay') {
+        setPaymentRequestsByOrderId((currentValue) => ({
+          ...currentValue,
+          [order.id]: result as PaymentRequest,
+        }))
+        await refreshBuyerOrders(2, 500)
+        setSuccess('Đã tạo yêu cầu thanh toán. Quét mã QR hoặc dùng thông tin chuyển khoản hiển thị trong đơn hàng.')
+      } else {
+        replaceOrder(result as Order)
+        setPaymentRequestsByOrderId((currentValue) => {
+          const nextValue = { ...currentValue }
+          delete nextValue[order.id]
+          return nextValue
+        })
+      }
+
       setError(null)
     } catch (requestError) {
-      setError(getErrorMessage(requestError, 'Không thể hủy đơn hàng lúc này.'))
+      setError(
+        getErrorMessage(
+          requestError,
+          action === 'pay'
+            ? 'Không thể tạo yêu cầu thanh toán lúc này.'
+            : 'Không thể hủy đơn hàng lúc này.',
+        ),
+      )
+      setSuccess(null)
     } finally {
       setActionLoadingKey(null)
     }
@@ -130,10 +192,12 @@ export function BuyerOrdersSection({ buyerId }: BuyerOrdersSectionProps) {
       setSelectedOrderForReceiveConfirm(null)
       setDeliveryError(null)
       setError(null)
+      setSuccess('Đã xác nhận nhận xe thành công.')
     } catch (requestError) {
       const message = getErrorMessage(requestError, 'Không thể xác nhận đã nhận xe lúc này.')
       setDeliveryError(message)
       setError(message)
+      setSuccess(null)
     } finally {
       setActionLoadingKey(null)
     }
@@ -146,6 +210,12 @@ export function BuyerOrdersSection({ buyerId }: BuyerOrdersSectionProps) {
           <CardTitle>Đơn mua</CardTitle>
         </CardHeader>
         <CardContent>
+          {success && (
+            <div className="mb-4 rounded-lg border border-emerald-300 bg-emerald-50 px-4 py-3 text-sm text-emerald-800">
+              {success}
+            </div>
+          )}
+
           {error && (
             <div className="mb-4 rounded-lg border border-destructive/30 bg-destructive/5 px-4 py-3 text-sm text-destructive">
               {error}
@@ -174,11 +244,8 @@ export function BuyerOrdersSection({ buyerId }: BuyerOrdersSectionProps) {
                 const paymentDeadlineExpired = isPaymentDeadlineExpired(order, nowMs)
                 const paymentCountdownText = getPaymentCountdownText(order.paymentDeadline, nowMs)
                 const buyerChargeAmount = getOrderBuyerChargeAmount(order) || order.totalAmount
-                const isTransferPaymentPending =
-                  order.status === 'pending' &&
-                  order.fundingStatus === 'awaiting_payment' &&
-                  order.paymentMethod !== 'cash' &&
-                  !paymentDeadlineExpired
+                const canPayNow = canBuyerRequestPayment(order, nowMs)
+                const paymentRequest = paymentRequestsByOrderId[order.id]
 
                 return (
                   <div key={order.id} className="space-y-4 rounded-xl border bg-card p-5 text-card-foreground shadow-sm">
@@ -209,10 +276,11 @@ export function BuyerOrdersSection({ buyerId }: BuyerOrdersSectionProps) {
 
                           {order.fundingStatus === 'awaiting_payment' && order.paymentDeadline && (
                             <div
-                              className={`rounded-lg border px-3 py-2 text-sm ${paymentDeadlineExpired
-                                ? 'border-destructive/30 bg-destructive/5 text-destructive'
-                                : 'border-primary/20 bg-primary/5 text-primary'
-                                }`}
+                              className={`rounded-lg border px-3 py-2 text-sm ${
+                                paymentDeadlineExpired
+                                  ? 'border-destructive/30 bg-destructive/5 text-destructive'
+                                  : 'border-primary/20 bg-primary/5 text-primary'
+                              }`}
                             >
                               <p className="font-medium">Hạn thanh toán: {formatOrderDate(order.paymentDeadline)}</p>
                               <p className={paymentDeadlineExpired ? 'text-destructive/90' : 'text-primary/90'}>
@@ -244,12 +312,18 @@ export function BuyerOrdersSection({ buyerId }: BuyerOrdersSectionProps) {
                         <div className="text-lg font-bold text-primary">{formatOrderCurrency(order.totalAmount)}</div>
 
                         <div className="flex w-full flex-wrap gap-2 lg:w-auto lg:justify-end">
-                          {isTransferPaymentPending && (
-                            <Button className="gap-1.5" asChild>
-                              <Link to={ROUTES.MESSAGES}>
+                          {canPayNow && (
+                            <Button
+                              className="gap-1.5"
+                              onClick={() => void runOrderAction(order, 'pay')}
+                              disabled={actionLoadingKey === `pay:${order.id}`}
+                            >
+                              {actionLoadingKey === `pay:${order.id}` ? (
+                                <Loader2 className="h-4 w-4 animate-spin" />
+                              ) : (
                                 <Wallet className="h-4 w-4" />
-                                Thanh toán ngay
-                              </Link>
+                              )}
+                              {actionLoadingKey === `pay:${order.id}` ? 'Đang xử lý...' : 'Thanh toán ngay'}
                             </Button>
                           )}
 
@@ -296,6 +370,67 @@ export function BuyerOrdersSection({ buyerId }: BuyerOrdersSectionProps) {
                         </div>
                       </div>
                     </div>
+
+                    {paymentRequest && (
+                      <div className="rounded-xl border border-primary/20 bg-primary/5 p-4">
+                        <div className="flex flex-col gap-4 lg:flex-row lg:items-start lg:justify-between">
+                          <div className="space-y-2">
+                            <p className="text-sm font-semibold text-foreground">Thông tin thanh toán</p>
+                            <div className="grid gap-1 text-sm text-muted-foreground">
+                              <p>
+                                Số tiền cần chuyển:{' '}
+                                <span className="font-medium text-foreground">
+                                  {formatOrderCurrency(paymentRequest.amount ?? buyerChargeAmount)}
+                                </span>
+                              </p>
+                              {paymentRequest.bankAccountName ? (
+                                <p>
+                                  Chủ tài khoản:{' '}
+                                  <span className="font-medium text-foreground">{paymentRequest.bankAccountName}</span>
+                                </p>
+                              ) : null}
+                              {paymentRequest.bankAccountNumber ? (
+                                <p>
+                                  Số tài khoản:{' '}
+                                  <span className="font-medium text-foreground">{paymentRequest.bankAccountNumber}</span>
+                                </p>
+                              ) : null}
+                              {paymentRequest.bankBin ? (
+                                <p>
+                                  Mã ngân hàng:{' '}
+                                  <span className="font-medium text-foreground">{paymentRequest.bankBin}</span>
+                                </p>
+                              ) : null}
+                              {paymentRequest.transferContent ? (
+                                <p>
+                                  Nội dung chuyển khoản:{' '}
+                                  <span className="font-medium text-foreground">{paymentRequest.transferContent}</span>
+                                </p>
+                              ) : null}
+                              {paymentRequest.expiresAt ? (
+                                <p>
+                                  Hết hạn:{' '}
+                                  <span className="font-medium text-foreground">{formatOrderDate(paymentRequest.expiresAt)}</span>
+                                </p>
+                              ) : null}
+                              {paymentRequest.instructions ? (
+                                <p className="pt-1 text-xs">{paymentRequest.instructions}</p>
+                              ) : null}
+                            </div>
+                          </div>
+
+                          {paymentRequest.qrCodeUrl ? (
+                            <div className="w-full max-w-[220px] overflow-hidden rounded-lg border bg-white p-3">
+                              <img
+                                src={paymentRequest.qrCodeUrl}
+                                alt={`QR thanh toán cho đơn ${order.id}`}
+                                className="h-full w-full object-contain"
+                              />
+                            </div>
+                          ) : null}
+                        </div>
+                      </div>
+                    )}
 
                     <div className="grid gap-3 lg:grid-cols-2">
                       <OrderEvidenceSection
