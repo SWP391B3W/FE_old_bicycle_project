@@ -1,4 +1,4 @@
-import { getResult, patchResult, postResult, compactParams } from '@/lib/http'
+import { getResult, patchResult, compactParams } from '@/lib/http'
 import type { PageResult } from '@/types/api'
 import type { Product, ProductStatus } from '@/types/product'
 
@@ -32,15 +32,10 @@ export const adminProductsApi = {
   },
 
   routeToInspection(productId: string) {
-    return postResult<unknown>(`/api/inspections/request/${productId}`)
+    return patchResult<unknown>(`/api/admin/products/${productId}/send-to-inspection`)
   },
 
-  async hide(productId: string) {
-    try {
-      return await patchResult<Product>(`/api/admin/products/${productId}/hide`)
-    } catch {
-      // Fallback for backends that support hide on product resource directly.
-      return patchResult<Product>(`/api/products/${productId}/hide`)
-    }
+  hide(productId: string) {
+    return patchResult<Product>(`/api/admin/products/${productId}/hide`)
   },
 }

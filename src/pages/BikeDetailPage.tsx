@@ -1,6 +1,7 @@
 import { useEffect, useMemo, useState } from 'react'
 import { Link, useParams } from 'react-router-dom'
 import { Loader2 } from 'lucide-react'
+import { adminProductsApi } from '@/api/admin-products.api'
 import { productsApi } from '@/api/products.api'
 import { Button } from '@/components/ui/button'
 import { ROUTES, buildRoute } from '@/constants/routes'
@@ -36,16 +37,36 @@ export default function BikeDetailPage() {
       setIsLoading(true)
       setError(null)
 
+      const isAdmin = isAuthenticated && user?.role === 'admin'
+
       try {
-        const result = await productsApi.getById(productId)
+        const result = isAdmin
+          ? await adminProductsApi.getById(productId)
+          : await productsApi.getById(productId)
 
         if (!ignore) {
           setBike(result)
         }
       } catch {
-        if (!ignore) {
-          setBike(null)
-          setError('Không thể tải chi tiết tin đăng từ API.')
+        if (!isAdmin) {
+          if (!ignore) {
+            setBike(null)
+            setError('Không thể tải chi tiết tin đăng từ API.')
+          }
+          return
+        }
+
+        try {
+          const fallbackResult = await productsApi.getById(productId)
+
+          if (!ignore) {
+            setBike(fallbackResult)
+          }
+        } catch {
+          if (!ignore) {
+            setBike(null)
+            setError('Không thể tải chi tiết tin đăng từ API.')
+          }
         }
       } finally {
         if (!ignore) {
@@ -59,7 +80,7 @@ export default function BikeDetailPage() {
     return () => {
       ignore = true
     }
-  }, [id])
+  }, [id, isAuthenticated, user?.role])
 
   useEffect(() => {
     setSelectedImage(bike ? getPrimaryImage(bike) : '')

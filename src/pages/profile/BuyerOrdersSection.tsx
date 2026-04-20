@@ -1,0 +1,339 @@
+import { useEffect, useState } from 'react'
+import { Link } from 'react-router-dom'
+import { CheckCircle, Loader2, ShoppingBag, Wallet, XCircle } from 'lucide-react'
+import { ordersApi } from '@/api/orders.api'
+import { OrderEvidenceDialog } from '@/components/profile/OrderEvidenceDialog'
+import { OrderEvidenceSection } from '@/components/profile/OrderEvidenceSection'
+import { Badge } from '@/components/ui/badge'
+import { Button } from '@/components/ui/button'
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
+import { ROUTES } from '@/constants/routes'
+import {
+  canBuyerConfirmReceived,
+  canCancelOpenOrder,
+  formatOrderCurrency,
+  formatOrderDate,
+  getOrderBuyerChargeAmount,
+  getOrderStatusMeta,
+  getOrderToneClass,
+  getPaymentCountdownText,
+  getPaymentMethodLabel,
+  getPaymentOptionLabel,
+  isPaymentDeadlineExpired,
+} from '@/lib/order-display'
+import type { Order, OrderEvidenceInput } from '@/types/order'
+
+interface BuyerOrdersSectionProps {
+  buyerId: string
+}
+
+function getErrorMessage(error: unknown, fallback: string) {
+  if (
+    error &&
+    typeof error === 'object' &&
+    'response' in error &&
+    typeof error.response === 'object' &&
+    error.response &&
+    'data' in error.response &&
+    typeof error.response.data === 'object' &&
+    error.response.data &&
+    'message' in error.response.data &&
+    typeof error.response.data.message === 'string'
+  ) {
+    return error.response.data.message
+  }
+
+  if (error instanceof Error && error.message) {
+    return error.message
+  }
+
+  return fallback
+}
+
+export function BuyerOrdersSection({ buyerId }: BuyerOrdersSectionProps) {
+  const [orders, setOrders] = useState<Order[]>([])
+  const [loading, setLoading] = useState(true)
+  const [error, setError] = useState<string | null>(null)
+  const [actionLoadingKey, setActionLoadingKey] = useState<string | null>(null)
+  const [deliveryError, setDeliveryError] = useState<string | null>(null)
+  const [selectedOrderForReceiveConfirm, setSelectedOrderForReceiveConfirm] = useState<Order | null>(null)
+  const [nowMs, setNowMs] = useState(() => Date.now())
+
+  useEffect(() => {
+    const intervalId = window.setInterval(() => {
+      setNowMs(Date.now())
+    }, 1000)
+
+    return () => {
+      window.clearInterval(intervalId)
+    }
+  }, [])
+
+  useEffect(() => {
+    let cancelled = false
+
+    async function loadOrders() {
+      setLoading(true)
+
+      try {
+        const result = await ordersApi.getMine()
+
+        if (!cancelled) {
+          setOrders(result.filter((order) => order.buyerId === buyerId))
+          setError(null)
+        }
+      } catch (requestError) {
+        if (!cancelled) {
+          setError(getErrorMessage(requestError, 'Không thể tải danh sách đơn mua.'))
+          setOrders([])
+        }
+      } finally {
+        if (!cancelled) {
+          setLoading(false)
+        }
+      }
+    }
+
+    void loadOrders()
+
+    return () => {
+      cancelled = true
+    }
+  }, [buyerId])
+
+  function replaceOrder(updatedOrder: Order) {
+    setOrders((currentOrders) =>
+      currentOrders.map((order) => (order.id === updatedOrder.id ? updatedOrder : order)),
+    )
+  }
+
+  async function runOrderAction(order: Order, action: 'cancel') {
+    setActionLoadingKey(`${action}:${order.id}`)
+
+    try {
+      const updatedOrder = await ordersApi.cancel(order.id)
+      replaceOrder(updatedOrder)
+      setError(null)
+    } catch (requestError) {
+      setError(getErrorMessage(requestError, 'Không thể hủy đơn hàng lúc này.'))
+    } finally {
+      setActionLoadingKey(null)
+    }
+  }
+
+  async function handleSubmitReceiveEvidence(order: Order, values: OrderEvidenceInput) {
+    setActionLoadingKey(`received:${order.id}`)
+
+    try {
+      const updatedOrder = await ordersApi.confirmReceived(order.id, values)
+      replaceOrder(updatedOrder)
+      setSelectedOrderForReceiveConfirm(null)
+      setDeliveryError(null)
+      setError(null)
+    } catch (requestError) {
+      const message = getErrorMessage(requestError, 'Không thể xác nhận đã nhận xe lúc này.')
+      setDeliveryError(message)
+      setError(message)
+    } finally {
+      setActionLoadingKey(null)
+    }
+  }
+
+  return (
+    <div className="space-y-6">
+      <Card>
+        <CardHeader>
+          <CardTitle>Đơn mua</CardTitle>
+        </CardHeader>
+        <CardContent>
+          {error && (
+            <div className="mb-4 rounded-lg border border-destructive/30 bg-destructive/5 px-4 py-3 text-sm text-destructive">
+              {error}
+            </div>
+          )}
+
+          {loading ? (
+            <div className="flex min-h-[220px] items-center justify-center rounded-xl border border-dashed border-border bg-card">
+              <div className="flex items-center gap-2 text-sm text-muted-foreground">
+                <Loader2 className="h-4 w-4 animate-spin" />
+                Đang tải danh sách đơn mua...
+              </div>
+            </div>
+          ) : orders.length === 0 ? (
+            <div className="rounded-xl border border-dashed border-border bg-card px-6 py-10 text-center">
+              <p className="text-base font-medium text-foreground">Bạn chưa có đơn mua nào.</p>
+              <p className="mt-2 text-sm text-muted-foreground">Khi bạn đặt mua xe, đơn sẽ xuất hiện tại đây.</p>
+              <Button className="mt-4" asChild>
+                <Link to={ROUTES.MARKET}>Đi mua xe</Link>
+              </Button>
+            </div>
+          ) : (
+            <div className="grid gap-4">
+              {orders.map((order) => {
+                const statusMeta = getOrderStatusMeta(order, nowMs)
+                const paymentDeadlineExpired = isPaymentDeadlineExpired(order, nowMs)
+                const paymentCountdownText = getPaymentCountdownText(order.paymentDeadline, nowMs)
+                const buyerChargeAmount = getOrderBuyerChargeAmount(order) || order.totalAmount
+                const isTransferPaymentPending =
+                  order.status === 'pending' &&
+                  order.fundingStatus === 'awaiting_payment' &&
+                  order.paymentMethod !== 'cash' &&
+                  !paymentDeadlineExpired
+
+                return (
+                  <div key={order.id} className="space-y-4 rounded-xl border bg-card p-5 text-card-foreground shadow-sm">
+                    <div className="flex flex-col gap-4 lg:flex-row lg:items-start lg:justify-between">
+                      <div className="flex gap-4">
+                        <div className="mt-1 flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-secondary/50 text-muted-foreground">
+                          <ShoppingBag className="h-5 w-5" />
+                        </div>
+
+                        <div className="space-y-2">
+                          <div className="flex flex-wrap items-center gap-2">
+                            <h3 className="font-semibold text-foreground">{order.productTitle}</h3>
+                            <Badge variant="outline" className="text-xs font-normal">
+                              Mã: {order.id}
+                            </Badge>
+                          </div>
+
+                          <div className="flex flex-wrap gap-x-4 gap-y-1 text-sm text-muted-foreground">
+                            <span>Người bán: <span className="font-medium text-foreground">{order.sellerName}</span></span>
+                            <span>•</span>
+                            <span>{formatOrderDate(order.createdAt)}</span>
+                          </div>
+
+                          <div className={`inline-flex items-center text-sm font-medium ${getOrderToneClass(statusMeta.tone)}`}>
+                            Trạng thái: {statusMeta.label}
+                          </div>
+                          <p className="text-sm text-muted-foreground">{statusMeta.helperText}</p>
+
+                          {order.fundingStatus === 'awaiting_payment' && order.paymentDeadline && (
+                            <div
+                              className={`rounded-lg border px-3 py-2 text-sm ${paymentDeadlineExpired
+                                ? 'border-destructive/30 bg-destructive/5 text-destructive'
+                                : 'border-primary/20 bg-primary/5 text-primary'
+                                }`}
+                            >
+                              <p className="font-medium">Hạn thanh toán: {formatOrderDate(order.paymentDeadline)}</p>
+                              <p className={paymentDeadlineExpired ? 'text-destructive/90' : 'text-primary/90'}>
+                                {paymentCountdownText}
+                              </p>
+                            </div>
+                          )}
+
+                          <div className="grid gap-1 text-sm text-muted-foreground sm:grid-cols-2">
+                            <p>
+                              Phương thức: <span className="font-medium text-foreground">{getPaymentMethodLabel(order)}</span>
+                            </p>
+                            <p>
+                              Hình thức: <span className="font-medium text-foreground">{getPaymentOptionLabel(order)}</span>
+                            </p>
+                            <p>
+                              Cần thanh toán hiện tại:{' '}
+                              <span className="font-medium text-foreground">{formatOrderCurrency(buyerChargeAmount)}</span>
+                            </p>
+                            <p>
+                              Đã thanh toán:{' '}
+                              <span className="font-medium text-foreground">{formatOrderCurrency(order.paidAmount ?? 0)}</span>
+                            </p>
+                          </div>
+                        </div>
+                      </div>
+
+                      <div className="flex w-full flex-col items-start gap-3 border-t border-border pt-4 lg:w-auto lg:items-end lg:border-0 lg:pt-0">
+                        <div className="text-lg font-bold text-primary">{formatOrderCurrency(order.totalAmount)}</div>
+
+                        <div className="flex w-full flex-wrap gap-2 lg:w-auto lg:justify-end">
+                          {isTransferPaymentPending && (
+                            <Button className="gap-1.5" asChild>
+                              <Link to={ROUTES.MESSAGES}>
+                                <Wallet className="h-4 w-4" />
+                                Thanh toán ngay
+                              </Link>
+                            </Button>
+                          )}
+
+                          {order.status === 'pending' && order.fundingStatus === 'awaiting_payment' && order.paymentMethod === 'cash' && (
+                            <Button variant="outline" asChild>
+                              <Link to={ROUTES.MESSAGES}>Liên hệ người bán để thanh toán trực tiếp</Link>
+                            </Button>
+                          )}
+
+                          {canBuyerConfirmReceived(order) && (
+                            <Button
+                              variant="outline"
+                              className="gap-1.5 border-green-200 text-green-700 hover:bg-green-50 dark:border-green-900/50 dark:text-green-400 dark:hover:bg-green-950/30"
+                              onClick={() => {
+                                setSelectedOrderForReceiveConfirm(order)
+                                setDeliveryError(null)
+                              }}
+                              disabled={actionLoadingKey === `received:${order.id}`}
+                            >
+                              {actionLoadingKey === `received:${order.id}` ? (
+                                <Loader2 className="h-4 w-4 animate-spin" />
+                              ) : (
+                                <CheckCircle className="h-4 w-4" />
+                              )}
+                              Xác nhận đã nhận xe
+                            </Button>
+                          )}
+
+                          {canCancelOpenOrder(order, nowMs) && (
+                            <Button
+                              variant="outline"
+                              className="gap-1.5 border-red-200 text-red-600 hover:bg-red-50 hover:text-red-700 dark:border-red-900/50 dark:text-red-400 dark:hover:bg-red-950/30"
+                              onClick={() => void runOrderAction(order, 'cancel')}
+                              disabled={actionLoadingKey === `cancel:${order.id}`}
+                            >
+                              {actionLoadingKey === `cancel:${order.id}` ? (
+                                <Loader2 className="h-4 w-4 animate-spin" />
+                              ) : (
+                                <XCircle className="h-4 w-4" />
+                              )}
+                              Hủy đơn
+                            </Button>
+                          )}
+                        </div>
+                      </div>
+                    </div>
+
+                    <div className="grid gap-3 lg:grid-cols-2">
+                      <OrderEvidenceSection
+                        title="Chứng cứ bàn giao từ người bán"
+                        evidence={order.sellerHandoverEvidence}
+                      />
+                      <OrderEvidenceSection
+                        title="Chứng cứ đã nhận xe từ người mua"
+                        evidence={order.buyerReceiptEvidence}
+                      />
+                    </div>
+                  </div>
+                )
+              })}
+            </div>
+          )}
+        </CardContent>
+      </Card>
+
+      <OrderEvidenceDialog
+        open={Boolean(selectedOrderForReceiveConfirm)}
+        title="Xác nhận đã nhận xe"
+        description="Tải ảnh xác nhận nhận xe để hệ thống hoàn tất giao dịch và chuyển bước giải ngân."
+        noteLabel="Ghi chú xác nhận"
+        notePlaceholder="Ví dụ: đã nhận đúng xe, tình trạng đúng mô tả."
+        submitLabel="Xác nhận đã nhận"
+        orderTitle={selectedOrderForReceiveConfirm?.productTitle ?? ''}
+        helperText="Bạn có thể đính kèm ảnh nhận xe để hỗ trợ đối soát khi cần."
+        loading={Boolean(selectedOrderForReceiveConfirm) && actionLoadingKey === `received:${selectedOrderForReceiveConfirm?.id}`}
+        error={deliveryError}
+        onClose={() => {
+          setSelectedOrderForReceiveConfirm(null)
+          setDeliveryError(null)
+        }}
+        onSubmit={(values) =>
+          selectedOrderForReceiveConfirm ? handleSubmitReceiveEvidence(selectedOrderForReceiveConfirm, values) : undefined
+        }
+      />
+    </div>
+  )
+}

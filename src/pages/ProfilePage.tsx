@@ -1,6 +1,7 @@
 import { PayoutProfileSection } from '@/components/profile/PayoutProfileSection'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { ProfileHero } from './profile/ProfileHero'
+import { BuyerOrdersSection } from './profile/BuyerOrdersSection'
 import { ProfileInfoSection } from './profile/ProfileInfoSection'
 import { ProfileSecuritySection } from './profile/ProfileSecuritySection'
 import { ProfileSidebar } from './profile/ProfileSidebar'
@@ -76,10 +77,7 @@ export default function ProfilePage() {
             {profilePage.activeTab === 'payout' ? <PayoutProfileSection /> : null}
 
             {profilePage.activeTab === 'orders' ? (
-              <PlaceholderSection
-                title="Đơn mua"
-                description="Danh sách đơn mua của bạn sẽ hiển thị ở đây trong phiên bản tiếp theo."
-              />
+              <BuyerOrdersSection buyerId={profilePage.user.id} />
             ) : null}
 
             {profilePage.activeTab === 'listings' ? (
