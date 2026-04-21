@@ -199,31 +199,30 @@ export default function InspectionRequestsPage() {
         )}
       </div>
 
-      {totalPages > 1 && (
-        <div className="flex items-center justify-center gap-3">
+      <div className="mt-6 flex items-center justify-between border-t border-border pt-4">
+        <p className="text-sm text-muted-foreground">
+          Trang {totalPages === 0 ? 0 : page + 1} / {totalPages}
+        </p>
+
+        <div className="flex items-center gap-2">
           <Button
             variant="outline"
             size="sm"
             onClick={() => setPage((current) => current - 1)}
             disabled={page === 0}
           >
-            <ChevronLeft className="mr-1 h-4 w-4" />
-            Trước
+            <ChevronLeft className="h-4 w-4" />
           </Button>
-          <span className="text-sm text-muted-foreground">
-            Trang {page + 1} / {totalPages}
-          </span>
           <Button
             variant="outline"
             size="sm"
             onClick={() => setPage((current) => current + 1)}
-            disabled={page >= totalPages - 1}
+            disabled={totalPages === 0 || page >= totalPages - 1}
           >
-            Tiếp
-            <ChevronRight className="ml-1 h-4 w-4" />
+            <ChevronRight className="h-4 w-4" />
           </Button>
         </div>
-      )}
+      </div>
     </div>
   )
 }
