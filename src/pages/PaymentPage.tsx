@@ -15,6 +15,7 @@ type PaymentMethodOption = 'bank_transfer'
 interface PaymentPageState {
   checkoutData?: CheckoutFormData
   product?: Product
+  shippingFee?: number
 }
 
 const SHIPPING_FEE_PENDING_LABEL = 'Đang tính toán...'
@@ -73,6 +74,7 @@ export default function PaymentPage() {
   const { isAuthenticated, user } = useAuth()
   const locationState = (location.state ?? {}) as PaymentPageState
   const checkoutData = locationState.checkoutData
+  const shippingFee = locationState.shippingFee ?? 0
   const [product, setProduct] = useState<Product | null>(locationState.product ?? null)
   const [isProductLoading, setIsProductLoading] = useState(!locationState.product)
   const [productError, setProductError] = useState<string | null>(null)
@@ -210,6 +212,7 @@ export default function PaymentPage() {
           order: createdOrder,
           product,
           checkoutData,
+          shippingFee,
         },
       })
     } catch (error: unknown) {
@@ -224,7 +227,7 @@ export default function PaymentPage() {
         <div className="mb-6">
           <Link
             to={`/thanh-toan-don-hang/${product.id}`}
-            state={{ checkoutData, product }}
+            state={{ checkoutData, product, shippingFee }}
             className="text-sm font-medium text-sky-600 hover:text-sky-500"
           >
             ← Quay lại bước giao hàng
@@ -253,8 +256,8 @@ export default function PaymentPage() {
                 <div className="rounded-2xl border border-sky-200 bg-sky-50 p-4">
                   <p className="text-sm font-medium text-sky-900">Phí vận chuyển</p>
                   <p className="mt-2 text-sm text-sky-800">
-                    Hệ thống đang chờ báo giá từ đơn vị giao hàng. Phí vận chuyển sẽ được cộng vào tổng thanh toán ngay
-                    khi có kết quả.
+                    Phí vận chuyển là <strong>{formatCurrency(shippingFee)}</strong>. Khoản phí này bạn sẽ thanh toán
+                    trực tiếp cho nhân viên giao hàng (shipper) khi nhận xe.
                   </p>
                 </div>
 
@@ -315,18 +318,18 @@ export default function PaymentPage() {
                   </div>
                   <div className="flex justify-between text-sm">
                     <span className="text-slate-600">Phí vận chuyển</span>
-                    <span className="font-medium text-slate-900">{SHIPPING_FEE_PENDING_LABEL}</span>
-                  </div>
-                  <div className="flex justify-between text-sm">
-                    <span className="text-slate-600">Phí buyer</span>
-                    <span className="font-medium text-slate-900">{formatCurrency(0)}</span>
+                    <span className="font-medium text-slate-900 text-right">
+                      {formatCurrency(shippingFee)}
+                      <br />
+                      <span className="text-xs text-amber-600">(Thanh toán cho shipper khi nhận xe)</span>
+                    </span>
                   </div>
                 </div>
 
                 <div className="border-t border-slate-200/80 pt-4">
                   <div className="flex justify-between rounded-xl bg-sky-50 p-4">
                     <span className="font-semibold text-slate-900">Tổng thanh toán qua SePay</span>
-                    <span className="text-lg font-bold text-sky-600">{SHIPPING_FEE_PENDING_LABEL}</span>
+                    <span className="text-lg font-bold text-sky-600">{formatCurrency(product.price)}</span>
                   </div>
                 </div>
               </CardContent>

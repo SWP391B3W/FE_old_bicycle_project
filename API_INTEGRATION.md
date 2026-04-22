@@ -1,225 +1,110 @@
-# 📋 API Integration Guide - Registration Endpoint
+# 📋 API Integration Guide - Full Backend Coverage
 
-## ✅ Status: API Fully Connected
+Dưới đây là tài liệu chi tiết về các Endpoint API đã được ổn định và sẵn sàng cho Frontend Agent tiến hành fetch dữ liệu.
 
-Ứng dụng đã được kết nối hoàn toàn với endpoint:
-```
-POST /api/auth/register
-```
+## 🔧 Base Configuration
 
----
+- **Base URL**: `http://localhost:8080/api` (Phụ thuộc vào cấu hình `VITE_API_BASE_URL` trong `.env`)
+- **Content-Type**: `application/json` (trừ các endpoint Upload dùng `multipart/form-data`)
+- **Authentication**: Bearer Token trong Header (`Authorization: Bearer <accessToken>`)
 
-## 🔧 Setup Instructions
-
-### 1. Configure Environment Variables
-
-Tạo file `.env` trong root folder của project:
-
-```bash
-# Copy from .env.example
-cp .env.example .env
-```
-
-Sau đó edit `.env` file:
-
-```env
-# API Configuration
-VITE_API_BASE_URL=http://localhost:8080
-# Hoặc thay bằng URL của backend api thực tế
-# VITE_API_BASE_URL=https://api.yourdomain.com
-```
-
-### 2. Restart Dev Server
-
-```bash
-npm run dev
-```
-
-Vite sẽ reload và load env variables mới.
-
----
-
-## 📝 API Integration Details
-
-### Endpoint
-
-```
-POST /api/auth/register
-```
-
-### Request Body
-
+### 📦 Common Response Wrapper
+Tất cả API đều trả về format:
 ```json
 {
-  "email": "user@example.com",
-  "password": "SecurePass123",
-  "firstName": "Nguyễn",
-  "lastName": "Văn A",
-  "phone": "0901234567",
-  "role": "buyer"
+  "code": 1000,
+  "message": "Thao tác thành công",
+  "result": { ... }
 }
 ```
 
-**Note:** `role` có thể là `"buyer"` hoặc `"seller"`
+---
 
-### Response
+## 🔐 1. Authentication (`/api/auth`)
 
-**Status 200 (Success):**
-```json
-{
-  "code": 1073741824,
-  "message": "Đăng ký thành công",
-  "result": "Vui lòng kiểm tra email để xác thực tài khoản"
-}
-```
-
-### Error Handling
-
-Ứng dụng sẽ tự động xử lý các lỗi:
-- ❌ Email đã tồn tại: "Email này đã được sử dụng. Vui lòng chọn email khác."
-- ❌ Số điện thoại đã tồn tại: "Số điện thoại này đã được sử dụng."
-- ❌ Invalid credentials: Thông báo chi tiết từ server
+| Method | Endpoint | Description | Payloads |
+|:--- |:--- |:--- |:--- |
+| `POST` | `/register` | Đăng ký | `RegisterRequest`: {email, password, firstName, lastName, phone, role} |
+| `POST` | `/login` | Đăng nhập | `LoginRequest`: {email, password} |
+| `POST` | `/refresh` | Làm mới Token | `RefreshTokenRequest`: {token} |
+| `GET` | `/me` | Lấy profile hiện tại | (Cần Bearer Token) |
+| `PATCH` | `/profile` | Cập nhật profile | `ProfileUpdateRequest`: {firstName, lastName, phone...} |
 
 ---
 
-## 🏗️ Code Architecture
+## 🚲 2. Product Management (`/api/products`)
 
-### Flow
+Dành cho người bán (Seller) và người mua (Buyer).
 
-```
-RegisterPage (UI)
-    ↓
-useRegisterPage (Logic + Validation)
-    ↓
-useAuth (AuthContext)
-    ↓
-authService.register()
-    ↓
-authApi.register()
-    ↓
-HTTP Client (axios)
-    ↓
-POST /api/auth/register
-```
+### 🔍 Lấy danh sách & Tìm kiếm
+- **Endpoint**: `GET /api/products`
+- **Query Params**: `keyword`, `brandId`, `categoryId`, `minPrice`, `maxPrice`, `condition`, `hasInspection`...
 
-### Key Files
+### 📄 Chi tiết sản phẩm
+- **Endpoint**: `GET /api/products/{id}`
 
-| File | Purpose |
-|------|---------|
-| `src/pages/register/RegisterPage.tsx` | UI Layout (Dark Theme) |
-| `src/pages/register/useRegisterPage.ts` | Form Logic + Validation |
-| `src/contexts/AuthContext.tsx` | Authentication State Management |
-| `src/services/authService.ts` | Business Logic Layer |
-| `src/api/auth.api.ts` | API Request Wrapper |
-| `src/lib/http.ts` | HTTP Client (Axios) + Interceptors |
-
-### Validation Rules
-
-Password phải:
-- ✓ Tối thiểu 8 ký tự
-- ✓ Có ít nhất 1 chữ hoa (A-Z)
-- ✓ Có ít nhất 1 số (0-9)
-
-User phải:
-- ✓ Nhập họ và tên
-- ✓ Email hợp lệ
-- ✓ Mật khẩu xác nhận trùng khớp
-- ✓ Đồng ý Điều khoản sử dụng
+### ➕ Đăng tin mới (Seller)
+- **Endpoint**: `POST /api/products`
+- **Format**: `multipart/form-data`
+- **Fields**:
+  - `request` (JSON Blob): `ProductRequestDTO` {title, description, price, categoryId, brandId...}
+  - `images` (Files): Danh sách ảnh
+  - `primaryImageIndex`: Index của ảnh đại diện
 
 ---
 
-## 🚀 Features Implemented
+## 🔍 3. Inspection Flow (`/api/inspections`)
 
-### Registration Page (`/register`)
+Luồng kiểm định dành cho Seller, Admin và Inspector.
 
-✅ Beautiful dark theme UI matching homepage  
-✅ Role selector (Buyer / Seller)  
-✅ Form validation  
-✅ Real-time password strength indicator  
-✅ Show/Hide password toggle  
-✅ Email verification flow  
-✅ Resend verification email  
-✅ Error handling with user-friendly messages  
+### ✅ Gửi yêu cầu kiểm định (Seller)
+- **Endpoint**: `POST /api/inspections/request/{productId}`
+- **Note**: Chuyển trạng thái sản phẩm sang `pending_inspection`.
 
-### Login Page (`/login`)
+### 📝 Đánh giá kiểm định (Inspector)
+- **Endpoint**: `POST /api/inspections/evaluate/{productId}`
+- **Payload**: `InspectionEvaluationDTO` {passed, frameScore, brakesScore, expertNotes...}
+- **Note**: Nếu `passed=true`, sản phẩm sẽ có trạng thái `active` và sẵn sàng hiển thị.
 
-✅ Dark theme UI consistent with homepage  
-✅ Remember email option  
-✅ Forgot password link  
-✅ Show/Hide password toggle  
-✅ Email verification reminder  
-✅ Resend verification flow  
-✅ Error handling & messages  
+### 📋 Dashboard Kiểm định
+- **Endpoint**: `GET /api/inspections/dashboard`
 
 ---
 
-## 🔐 Security Features
+## 🛒 4. Order Flow (`/api/orders`)
 
-- ✅ Password policies enforced client-side
-- ✅ Bearer token authentication
-- ✅ Automatic token refresh
-- ✅ CSRF protection ready
-- ✅ XSS protection via escaping
-- ✅ HTTP-only cookies support
+Giao dịch giữa Người mua và Người bán.
 
----
-
-## 🧪 Testing
-
-### Manual Test Flow
-
-1. Go to `http://localhost:5173/register`
-2. Fill form with:
-   - Role: Buyer / Seller
-   - First Name, Last Name
-   - Valid Email
-   - Password: Min 8 chars, 1 uppercase, 1 number
-   - Agree to terms
-3. Click "Đăng ký"
-4. Should see success message
-5. Check email for verification link
-
-### Test Credentials
-
-```
-Email: test@example.com
-Password: TestPass123
-```
+| Action | Endpoint | Role | Transition |
+|:--- |:--- |:--- |:--- |
+| **Tạo đơn** | `POST /api/orders` | Buyer | `pending` |
+| **Chấp nhận** | `PATCH /api/orders/{id}/accept` | Seller | `awaiting_payment` |
+| **Xác nhận cọc** | `PATCH /api/orders/{id}/confirm-deposit` | Seller | `deposited` |
+| **Hoàn tất giao** | `PATCH /api/orders/{id}/complete` | Seller | `awaiting_buyer_confirmation` |
+| **Xác nhận nhận xe**| `PATCH /api/orders/{id}/confirm-received`| Buyer | `completed` |
 
 ---
 
-## 📊 Build Status
+## ⚒️ 5. Master Data (Reference)
 
-```
-✓ 1838 modules transformed
-✓ Build completed successfully
-✓ Output: dist/
-✓ No TypeScript errors
-✓ No critical warnings
-```
-
----
-
-## 🔗 Related Endpoints
-
-- `POST /api/auth/login` - Already connected
-- `POST /api/auth/logout` - Already connected
-- `POST /api/auth/forgot-password` - Already connected
-- `POST /api/auth/resend-verification` - Already connected
-- `GET /api/auth/verify-email?token=...` - Already connected
+Dùng để đổ dữ liệu vào các Dropdown khi Đăng tin hoặc Lọc.
+- `GET /api/categories`
+- `GET /api/brands`
+- `GET /api/brake-types`
+- `GET /api/frame-materials`
+- `GET /api/groupsets`
 
 ---
 
-## 📞 Support
+## ⚠️ 6. Error Codes
 
-Nếu gặp lỗi:
-
-1. Check `.env` file có `VITE_API_BASE_URL` không
-2. Server backend có running không?
-3. Check browser console (F12) để xem error details
-4. Check Network tab để xem API request/response
+Hệ thống trả về các mã lỗi cụ thể trong trường `code`:
+- `1005`: Người dùng không tồn tại
+- `1009`: Sản phẩm không tồn tại
+- `1011`: Trạng thái không hợp lệ (ví dụ: accept đơn đã hủy)
+- `1030`: Email hoặc mật khẩu sai
+- `1051`: File kiểm định không hợp lệ (phải là PDF)
 
 ---
-
-**Last Updated:** April 14, 2026  
-**Status:** ✅ Production Ready
+**Last Updated**: April 17, 2026
+**Contact**: Backend Team
