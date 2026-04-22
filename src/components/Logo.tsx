@@ -1,10 +1,11 @@
 import { Link } from 'react-router-dom'
+import { BRAND } from '@/constants/brand'
 
 interface LogoProps {
-  className?: string
-  textClassName?: string
-  showText?: boolean
-  asLink?: boolean
+  readonly className?: string
+  readonly textClassName?: string
+  readonly showText?: boolean
+  readonly asLink?: boolean
 }
 
 export default function Logo({
@@ -16,11 +17,11 @@ export default function Logo({
   const content = (
     <>
       <img
-        src="/logo.jpg"
-        alt="Market Bike Logo"
+        src={BRAND.logoPath}
+        alt={BRAND.logoAlt}
         className={`h-11 w-11 rounded-2xl shadow-xl shadow-sky-900/15 object-cover ${className}`}
       />
-      {showText && <span className={`text-lg font-semibold tracking-tight text-white ${textClassName}`}>Market Bike</span>}
+      {showText && <span className={`text-lg font-semibold tracking-tight text-white ${textClassName}`}>{BRAND.name}</span>}
     </>
   )
 
