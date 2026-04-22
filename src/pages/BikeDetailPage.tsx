@@ -173,15 +173,15 @@ export default function BikeDetailPage() {
 
           <div className="grid gap-6 xl:grid-cols-[1.9fr_0.85fr]">
             <div className="space-y-4">
-              <div className="relative overflow-hidden rounded-3xl bg-slate-100">
+              <div className="relative h-[520px] overflow-hidden rounded-3xl bg-slate-100">
                 {currentImage ? (
                   <img
                     src={currentImage}
                     alt={bike.title}
-                    className="h-full min-h-[520px] w-full object-cover"
+                    className="h-full w-full object-cover"
                   />
                 ) : (
-                  <div className="flex min-h-[520px] items-center justify-center text-sm text-slate-500">
+                  <div className="flex h-full items-center justify-center text-sm text-slate-500">
                     Chưa có ảnh sản phẩm
                   </div>
                 )}
