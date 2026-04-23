@@ -9,6 +9,8 @@ import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { ROUTES } from '@/constants/routes'
 import { ReviewModal } from '@/components/reviews/ReviewModal'
+import { ReportModal } from '@/components/common/ReportModal'
+import { Flag } from 'lucide-react'
 import {
   canBuyerConfirmReceived,
   canBuyerRequestPayment,
@@ -80,6 +82,7 @@ export function BuyerOrdersSection({ buyerId }: BuyerOrdersSectionProps) {
   const [deliveryError, setDeliveryError] = useState<string | null>(null)
   const [selectedOrderForReceiveConfirm, setSelectedOrderForReceiveConfirm] = useState<Order | null>(null)
   const [selectedOrderForReview, setSelectedOrderForReview] = useState<Order | null>(null)
+  const [selectedOrderForReport, setSelectedOrderForReport] = useState<Order | null>(null)
   const [nowMs, setNowMs] = useState(() => Date.now())
 
   async function refreshBuyerOrders(maxAttempts = 1, delayMs = 0) {
@@ -375,6 +378,16 @@ export function BuyerOrdersSection({ buyerId }: BuyerOrdersSectionProps) {
                               Đánh giá ngay
                             </Button>
                           )}
+
+                          <Button
+                            variant="ghost"
+                            size="sm"
+                            className="gap-1.5 text-muted-foreground hover:text-destructive"
+                            onClick={() => setSelectedOrderForReport(order)}
+                          >
+                            <Flag className="h-3.5 w-3.5" />
+                            Báo cáo
+                          </Button>
                         </div>
                       </div>
                     </div>
@@ -482,6 +495,13 @@ export function BuyerOrdersSection({ buyerId }: BuyerOrdersSectionProps) {
         orderId={selectedOrderForReview?.id ?? ''}
         onClose={() => setSelectedOrderForReview(null)}
         onSuccess={() => void refreshBuyerOrders()}
+      />
+      <ReportModal
+        open={Boolean(selectedOrderForReport)}
+        onOpenChange={(open) => !open && setSelectedOrderForReport(null)}
+        targetId={selectedOrderForReport?.sellerId ?? ''}
+        targetType="USER"
+        targetName={selectedOrderForReport?.sellerName ?? 'người bán'}
       />
     </div>
   )
