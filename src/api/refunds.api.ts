@@ -5,12 +5,13 @@ import type { AdminRefund, AdminRefundFilters, Refund, RefundRequest, RefundRevi
 function buildRefundFormData(request: RefundRequest) {
   const formData = new FormData()
 
-  formData.append('amount', String(request.amount))
-  formData.append('reason', request.reason)
-
-  if (request.evidenceNote?.trim()) {
-    formData.append('evidenceNote', request.evidenceNote.trim())
+  // BE expects @RequestPart("request") as a JSON blob
+  const requestPayload = {
+    amount: request.amount,
+    reason: request.reason,
+    ...(request.evidenceNote?.trim() ? { evidenceNote: request.evidenceNote.trim() } : {}),
   }
+  formData.append('request', new Blob([JSON.stringify(requestPayload)], { type: 'application/json' }))
 
   request.files?.forEach((file) => {
     formData.append('files', file)

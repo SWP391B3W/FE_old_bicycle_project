@@ -12,6 +12,14 @@ const statusLabels: Record<string, string> = {
   resolved_dismissed: 'Bác bỏ báo cáo',
 }
 
+const reasonLabels: Record<string, string> = {
+  fraud: 'Dấu hiệu lừa đảo',
+  fake: 'Hàng giả, hàng nhái',
+  wrong_description: 'Mô tả sai sự thật',
+  spam: 'Tin rác, trùng lặp',
+  other: 'Lý do khác',
+}
+
 export function BuyerReportsSection() {
   const [reports, setReports] = useState<Report[]>([])
   const [isLoading, setIsLoading] = useState(true)
@@ -78,7 +86,12 @@ export function BuyerReportsSection() {
                       ID: {report.targetId.substring(0, 8)}...
                     </span>
                   </div>
-                  <h4 className="font-medium text-foreground">{report.reason}</h4>
+                  <h4 className="font-medium text-foreground">
+                    {reasonLabels[report.reason] ?? report.reason}
+                  </h4>
+                  {report.description && (
+                    <p className="text-sm text-muted-foreground line-clamp-2">{report.description}</p>
+                  )}
                   <p className="text-sm text-muted-foreground">
                     Ngày gửi: {new Date(report.createdAt).toLocaleDateString('vi-VN')}
                   </p>
