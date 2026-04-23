@@ -21,7 +21,7 @@ function buildRefundFormData(request: RefundRequest) {
 
 export const refundsApi = {
   async create(orderId: string, request: RefundRequest) {
-    const response = await http.post(`/api/orders/${orderId}/refunds`, buildRefundFormData(request), {
+    const response = await http.post(`/api/refunds/orders/${orderId}`, buildRefundFormData(request), {
       headers: {
         'Content-Type': 'multipart/form-data',
       },

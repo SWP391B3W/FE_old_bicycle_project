@@ -10,6 +10,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { ROUTES } from '@/constants/routes'
 import { ReviewModal } from '@/components/reviews/ReviewModal'
 import { ReportModal } from '@/components/common/ReportModal'
+import { RefundModal } from '@/components/profile/RefundModal'
 import { Flag } from 'lucide-react'
 import {
   canBuyerConfirmReceived,
@@ -84,6 +85,7 @@ export function BuyerOrdersSection({ buyerId }: BuyerOrdersSectionProps) {
   const [selectedOrderForReceiveConfirm, setSelectedOrderForReceiveConfirm] = useState<Order | null>(null)
   const [selectedOrderForReview, setSelectedOrderForReview] = useState<Order | null>(null)
   const [selectedOrderForReport, setSelectedOrderForReport] = useState<Order | null>(null)
+  const [selectedOrderForRefund, setSelectedOrderForRefund] = useState<Order | null>(null)
   const [nowMs, setNowMs] = useState(() => Date.now())
 
   async function refreshBuyerOrders(maxAttempts = 1, delayMs = 0) {
@@ -395,10 +397,21 @@ export function BuyerOrdersSection({ buyerId }: BuyerOrdersSectionProps) {
                             <Button
                               variant="outline"
                               className="gap-1.5 border-red-200 text-red-600 hover:bg-red-50"
+                              onClick={() => setSelectedOrderForRefund(order)}
+                            >
+                              <RotateCcw className="h-4 w-4" />
+                              Hoàn tiền
+                            </Button>
+                          )}
+
+                          {canBuyerConfirmReceived(order) && (
+                            <Button
+                              variant="outline"
+                              className="gap-1.5 border-orange-200 text-orange-600 hover:bg-orange-50"
                               onClick={() => setSelectedOrderForReport(order)}
                             >
                               <Flag className="h-4 w-4" />
-                              Khiếu nại / Hoàn tiền
+                              Báo cáo
                             </Button>
                           )}
 
@@ -422,17 +435,9 @@ export function BuyerOrdersSection({ buyerId }: BuyerOrdersSectionProps) {
                             <Button
                               variant="outline"
                               className="gap-1.5 border-red-200 text-red-600 hover:bg-red-50"
-                              onClick={() => {
-                                // Reuse cancel action for refund request if implemented in API
-                                void runOrderAction(order, 'cancel')
-                              }}
-                              disabled={actionLoadingKey === `cancel:${order.id}`}
+                              onClick={() => setSelectedOrderForRefund(order)}
                             >
-                              {actionLoadingKey === `cancel:${order.id}` ? (
-                                <Loader2 className="h-4 w-4 animate-spin" />
-                              ) : (
-                                <RotateCcw className="h-4 w-4" />
-                              )}
+                              <RotateCcw className="h-4 w-4" />
                               Yêu cầu hoàn tiền
                             </Button>
                           )}
@@ -562,6 +567,14 @@ export function BuyerOrdersSection({ buyerId }: BuyerOrdersSectionProps) {
         targetType="USER"
         targetName={selectedOrderForReport?.sellerName ?? 'người bán'}
       />
+      {selectedOrderForRefund && (
+        <RefundModal
+          open={Boolean(selectedOrderForRefund)}
+          onOpenChange={(open) => !open && setSelectedOrderForRefund(null)}
+          order={selectedOrderForRefund}
+          onSuccess={() => void refreshBuyerOrders()}
+        />
+      )}
     </div>
   )
 }
