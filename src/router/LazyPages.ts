@@ -24,6 +24,7 @@ export const AdminOrdersPage = lazy(() => import('../pages/admin/AdminOrdersPage
 export const AdminPayoutsPage = lazy(() => import('../pages/admin/AdminPayoutsPage'));
 export const AdminReportsPage = lazy(() => import('../pages/admin/AdminReportsPage'));
 export const AdminUsersPage = lazy(() => import('../pages/admin/AdminUsersPage'));
+export const AdminSettingsPage = lazy(() => import('../pages/admin/AdminSettingsPage'));
 
 // Other Pages
 export const GuidePage = lazy(() => import('../pages/GuidePage'));

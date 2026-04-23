@@ -24,6 +24,7 @@ export const ROUTES = {
   ADMIN_CATEGORIES: '/admin/categories',
   ADMIN_DISPUTES: '/admin/disputes',
   ADMIN_PAYOUTS: '/admin/payouts',
+  ADMIN_SETTINGS: '/admin/settings',
   // Inspector routes
   INSPECTOR: '/inspector',
   INSPECTOR_REQUESTS: '/inspector/requests',

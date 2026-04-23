@@ -10,6 +10,7 @@ import {
   LayoutDashboard,
   Package,
   Scale,
+  Settings,
   ShoppingBag,
   Tags,
   Users,
@@ -101,6 +102,7 @@ export const adminNavItems: NavItem[] = [
   { icon: Tags, label: 'Danh mục', href: ROUTES.ADMIN_CATEGORIES },
   { icon: Scale, label: 'Tranh chấp', href: ROUTES.ADMIN_DISPUTES },
   { icon: Wallet, label: 'Giải ngân', href: ROUTES.ADMIN_PAYOUTS },
+  { icon: Settings, label: 'Cài đặt', href: ROUTES.ADMIN_SETTINGS },
 ]
 
 export const inspectorNavItems: NavItem[] = [

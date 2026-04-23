@@ -28,6 +28,7 @@ import {
     AdminCategoriesPage,
     AdminDisputesPage,
     AdminPayoutsPage,
+    AdminSettingsPage,
     GuidePage,
     MessagesPage,
     InspectorDashboardPage,
@@ -105,17 +106,7 @@ export default function AppRouter() {
                     <Route path={ROUTES.SELLER_ORDERS} element={<SellerOrdersPage />} />
                 </Route>
 
-                {/* Admin routes */}
-                <Route element={<AdminLayout />}>
-                    <Route path={ROUTES.ADMIN} element={<AdminDashboardPage />} />
-                    <Route path={ROUTES.ADMIN_USERS} element={<AdminUsersPage />} />
-                    <Route path={ROUTES.ADMIN_ORDERS} element={<AdminOrdersPage />} />
-                    <Route path={ROUTES.ADMIN_LISTINGS} element={<AdminListingsPage />} />
-                    <Route path={ROUTES.ADMIN_REPORTS} element={<AdminReportsPage />} />
-                    <Route path={ROUTES.ADMIN_CATEGORIES} element={<AdminCategoriesPage />} />
-                    <Route path={ROUTES.ADMIN_DISPUTES} element={<AdminDisputesPage />} />
-                    <Route path={ROUTES.ADMIN_PAYOUTS} element={<AdminPayoutsPage />} />
-                </Route>
+
 
                 <Route
                     element={
@@ -132,6 +123,7 @@ export default function AppRouter() {
                     <Route path={ROUTES.ADMIN_CATEGORIES} element={<AdminCategoriesPage />} />
                     <Route path={ROUTES.ADMIN_DISPUTES} element={<AdminDisputesPage />} />
                     <Route path={ROUTES.ADMIN_PAYOUTS} element={<AdminPayoutsPage />} />
+                    <Route path={ROUTES.ADMIN_SETTINGS} element={<AdminSettingsPage />} />
                 </Route>
             </Routes>
         </Suspense>
