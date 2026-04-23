@@ -14,6 +14,7 @@ import { Flag } from 'lucide-react'
 import {
   canBuyerConfirmReceived,
   canBuyerRequestPayment,
+  canBuyerRequestRefund,
   canBuyerSubmitReview,
   canCancelOpenOrder,
   formatOrderCurrency,
