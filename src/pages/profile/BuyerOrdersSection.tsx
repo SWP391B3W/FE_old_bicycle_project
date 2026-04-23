@@ -364,22 +364,31 @@ export function BuyerOrdersSection({ buyerId }: BuyerOrdersSectionProps) {
                             </div>
                           )}
 
-                          <div className="grid gap-1 text-sm text-muted-foreground sm:grid-cols-2">
-                            <p>
-                              Phương thức: <span className="font-medium text-foreground">{getPaymentMethodLabel(order)}</span>
-                            </p>
-                            <p>
-                              Hình thức: <span className="font-medium text-foreground">{getPaymentOptionLabel(order)}</span>
-                            </p>
-                            <p>
-                              Cần thanh toán hiện tại:{' '}
-                              <span className="font-medium text-foreground">{formatOrderCurrency(buyerChargeAmount)}</span>
-                            </p>
-                            <p>
-                              Đã thanh toán:{' '}
-                              <span className="font-medium text-foreground">{formatOrderCurrency(order.paidAmount ?? 0)}</span>
-                            </p>
-                          </div>
+                          {order.status === 'awaiting_buyer_confirmation' ? (
+                            <div className="grid gap-1 text-sm text-muted-foreground sm:grid-cols-2">
+                              <p>
+                                Đã thanh toán:{' '}
+                                <span className="font-medium text-foreground">{formatOrderCurrency(order.paidAmount ?? 0)}</span>
+                              </p>
+                            </div>
+                          ) : (
+                            <div className="grid gap-1 text-sm text-muted-foreground sm:grid-cols-2">
+                              <p>
+                                Phương thức: <span className="font-medium text-foreground">{getPaymentMethodLabel(order)}</span>
+                              </p>
+                              <p>
+                                Hình thức: <span className="font-medium text-foreground">{getPaymentOptionLabel(order)}</span>
+                              </p>
+                              <p>
+                                Cần thanh toán hiện tại:{' '}
+                                <span className="font-medium text-foreground">{formatOrderCurrency(buyerChargeAmount)}</span>
+                              </p>
+                              <p>
+                                Đã thanh toán:{' '}
+                                <span className="font-medium text-foreground">{formatOrderCurrency(order.paidAmount ?? 0)}</span>
+                              </p>
+                            </div>
+                          )}
                         </div>
                       </div>
 
