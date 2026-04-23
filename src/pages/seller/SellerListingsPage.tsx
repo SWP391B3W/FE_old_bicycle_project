@@ -197,9 +197,11 @@ export default function SellerListingsPage() {
                     product.status !== 'inspected_failed' &&
                     !product.sellerActionLocked
                   const statusPresentation = getSellerListingStatusPresentation(product)
+                  // Hide is available for any posted listing (not hidden/sold/locked)
                   const canHide =
-                    (product.status === 'active' || product.status === 'inspected_passed') &&
-                    statusPresentation.isPubliclyVisible &&
+                    product.status !== 'hidden' &&
+                    product.status !== 'sold' &&
+                    product.status !== 'rejected' &&
                     !product.sellerActionLocked
                   const canShow = product.status === 'hidden' && !product.sellerActionLocked
                   const timelineEntries = getProductTimelineEntries(product)
