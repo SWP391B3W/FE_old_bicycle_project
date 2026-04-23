@@ -412,7 +412,7 @@ export function BuyerOrdersSection({ buyerId }: BuyerOrdersSectionProps) {
                       </div>
                     </div>
 
-                    {paymentRequest && (
+                    {paymentRequest && (order.productStatus === 'active' || order.productStatus === 'inspected_passed') && order.productIsVerified !== false && (
                       <div className="rounded-xl border border-primary/20 bg-primary/5 p-4">
                         <div className="flex flex-col gap-4 lg:flex-row lg:items-start lg:justify-between">
                           <div className="space-y-2">
