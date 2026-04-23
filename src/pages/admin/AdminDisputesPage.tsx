@@ -91,6 +91,31 @@ function getErrorMessage(error: unknown, fallback: string) {
   return fallback
 }
 
+const ORDER_STATUS_LABELS: Record<string, string> = {
+  pending: 'Chờ người bán duyệt',
+  deposited: 'Đã đặt cọc',
+  awaiting_buyer_confirmation: 'Chờ người mua xác nhận',
+  completed: 'Hoàn tất',
+  cancelled: 'Đã hủy',
+}
+
+const FUNDING_STATUS_LABELS: Record<string, string> = {
+  unpaid: 'Chưa thanh toán',
+  awaiting_payment: 'Đang chờ thanh toán',
+  held: 'Đang giữ tiền',
+  refund_pending: 'Chờ admin duyệt hoàn tiền',
+  refund_pending_transfer: 'Chờ chuyển khoản hoàn tiền',
+  refunded: 'Đã hoàn tiền',
+  seller_payout_pending: 'Chờ giải ngân cho người bán',
+  released: 'Đã giải ngân',
+  not_applicable: 'Không áp dụng',
+}
+
+const PAYMENT_METHOD_LABELS: Record<string, string> = {
+  cash: 'Tiền mặt',
+  transfer: 'Chuyển khoản online (SePay)',
+}
+
 export default function AdminDisputesPage() {
   const [searchQuery, setSearchQuery] = useState('')
   const deferredSearchQuery = useDeferredValue(searchQuery.trim())
@@ -437,22 +462,22 @@ export default function AdminDisputesPage() {
                 ['Mã yêu cầu', detailDialog.refund.id],
                 ['Mã đơn hàng', detailDialog.refund.orderId],
                 ['Sản phẩm', detailDialog.refund.productTitle ?? '—'],
-                ['Buyer', detailDialog.refund.buyerName ?? '—'],
-                ['Seller', detailDialog.refund.sellerName ?? '—'],
+                ['Người mua', detailDialog.refund.buyerName ?? '—'],
+                ['Người bán', detailDialog.refund.sellerName ?? '—'],
                 ['Số tiền', formatCurrency(detailDialog.refund.amount)],
                 ['Lý do', detailDialog.refund.reason],
                 ['Ghi chú bằng chứng', detailDialog.refund.evidenceNote || '—'],
                 ['Trạng thái', reviewLabels[detailDialog.refund.status]],
-                ['Phương thức thanh toán', detailDialog.refund.paymentMethod ?? '—'],
-                ['Trạng thái đơn hàng', detailDialog.refund.orderStatus ?? '—'],
-                ['Trạng thái tiền giữ', detailDialog.refund.fundingStatus ?? '—'],
+                ['Phương thức thanh toán', PAYMENT_METHOD_LABELS[detailDialog.refund.paymentMethod ?? ''] ?? detailDialog.refund.paymentMethod ?? '—'],
+                ['Trạng thái đơn hàng', ORDER_STATUS_LABELS[detailDialog.refund.orderStatus ?? ''] ?? detailDialog.refund.orderStatus ?? '—'],
+                ['Trạng thái tiền giữ', FUNDING_STATUS_LABELS[detailDialog.refund.fundingStatus ?? ''] ?? detailDialog.refund.fundingStatus ?? '—'],
                 ['Có kiểm định', detailDialog.refund.hasInspection ? 'Có' : 'Không'],
-                ['Admin note', detailDialog.refund.adminNote || '—'],
+                ['Ghi chú admin', detailDialog.refund.adminNote || '—'],
                 ['Mã tham chiếu hoàn tiền', detailDialog.refund.refundReference || '—'],
-                ['Reviewed by', detailDialog.refund.reviewedByName || '—'],
-                ['Reviewed at', formatDateTime(detailDialog.refund.reviewedAt)],
-                ['Processed at', formatDateTime(detailDialog.refund.processedAt)],
-                ['Created at', formatDateTime(detailDialog.refund.createdAt)],
+                ['Xử lý bởi', detailDialog.refund.reviewedByName || '—'],
+                ['Thời gian xử lý', formatDateTime(detailDialog.refund.reviewedAt)],
+                ['Hoàn tất lúc', formatDateTime(detailDialog.refund.processedAt)],
+                ['Ngày tạo', formatDateTime(detailDialog.refund.createdAt)],
               ].map(([label, value]) => (
                 <div key={String(label)} className="flex justify-between gap-4 border-b border-border pb-2">
                   <span className="text-muted-foreground">{label}</span>

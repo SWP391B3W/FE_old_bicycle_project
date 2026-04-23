@@ -46,6 +46,14 @@ const statusLabels: Record<ReportStatus, string> = {
   resolved_dismissed: 'Bác bỏ báo cáo',
 }
 
+const reasonLabels: Record<string, string> = {
+  fraud: 'Dấu hiệu lừa đảo',
+  fake: 'Hàng giả, hàng nhái',
+  wrong_description: 'Mô tả sai sự thật',
+  spam: 'Tin rác, trùng lặp',
+  other: 'Lý do khác',
+}
+
 type ProcessStatusSelection = ReportStatus | ''
 
 function canProcessReport(status: ReportStatus) {
@@ -173,13 +181,18 @@ export default function AdminReportsPage() {
           <p className="text-xs font-medium text-muted-foreground">
             {targetTypeLabels[row.original.targetType] || row.original.targetType}
           </p>
-          <p className="max-w-[120px] truncate font-mono text-xs">{row.original.targetId}</p>
+          <p className="text-xs text-foreground font-medium">
+            {row.original.targetType?.toUpperCase() === 'USER'
+              ? (row.original.reporterName ? `ID: ${row.original.targetId.substring(0, 8)}...` : '—')
+              : `ID: ${row.original.targetId.substring(0, 8)}...`}
+          </p>
         </div>
       ),
     },
     {
       accessorKey: 'reason',
       header: 'Lý do',
+      cell: ({ row }) => reasonLabels[row.original.reason] ?? row.original.reason,
     },
     {
       accessorKey: 'status',
