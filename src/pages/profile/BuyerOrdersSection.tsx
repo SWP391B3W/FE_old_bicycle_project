@@ -12,6 +12,8 @@ import { ReviewModal } from '@/components/reviews/ReviewModal'
 import { ReportModal } from '@/components/common/ReportModal'
 import { RefundModal } from '@/components/profile/RefundModal'
 import { Flag } from 'lucide-react'
+import { payoutsApi } from '@/api/payouts.api'
+import { isPayoutProfileReady } from '@/lib/payout-profile'
 import {
   canBuyerConfirmReceived,
   canBuyerRequestPayment,
@@ -86,6 +88,7 @@ export function BuyerOrdersSection({ buyerId }: BuyerOrdersSectionProps) {
   const [selectedOrderForReview, setSelectedOrderForReview] = useState<Order | null>(null)
   const [selectedOrderForReport, setSelectedOrderForReport] = useState<Order | null>(null)
   const [selectedOrderForRefund, setSelectedOrderForRefund] = useState<Order | null>(null)
+  const [payoutProfileReady, setPayoutProfileReady] = useState(false)
   const [nowMs, setNowMs] = useState(() => Date.now())
 
   async function refreshBuyerOrders(maxAttempts = 1, delayMs = 0) {
@@ -180,6 +183,30 @@ export function BuyerOrdersSection({ buyerId }: BuyerOrdersSectionProps) {
 
     return () => {
       cancelled = true
+    }
+  }, [buyerId])
+
+  // Load buyer's payout profile to check if refund is allowed
+  useEffect(() => {
+    let ignore = false
+
+    async function loadPayoutProfile() {
+      try {
+        const profile = await payoutsApi.getMyProfile()
+        if (!ignore) {
+          setPayoutProfileReady(isPayoutProfileReady(profile))
+        }
+      } catch {
+        if (!ignore) {
+          setPayoutProfileReady(false)
+        }
+      }
+    }
+
+    void loadPayoutProfile()
+
+    return () => {
+      ignore = true
     }
   }, [buyerId])
 
@@ -573,6 +600,7 @@ export function BuyerOrdersSection({ buyerId }: BuyerOrdersSectionProps) {
           onOpenChange={(open) => !open && setSelectedOrderForRefund(null)}
           order={selectedOrderForRefund}
           onSuccess={() => void refreshBuyerOrders()}
+          payoutProfileReady={payoutProfileReady}
         />
       )}
     </div>
