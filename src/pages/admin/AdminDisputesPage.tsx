@@ -93,7 +93,7 @@ function getErrorMessage(error: unknown, fallback: string) {
 
 const ORDER_STATUS_LABELS: Record<string, string> = {
   pending: 'Chờ người bán duyệt',
-  deposited: 'Đã đặt cọc',
+  deposited: 'Đã thanh toán',
   awaiting_buyer_confirmation: 'Chờ người mua xác nhận',
   completed: 'Hoàn tất',
   cancelled: 'Đã hủy',
