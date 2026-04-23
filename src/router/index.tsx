@@ -31,6 +31,7 @@ import {
     AdminSettingsPage,
     GuidePage,
     MessagesPage,
+    PublicProfilePage,
     InspectorDashboardPage,
     InspectionRequestsPage,
     InspectionFormPage,
@@ -56,6 +57,7 @@ export default function AppRouter() {
                     <Route path={ROUTES.FORGOT_PASSWORD} element={<ForgotPasswordPage />} />
                     <Route path={ROUTES.VERIFY_EMAIL} element={<VerifyEmailPage />} />
                     <Route path={ROUTES.GUIDE} element={<GuidePage />} />
+                    <Route path={ROUTES.PUBLIC_PROFILE} element={<PublicProfilePage />} />
 
                     {/* Protected general routes */}
                     <Route element={<ProtectedRoute />}>

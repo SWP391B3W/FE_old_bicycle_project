@@ -6,6 +6,8 @@ import { ProfileInfoSection } from './profile/ProfileInfoSection'
 import { ProfileSecuritySection } from './profile/ProfileSecuritySection'
 import { ProfileSidebar } from './profile/ProfileSidebar'
 import { useProfilePage } from './profile/useProfilePage'
+import { ReviewList } from '@/components/reviews/ReviewList'
+import { SellerListingsSection } from './profile/SellerListingsSection'
 
 interface PlaceholderSectionProps {
   title: string
@@ -81,10 +83,7 @@ export default function ProfilePage() {
             ) : null}
 
             {profilePage.activeTab === 'listings' ? (
-              <PlaceholderSection
-                title="Tin đăng"
-                description="Danh sách tin đăng sẽ được đồng bộ vào trang profile trong phiên bản tiếp theo."
-              />
+              <SellerListingsSection sellerId={profilePage.user.id} />
             ) : null}
 
             {profilePage.activeTab === 'wishlist' ? (
@@ -95,10 +94,18 @@ export default function ProfilePage() {
             ) : null}
 
             {profilePage.activeTab === 'reviews' ? (
-              <PlaceholderSection
-                title="Đánh giá"
-                description="Bạn chưa có đánh giá nào được hiển thị trên hồ sơ."
-              />
+              <Card>
+                <CardHeader>
+                  <CardTitle>Đánh giá của bạn</CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <ReviewList 
+                    reviews={profilePage.reviews} 
+                    isLoading={profilePage.isReviewsLoading} 
+                    mode={profilePage.user.role === 'buyer' ? 'buyer' : 'seller'}
+                  />
+                </CardContent>
+              </Card>
             ) : null}
           </div>
         </div>

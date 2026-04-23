@@ -4,6 +4,7 @@ import { ROUTES } from '@/constants/routes'
 import { useAuth } from '@/contexts/AuthContext'
 import { PASSWORD_POLICY_GUIDANCE, getPasswordPolicyChecks } from '@/lib/password-policy'
 import { authService } from '@/services/authService'
+import { reviewApi, type Review } from '@/api/review.api'
 import { getVisibleProfileTabs, isProfileTabId } from './profile.constants'
 import {
   INITIAL_PASSWORD_FORM_DATA,
@@ -75,6 +76,28 @@ export function useProfilePage() {
   const [passwordLoading, setPasswordLoading] = useState(false)
   const [passwordError, setPasswordError] = useState<string | null>(null)
   const [passwordSuccess, setPasswordSuccess] = useState(false)
+
+  const [reviews, setReviews] = useState<Review[]>([])
+  const [isReviewsLoading, setIsReviewsLoading] = useState(false)
+
+  useEffect(() => {
+    if (activeTab === 'reviews' && user?.id) {
+      void (async () => {
+        setIsReviewsLoading(true)
+        try {
+          const result =
+            user.role === 'buyer'
+              ? await reviewApi.getBuyerReviews(user.id)
+              : await reviewApi.getSellerReviews(user.id)
+          setReviews(result.content || [])
+        } catch (err) {
+          console.error('Failed to load user reviews:', err)
+        } finally {
+          setIsReviewsLoading(false)
+        }
+      })()
+    }
+  }, [activeTab, user?.id])
 
   useEffect(() => {
     if (!user) {
@@ -244,6 +267,8 @@ export function useProfilePage() {
       updateField: updatePasswordField,
       submit: submitPasswordChange,
     },
+    reviews,
+    isReviewsLoading,
     actions: {
       changeTab: handleTabChange,
       logout: handleLogout,

@@ -3,6 +3,8 @@ import { Link, useParams } from 'react-router-dom'
 import { ChevronLeft, ChevronRight, Loader2 } from 'lucide-react'
 import { adminProductsApi } from '@/api/admin-products.api'
 import { productsApi } from '@/api/products.api'
+import { reviewApi, type Review } from '@/api/review.api'
+import { ReviewList } from '@/components/reviews/ReviewList'
 import { Button } from '@/components/ui/button'
 import { ROUTES, buildRoute } from '@/constants/routes'
 import { useAuth } from '@/contexts/AuthContext'
@@ -19,9 +21,29 @@ export default function BikeDetailPage() {
   const { id } = useParams<{ id: string }>()
   const { user, isAuthenticated } = useAuth()
   const [bike, setBike] = useState<Product | null>(null)
+  const [reviews, setReviews] = useState<Review[]>([])
   const [isLoading, setIsLoading] = useState(true)
+  const [isReviewsLoading, setIsReviewsLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
   const [selectedImage, setSelectedImage] = useState('')
+
+  useEffect(() => {
+    if (!bike?.seller?.id) return
+
+    async function loadReviews() {
+      setIsReviewsLoading(true)
+      try {
+        const result = await reviewApi.getSellerReviews(bike!.seller!.id)
+        setReviews(result.content || [])
+      } catch (err) {
+        console.error('Failed to load reviews:', err)
+      } finally {
+        setIsReviewsLoading(false)
+      }
+    }
+
+    void loadReviews()
+  }, [bike?.seller?.id])
 
   useEffect(() => {
     if (!id) {
@@ -323,7 +345,12 @@ export default function BikeDetailPage() {
             <div className="mt-5 grid gap-4 md:grid-cols-3">
               <div className="rounded-3xl bg-slate-50 p-5">
                 <p className="text-sm text-slate-600">Người đăng</p>
-                <p className="mt-2 text-lg font-semibold text-slate-950">{sellerName}</p>
+                <Link 
+                  to={buildRoute.publicProfile(bike.seller!.id)} 
+                  className="mt-2 block text-lg font-semibold text-sky-600 hover:text-sky-500 hover:underline transition-all"
+                >
+                  {sellerName}
+                </Link>
               </div>
               <div className="rounded-3xl bg-slate-50 p-5">
                 <p className="text-sm text-slate-600">Được đăng từ</p>
@@ -340,6 +367,16 @@ export default function BikeDetailPage() {
                 <p className="mt-2 text-lg font-semibold text-slate-950">{conditionLabel}</p>
               </div>
             </div>
+          </article>
+
+          <article className="rounded-3xl border border-slate-200/80 bg-white p-8">
+            <div className="flex items-center justify-between mb-8">
+              <h2 className="text-xl font-semibold text-slate-950">Đánh giá về người bán</h2>
+              <span className="text-sm font-medium text-slate-500 bg-slate-100 px-3 py-1 rounded-full">
+                {reviews.length} đánh giá
+              </span>
+            </div>
+            <ReviewList reviews={reviews} isLoading={isReviewsLoading} />
           </article>
         </section>
       </div>

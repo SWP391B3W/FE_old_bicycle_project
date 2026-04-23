@@ -13,6 +13,7 @@ export const CheckoutPage = lazy(() => import('../pages/CheckoutPage'));
 export const PaymentPage = lazy(() => import('../pages/PaymentPage'));
 export const OrderConfirmationPage = lazy(() => import('../pages/OrderConfirmationPage'));
 export const ProfilePage = lazy(() => import('../pages/ProfilePage'));
+export const PublicProfilePage = lazy(() => import('../pages/PublicProfilePage'));
 export const PayoutPage = lazy(() => import('../pages/PayoutPage'));
 
 // Admin Pages

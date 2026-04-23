@@ -11,6 +11,7 @@ export const ROUTES = {
   RESET_PASSWORD: '/reset-password',
   VERIFY_EMAIL: '/verify-email',
   PROFILE: '/profile',
+  PUBLIC_PROFILE: '/users/:userId',
   PAYOUT: '/payout',
   MESSAGES: '/messages',
   ASSISTANT: '/assistant',
@@ -68,4 +69,5 @@ export const buildRoute = {
   sellerEditProduct: (id: string | number) => `/seller/listings/${id}/edit`,
   checkout: (id: string | number) => `/thanh-toan-don-hang/${id}`,
   payment: (id: string | number) => `/thanh-toan/${id}`,
+  publicProfile: (userId: string) => `/users/${userId}`,
 };

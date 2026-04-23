@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react'
 import { Link } from 'react-router-dom'
-import { CheckCircle, Loader2, ShoppingBag, Wallet, XCircle } from 'lucide-react'
+import { CheckCircle, Loader2, ShoppingBag, Wallet, XCircle, Star } from 'lucide-react'
 import { ordersApi } from '@/api/orders.api'
 import { OrderEvidenceDialog } from '@/components/profile/OrderEvidenceDialog'
 import { OrderEvidenceSection } from '@/components/profile/OrderEvidenceSection'
@@ -8,9 +8,11 @@ import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { ROUTES } from '@/constants/routes'
+import { ReviewModal } from '@/components/reviews/ReviewModal'
 import {
   canBuyerConfirmReceived,
   canBuyerRequestPayment,
+  canBuyerSubmitReview,
   canCancelOpenOrder,
   formatOrderCurrency,
   formatOrderDate,
@@ -77,6 +79,7 @@ export function BuyerOrdersSection({ buyerId }: BuyerOrdersSectionProps) {
   const [actionLoadingKey, setActionLoadingKey] = useState<string | null>(null)
   const [deliveryError, setDeliveryError] = useState<string | null>(null)
   const [selectedOrderForReceiveConfirm, setSelectedOrderForReceiveConfirm] = useState<Order | null>(null)
+  const [selectedOrderForReview, setSelectedOrderForReview] = useState<Order | null>(null)
   const [nowMs, setNowMs] = useState(() => Date.now())
 
   async function refreshBuyerOrders(maxAttempts = 1, delayMs = 0) {
@@ -361,6 +364,17 @@ export function BuyerOrdersSection({ buyerId }: BuyerOrdersSectionProps) {
                               Hủy đơn
                             </Button>
                           )}
+
+                          {canBuyerSubmitReview(order) && (
+                            <Button
+                              variant="outline"
+                              className="gap-1.5 border-amber-200 text-amber-700 hover:bg-amber-50 dark:border-amber-900/50 dark:text-amber-400 dark:hover:bg-amber-950/30"
+                              onClick={() => setSelectedOrderForReview(order)}
+                            >
+                              <Star className="h-4 w-4" />
+                              Đánh giá ngay
+                            </Button>
+                          )}
                         </div>
                       </div>
                     </div>
@@ -462,6 +476,12 @@ export function BuyerOrdersSection({ buyerId }: BuyerOrdersSectionProps) {
         onSubmit={(values) =>
           selectedOrderForReceiveConfirm ? handleSubmitReceiveEvidence(selectedOrderForReceiveConfirm, values) : undefined
         }
+      />
+      <ReviewModal
+        isOpen={Boolean(selectedOrderForReview)}
+        orderId={selectedOrderForReview?.id ?? ''}
+        onClose={() => setSelectedOrderForReview(null)}
+        onSuccess={() => void refreshBuyerOrders()}
       />
     </div>
   )
