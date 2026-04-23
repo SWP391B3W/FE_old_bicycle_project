@@ -386,8 +386,7 @@ export default function SellerOrdersPage() {
 
                       {canCancelOpenOrder(order, nowMs) && (
                         <Button
-                          variant="outline"
-                          className="gap-1.5 border-red-200 text-red-600 hover:bg-red-50 hover:text-red-700 dark:border-red-900/50 dark:text-red-400 dark:hover:bg-red-950/30"
+                          className="gap-1.5 bg-rose-600 text-white shadow-sm hover:bg-rose-700 active:bg-rose-800"
                           onClick={() => void runOrderAction(order, 'cancel')}
                           disabled={actionLoadingKey === `cancel:${order.id}`}
                         >
