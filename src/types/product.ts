@@ -64,6 +64,10 @@ export interface Product {
   sellerActionLocked?: boolean
   currentUserHasPendingOrder?: boolean
   isFavorite?: boolean
+  isHidden?: boolean
+  isReported?: boolean
+  sellerId?: string
+  locationName?: string
   inspection?: ProductInspectionInfo | null
 
   // Legacy schema (existing pages)
@@ -92,6 +96,7 @@ export interface ProductFilterRequest {
   province?: string
   district?: string
   ward?: string
+  sellerId?: string
   hasInspection?: boolean
   sortBy?: string
 }

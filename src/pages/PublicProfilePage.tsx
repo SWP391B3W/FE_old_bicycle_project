@@ -168,7 +168,7 @@ export default function PublicProfilePage() {
                         ))}
                       </div>
                       <p className="text-sm font-medium line-clamp-2 italic">"{review.comment}"</p>
-                      <p className="text-xs text-muted-foreground">— {review.buyerName}</p>
+                      <p className="text-xs text-muted-foreground">— {review.reviewerName}</p>
                     </div>
                   ))
                 )}

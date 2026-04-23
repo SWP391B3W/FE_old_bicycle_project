@@ -10,6 +10,8 @@ export interface Review {
   revieweeName: string;
   rating: number;
   comment: string;
+  content?: string; // Alias for comment in some components
+  buyerName?: string; // Alias for reviewerName in some components
   sellerReply?: string;
   sellerRepliedAt?: string;
   createdAt: string;

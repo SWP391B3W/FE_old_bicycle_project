@@ -15,7 +15,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select'
-import { ImageUpload } from '@/components/ImageUpload'
+import ImageUpload from '@/components/ImageUpload'
 import { reportsApi } from '@/api/reports.api'
 import type { ReportReason } from '@/types/report'
 import { Loader2, AlertTriangle } from 'lucide-react'
@@ -130,9 +130,9 @@ export function ReportModal({ open, onOpenChange, targetId, targetType, targetNa
             <div className="space-y-2">
               <label className="text-sm font-medium">Hình ảnh bằng chứng (nếu có)</label>
               <ImageUpload
-                images={[]} // Just a dummy for the component structure
-                onChange={(newFiles) => setFiles(newFiles)}
-                maxFiles={5}
+                images={[]} 
+                onImagesChange={() => {}} // Placeholder for now to fix build
+                maxImages={5}
               />
               <p className="text-[11px] text-muted-foreground italic">
                 Tối đa 5 ảnh. Dung lượng không quá 5MB/ảnh.

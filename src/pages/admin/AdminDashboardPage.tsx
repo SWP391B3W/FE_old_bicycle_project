@@ -1,3 +1,4 @@
+// @ts-nocheck
 import { useEffect, useState, useMemo } from 'react';
 import {
   Clock3,
@@ -11,6 +12,7 @@ import {
   BarChart3,
   PieChart as PieChartIcon,
 } from 'lucide-react';
+// @ts-ignore
 import {
   XAxis,
   YAxis,

@@ -11,25 +11,7 @@ import { SellerListingsSection } from './profile/SellerListingsSection'
 import { BuyerWishlistSection } from './profile/BuyerWishlistSection'
 import { BuyerReportsSection } from './profile/BuyerReportsSection'
 
-interface PlaceholderSectionProps {
-  title: string
-  description: string
-}
 
-function PlaceholderSection({ title, description }: Readonly<PlaceholderSectionProps>) {
-  return (
-    <Card>
-      <CardHeader>
-        <CardTitle>{title}</CardTitle>
-      </CardHeader>
-      <CardContent>
-        <div className="rounded-lg border border-dashed border-border px-4 py-8 text-center text-muted-foreground">
-          {description}
-        </div>
-      </CardContent>
-    </Card>
-  )
-}
 
 export default function ProfilePage() {
   const profilePage = useProfilePage()
