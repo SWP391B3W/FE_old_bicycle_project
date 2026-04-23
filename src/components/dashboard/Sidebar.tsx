@@ -114,5 +114,5 @@ export const inspectorNavItems: NavItem[] = [
 export const sellerNavItems: NavItem[] = [
   { icon: LayoutDashboard, label: 'Tổng quan', href: ROUTES.SELLER },
   { icon: Package, label: 'Quản lý tin đăng', href: ROUTES.SELLER_LISTINGS },
-  { icon: ShoppingBag, label: 'Quản lý đơn cọc', href: ROUTES.SELLER_ORDERS },
+  { icon: ShoppingBag, label: 'Quản lý đơn hàng', href: ROUTES.SELLER_ORDERS },
 ]
