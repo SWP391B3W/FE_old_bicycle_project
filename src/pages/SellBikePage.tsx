@@ -772,12 +772,12 @@ export default function SellBikePage() {
                 <span className="mt-0.5 text-xl leading-none">⚠️</span>
                 <div className="text-sm">
                   <p className="font-bold text-red-600 dark:text-red-400">
-                    Lưu ý quan trọng: Không thể chỉnh sửa sau khi đăng!
+                    Lưu ý: Sau khi Inspector kiểm định xong, bạn sẽ không thể chỉnh sửa!
                   </p>
                   <p className="mt-1 text-red-600/80 dark:text-red-400/80">
-                    Để đảm bảo minh bạch và chống gian lận, bạn sẽ{' '}
-                    <strong>KHÔNG THỂ</strong> chỉnh sửa thông tin, hình ảnh hay mức giá sau khi bấm Đăng tin.
-                    Vui lòng kiểm tra kỹ trước khi xác nhận.
+                    Bạn có thể chỉnh sửa tin trong lúc đang chờ Inspector. Tuy nhiên khi Inspector đã duyệt,
+                    thông tin sẽ bị <strong>khóa vĩnh viễn</strong> để đảm bảo minh bạch và chống gian lận.
+                    Vui lòng kiểm tra kỹ hình ảnh và giá bán trước khi đăng.
                   </p>
                 </div>
               </div>

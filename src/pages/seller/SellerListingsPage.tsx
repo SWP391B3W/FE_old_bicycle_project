@@ -6,6 +6,7 @@ import {
   EyeOff,
   Loader2,
   Package,
+  PenSquare,
   PlusCircle,
   Search,
   Trash2,
@@ -14,7 +15,7 @@ import { Link } from 'react-router-dom'
 import { productsApi } from '@/api/products.api'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
-import { ROUTES } from '@/constants/routes'
+import { ROUTES, buildRoute } from '@/constants/routes'
 import { formatPriceDisplay } from '@/lib/currency-input'
 import { getProductTimelineEntries } from '@/lib/product-visibility'
 import type { Product } from '@/types/product'
@@ -184,6 +185,11 @@ export default function SellerListingsPage() {
                 filteredProducts.map((product) => {
                   const isActing = actionLoading === product.id
 
+                  // Only allow editing while waiting for inspector — once inspected, listing is locked
+                  const canEdit =
+                    product.status === 'pending_inspection' &&
+                    !product.sellerActionLocked
+
                   const canDelete =
                     product.status !== 'sold' &&
                     product.status !== 'pending_inspection' &&
@@ -258,6 +264,13 @@ export default function SellerListingsPage() {
                             <Loader2 className="h-5 w-5 animate-spin text-muted-foreground" />
                           ) : (
                             <>
+                              {canEdit && (
+                                <Link to={buildRoute.sellerEditProduct(product.id)}>
+                                  <Button variant="ghost" size="icon" title="Chỉnh sửa (trước khi kiểm định)">
+                                    <PenSquare className="h-4 w-4" />
+                                  </Button>
+                                </Link>
+                              )}
                               {canHide && (
                                 <Button
                                   variant="ghost"
