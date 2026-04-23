@@ -167,15 +167,7 @@ export default function AdminUsersPage() {
             header: 'Trạng thái',
             cell: ({ row }) => <StatusBadge status={row.original.status as any} />,
         },
-        {
-            accessorKey: 'isVerified',
-            header: 'Đã xác minh',
-            cell: ({ row }) => (
-                <span className={row.original.isVerified ? 'text-green-500 text-sm' : 'text-muted-foreground text-sm'}>
-                    {row.original.isVerified ? 'Đã xác minh' : 'Chưa xác minh'}
-                </span>
-            ),
-        },
+
         {
             accessorKey: 'createdAt',
             header: 'Ngày đăng ký',
