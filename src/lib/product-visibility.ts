@@ -64,13 +64,27 @@ export function getProductTimelineEntries(product: Product, now = new Date()): P
   const timelineEntries: ProductTimelineEntry[] = []
   const inspectionValidUntil = formatProductDateTime(product.inspection?.validUntil)
   const listingExpiresAt = formatProductDateTime(product.expiresAt)
+  const isExpired = hasExpiredInspection(product, now)
+
+  // When status is pending/pending_inspection, the inspection was intentionally invalidated
+  // by the system as part of the edit/show flow — don't alarm seller with "hết hạn"
+  const isAwaitingReview =
+    product.status === 'pending' || product.status === 'pending_inspection'
 
   if (inspectionValidUntil) {
-    timelineEntries.push({
-      label: hasExpiredInspection(product, now) ? 'Kiểm định hết hạn' : 'Hạn kiểm định',
-      value: inspectionValidUntil,
-      tone: hasExpiredInspection(product, now) ? 'warning' : 'neutral',
-    })
+    if (isAwaitingReview) {
+      timelineEntries.push({
+        label: 'Kiểm định',
+        value: 'Chờ kiểm định lại',
+        tone: 'neutral',
+      })
+    } else {
+      timelineEntries.push({
+        label: isExpired ? 'Kiểm định hết hạn' : 'Hạn kiểm định',
+        value: inspectionValidUntil,
+        tone: isExpired ? 'warning' : 'neutral',
+      })
+    }
   }
 
   if (listingExpiresAt) {
@@ -83,6 +97,7 @@ export function getProductTimelineEntries(product: Product, now = new Date()): P
 
   return timelineEntries
 }
+
 
 export function getPublicVisibilityHint(product: Product, now = new Date()): string | null {
   if (!isBlockedFromPublicVisibility(product)) {
