@@ -17,7 +17,7 @@ import { referenceDataApi } from '@/api/reference-data.api'
 import { Button } from '@/components/ui/button'
 import { buildRoute, ROUTES } from '@/constants/routes'
 import { useAuth } from '@/contexts/AuthContext'
-import { canAccessSellerEntry, getSellEntryHref } from '@/layouts/app-header-visibility'
+
 import { formatCurrencyInput, formatPriceDisplay, parseCurrencyInput } from '@/lib/currency-input'
 import { getPrimaryImage, getProductConditionLabel, getProductLocation } from '@/pages/home/home.utils'
 import type { Product } from '@/types/product'
@@ -129,7 +129,7 @@ function SkeletonCard() {
 function BikeCard({ bike, viewMode }: Readonly<{ bike: Product; viewMode: 'grid' | 'list' }>) {
   const imageUrl = getPrimaryImage(bike)
   const categoryLabel = bike.categoryName ?? bike.category ?? 'Xe đạp'
-  const brandLabel = bike.brandName ?? bike.brand ?? 'Chưa cập nhật'
+  // const brandLabel = bike.brandName ?? bike.brand ?? 'Chưa cập nhật'
   const conditionLabel = getProductConditionLabel(bike.condition) ?? 'Chưa cập nhật'
   const locationLabel = getProductLocation(bike)
 
@@ -219,6 +219,8 @@ export default function MarketPage() {
   const [isLoading, setIsLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
   const [viewMode, setViewMode] = useState<'grid' | 'list'>('grid')
+  const sellEntryHref = ROUTES.SELLER
+  const sellEntryLabel = 'Quản lý cửa hàng'
   const debounceRef = useRef<ReturnType<typeof setTimeout> | null>(null)
 
   const minPrice = parseCurrencyInput(minPriceInput)

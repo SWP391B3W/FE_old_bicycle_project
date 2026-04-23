@@ -12,7 +12,7 @@ import {
   getPaymentMethodLabel,
   getPaymentOptionLabel,
 } from '@/lib/order-display'
-import type { Order, OrderFundingStatus, OrderStatus } from '@/types/order'
+import type { Order } from '@/types/order'
 
 type StatusFilter =
   | 'Tất cả trạng thái đơn'

@@ -12,8 +12,6 @@ import {
   PieChart as PieChartIcon,
 } from 'lucide-react';
 import {
-  AreaChart,
-  Area,
   XAxis,
   YAxis,
   CartesianGrid,
@@ -73,7 +71,7 @@ export default function AdminDashboardPage() {
     const monthlyOrders = stats.monthlyOrders ?? {};
     
     // Generate last 6 months keys
-    const last6Months = [];
+    const last6Months: string[] = [];
     for (let i = 5; i >= 0; i--) {
       const d = new Date();
       d.setMonth(d.getMonth() - i);

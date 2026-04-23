@@ -251,9 +251,20 @@ export default function BikeDetailPage() {
               </div>
               <div className="space-y-3">
                 {isBuyer ? (
-                  <Button asChild className="h-11 w-full bg-sky-600 text-white hover:bg-sky-500">
-                    <Link to={buildRoute.checkout(bike.id)}>Mua ngay</Link>
-                  </Button>
+                  bike.currentUserHasPendingOrder ? (
+                    <div className="space-y-2">
+                      <Button disabled className="h-11 w-full bg-slate-200 text-slate-500 cursor-not-allowed">
+                        Đã gửi yêu cầu mua
+                      </Button>
+                      <p className="text-center text-xs text-amber-600">
+                        Bạn đã có một yêu cầu mua đang chờ xử lý cho chiếc xe này.
+                      </p>
+                    </div>
+                  ) : (
+                    <Button asChild className="h-11 w-full bg-sky-600 text-white hover:bg-sky-500">
+                      <Link to={buildRoute.checkout(bike.id)}>Mua ngay</Link>
+                    </Button>
+                  )
                 ) : null}
                 {showSellerButton ? (
                   <Button

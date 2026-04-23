@@ -79,7 +79,7 @@ export function getSellerListingStatusPresentation(product: Product): SellerList
   }
 
   return {
-    label: product.status,
+    label: product.status ?? 'unknown',
     className: 'bg-gray-100 text-gray-600',
     isPubliclyVisible: false,
   }

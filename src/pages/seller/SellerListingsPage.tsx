@@ -201,17 +201,22 @@ export default function SellerListingsPage() {
                     <tr key={product.id} className="border-b transition-colors hover:bg-muted/50">
                       <td className="p-4 align-middle">
                         <div className="flex items-center gap-3">
-                          {product.images?.[0]?.url ? (
-                            <img
-                              src={product.images[0].url}
-                              alt={product.title}
-                              className="h-10 w-10 shrink-0 rounded object-cover"
-                            />
-                          ) : (
-                            <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded bg-secondary/50">
-                              <Package className="h-5 w-5 text-muted-foreground" />
-                            </div>
-                          )}
+                          {(() => {
+                            const firstImage = product.images?.[0]
+                            const imageUrl = typeof firstImage === 'string' ? firstImage : firstImage?.url
+                            
+                            return imageUrl ? (
+                              <img
+                                src={imageUrl}
+                                alt={product.title}
+                                className="h-10 w-10 shrink-0 rounded object-cover"
+                              />
+                            ) : (
+                              <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded bg-secondary/50">
+                                <Package className="h-5 w-5 text-muted-foreground" />
+                              </div>
+                            )
+                          })()}
                           <div className="min-w-0 flex-1">
                             <p className="line-clamp-1 font-medium text-foreground">{product.title}</p>
                             <p className="truncate text-xs text-muted-foreground">#{product.id.slice(0, 8)}</p>
@@ -244,7 +249,7 @@ export default function SellerListingsPage() {
                         </span>
                       </td>
                       <td className="hidden whitespace-nowrap p-4 align-middle text-muted-foreground md:table-cell">
-                        {formatDate(product.createdAt)}
+                        {product.createdAt ? formatDate(product.createdAt) : '—'}
                       </td>
                       <td className="p-4 align-middle text-right">
                         <div className="flex justify-end gap-1">

@@ -105,7 +105,7 @@ export default function MessagesPage() {
   const [inputValue, setInputValue] = useState('')
   const [isTyping, setIsTyping] = useState(false)
   const viewportRef = useRef<HTMLDivElement | null>(null)
-  const typingTimeoutRef = useRef<number | null>(null)
+  const typingTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null)
 
   useEffect(() => {
     if (!viewportRef.current) {

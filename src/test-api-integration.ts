@@ -109,7 +109,7 @@ export async function testRefreshToken() {
 
 // ========== PRODUCT TESTS ==========
 
-export async function testGetProducts(filters?: { category?: string; minPrice?: number; maxPrice?: number }) {
+export async function testGetProducts(_filters?: { category?: string; minPrice?: number; maxPrice?: number }) {
   console.log('\n📦 Testing Get Products...')
   const result = await testEndpoint('GET', '/api/products', undefined, {})
   console.log('✅ Get products success:', result)

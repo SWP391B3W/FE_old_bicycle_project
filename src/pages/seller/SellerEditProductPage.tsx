@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react'
 import { useNavigate, useParams } from 'react-router-dom'
-import { ArrowLeft, Info, Loader2, Upload, X } from 'lucide-react'
+import { ArrowLeft, Info, Loader2, Upload, X, CircleCheck } from 'lucide-react'
 import { productsApi } from '@/api/products.api'
 import { referenceDataApi } from '@/api/reference-data.api'
 import { AdministrativeLocationFields } from '@/components/AdministrativeLocationFields'
@@ -392,7 +392,7 @@ export default function SellerEditProductPage() {
                   step >= item.num ? 'bg-primary text-primary-foreground' : 'bg-muted text-muted-foreground',
                 )}
               >
-                {step > item.num ? <CheckCircle2 className="h-5 w-5" /> : item.num}
+                {step > item.num ? <CircleCheck className="h-5 w-5" /> : item.num}
               </div>
 
               <span
@@ -481,7 +481,6 @@ export default function SellerEditProductPage() {
               <div className="grid gap-4 sm:grid-cols-2">
                 <div className="space-y-2">
                   <label className="text-sm font-medium">Size khung</label>
-                  <div className="flex flex-wrap gap-2">
                     {FRAME_SIZES.map((frameSize) => (
                       <Button
                         key={frameSize}
@@ -493,7 +492,6 @@ export default function SellerEditProductPage() {
                         {frameSize}
                       </Button>
                     ))}
-                  </div>
                 </div>
 
                 <div className="space-y-2">

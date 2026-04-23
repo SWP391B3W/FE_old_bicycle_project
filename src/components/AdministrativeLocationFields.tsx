@@ -107,8 +107,8 @@ export function AdministrativeLocationFields({
     }
   }, [selectedProvinceOption])
 
-  const provinceSelectValue = (selectedProvinceOption?.name ?? normalizedProvince) || null
-  const districtSelectValue = (selectedDistrictOption?.name ?? normalizedDistrict) || null
+  const provinceSelectValue = (selectedProvinceOption?.name ?? normalizedProvince) || ''
+  const districtSelectValue = (selectedDistrictOption?.name ?? normalizedDistrict) || ''
   const hasProvince = normalizedProvince.length > 0
   let districtPlaceholder = 'Quận / huyện'
   if (hasProvince) {
@@ -124,7 +124,8 @@ export function AdministrativeLocationFields({
         <Select
           value={provinceSelectValue}
           onValueChange={(value) => {
-            const nextProvince = value === EMPTY_LOCATION_VALUE ? '' : value
+            const val = value as string
+            const nextProvince = val === EMPTY_LOCATION_VALUE ? '' : val
             onProvinceChange(nextProvince)
             onDistrictChange('')
           }}
@@ -155,7 +156,8 @@ export function AdministrativeLocationFields({
         <Select
           value={districtSelectValue}
           onValueChange={(value) => {
-            onDistrictChange(value === EMPTY_LOCATION_VALUE ? '' : value)
+            const val = value as string
+            onDistrictChange(val === EMPTY_LOCATION_VALUE ? '' : val)
           }}
           disabled={!hasProvince || districtOptionsLoading}
         >

@@ -66,7 +66,7 @@ export default function SellerDashboardPage() {
   }, [user?.id])
 
   const activeListings = products.filter((product) => getSellerListingStatusPresentation(product).isPubliclyVisible).length
-  const pendingListings = products.filter((product) => product.status === 'pending').length
+  const pendingListings = products.filter((product) => (product.status ?? 'unknown') === 'pending').length
   const incomingRequests = orders.filter((order) => canSellerAcceptOrder(order))
   const acceptedWaitingPayment = orders.filter(
     (order) => order.status === 'pending' && order.fundingStatus === 'awaiting_payment',
@@ -167,23 +167,28 @@ export default function SellerDashboardPage() {
 
                 return (
                   <div key={product.id} className="flex items-center gap-3">
-                    {product.images?.[0]?.url ? (
-                      <img
-                        src={product.images[0].url}
-                        alt={product.title}
-                        className="h-10 w-10 shrink-0 rounded-md border bg-muted object-cover"
-                        onError={(event) => {
-                          event.currentTarget.style.display = 'none'
-                        }}
-                      />
-                    ) : (
-                      <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-md bg-muted text-xs text-muted-foreground">
-                        Xe
-                      </div>
-                    )}
+                    {(() => {
+                      const firstImage = product.images?.[0]
+                      const imageUrl = typeof firstImage === 'string' ? firstImage : firstImage?.url
+                      
+                      return imageUrl ? (
+                        <img
+                          src={imageUrl}
+                          alt={product.title}
+                          className="h-10 w-10 shrink-0 rounded-md border bg-muted object-cover"
+                          onError={(event) => {
+                            event.currentTarget.style.display = 'none'
+                          }}
+                        />
+                      ) : (
+                        <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-md bg-muted text-xs text-muted-foreground">
+                          Xe
+                        </div>
+                      )
+                    })()}
                     <div className="min-w-0 flex-1">
                       <p className="truncate text-sm font-medium">{product.title}</p>
-                      <p className="text-xs text-muted-foreground">{formatDate(product.createdAt)}</p>
+                      <p className="text-xs text-muted-foreground">{product.createdAt ? formatDate(product.createdAt) : '—'}</p>
                     </div>
                     <span
                       className={`shrink-0 rounded-full px-2 py-0.5 text-xs font-medium ${statusPresentation.className}`}

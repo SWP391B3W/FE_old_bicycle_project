@@ -18,7 +18,7 @@ interface PaymentPageState {
   shippingFee?: number
 }
 
-const SHIPPING_FEE_PENDING_LABEL = 'Đang tính toán...'
+
 
 function toImageUrl(image: string | { url: string }) {
   return typeof image === 'string' ? image : image.url

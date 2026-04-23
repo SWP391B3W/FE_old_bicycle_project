@@ -62,6 +62,7 @@ export interface Product {
   isVerified?: boolean
   lockedForTransaction?: boolean
   sellerActionLocked?: boolean
+  currentUserHasPendingOrder?: boolean
   inspection?: ProductInspectionInfo | null
 
   // Legacy schema (existing pages)
