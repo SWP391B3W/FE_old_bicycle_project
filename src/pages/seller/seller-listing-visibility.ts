@@ -19,10 +19,10 @@ export function getSellerListingStatusPresentation(product: Product): SellerList
 
   if (product.status === 'pending_inspection') {
     return {
-      label: 'Đang kiểm định',
+      label: 'Chờ kiểm định',
       className: 'bg-sky-100 text-sky-800 dark:bg-sky-900/40 dark:text-sky-300',
       isPubliclyVisible: false,
-      hint: 'Xe đang được inspector đánh giá thực tế.',
+      hint: 'Tin đăng đang trong hàng chờ kiểm định. Inspector sẽ đánh giá thực tế xe của bạn.',
     }
   }
 
