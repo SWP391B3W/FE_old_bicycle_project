@@ -111,6 +111,8 @@ export interface Order {
   status: OrderStatus
   createdAt: string
   updatedAt: string
+  productStatus?: string
+  productIsVerified?: boolean
 }
 
 export interface OrderCreateRequest {
