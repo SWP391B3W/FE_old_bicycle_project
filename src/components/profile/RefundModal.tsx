@@ -11,7 +11,8 @@ import { Button } from '@/components/ui/button'
 import { Textarea } from '@/components/ui/textarea'
 import ImageUpload from '@/components/ImageUpload'
 import { refundsApi } from '@/api/refunds.api'
-import { Loader2, RotateCcw } from 'lucide-react'
+import { Loader2, RotateCcw, AlertTriangle } from 'lucide-react'
+import { Link } from 'react-router-dom'
 import type { Order } from '@/types/order'
 
 interface RefundModalProps {
@@ -19,6 +20,7 @@ interface RefundModalProps {
   onOpenChange: (open: boolean) => void
   order: Order
   onSuccess: () => void
+  payoutProfileReady?: boolean
 }
 
 // Helper to convert base64 to File
@@ -34,7 +36,7 @@ function base64ToFile(base64String: string, filename: string): File {
   return new File([u8arr], filename, { type: mime })
 }
 
-export function RefundModal({ open, onOpenChange, order, onSuccess }: Readonly<RefundModalProps>) {
+export function RefundModal({ open, onOpenChange, order, onSuccess, payoutProfileReady = false }: Readonly<RefundModalProps>) {
   const [reason, setReason] = useState('')
   const [evidenceNote, setEvidenceNote] = useState('')
   const [imagePreviews, setImagePreviews] = useState<string[]>([])
@@ -110,7 +112,28 @@ export function RefundModal({ open, onOpenChange, order, onSuccess }: Readonly<R
           </DialogDescription>
         </DialogHeader>
 
-        {success ? (
+        {!payoutProfileReady ? (
+          <div className="space-y-4 py-2">
+            <div className="flex items-start gap-3 rounded-lg border border-amber-200 bg-amber-50 p-4">
+              <AlertTriangle className="mt-0.5 h-5 w-5 shrink-0 text-amber-600" />
+              <div className="space-y-1">
+                <p className="text-sm font-semibold text-amber-900">Chưa có thông tin ngân hàng</p>
+                <p className="text-sm text-amber-800">
+                  Bạn cần cập nhật thông tin tài khoản ngân hàng trước khi yêu cầu hoàn tiền.
+                  Admin cần thông tin này để chuyển tiền hoàn lại cho bạn.
+                </p>
+              </div>
+            </div>
+            <div className="flex justify-end gap-3">
+              <Button variant="ghost" onClick={handleClose}>Hủy</Button>
+              <Link to="/profile?tab=payouts">
+                <Button className="bg-amber-600 hover:bg-amber-700 text-white" onClick={handleClose}>
+                  Cập nhật thông tin ngân hàng
+                </Button>
+              </Link>
+            </div>
+          </div>
+        ) : success ? (
           <div className="flex flex-col items-center justify-center py-8 text-center text-green-600">
             <div className="mb-4 flex h-12 w-12 items-center justify-center rounded-full bg-green-100">
               <svg className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">

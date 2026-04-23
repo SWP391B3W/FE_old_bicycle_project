@@ -64,12 +64,26 @@ export function getProductTimelineEntries(product: Product, now = new Date()): P
   const timelineEntries: ProductTimelineEntry[] = []
   const inspectionValidUntil = formatProductDateTime(product.inspection?.validUntil)
   const listingExpiresAt = formatProductDateTime(product.expiresAt)
+  const isExpired = hasExpiredInspection(product, now)
 
-  if (inspectionValidUntil) {
+  // When status is pending/pending_inspection, the inspection was intentionally invalidated
+  // by the system as part of the edit/show flow — show neutral 'awaiting' info instead
+  const isAwaitingReview =
+    product.status === 'pending' || product.status === 'pending_inspection'
+
+  if (isAwaitingReview) {
+    // Always show re-inspection notice when in review queue (even if validUntil is null)
     timelineEntries.push({
-      label: hasExpiredInspection(product, now) ? 'Kiểm định hết hạn' : 'Hạn kiểm định',
+      label: 'Kiểm định',
+      value: 'Chờ kiểm định lại',
+      tone: 'neutral',
+    })
+  } else if (inspectionValidUntil) {
+    // Only show inspection expiry info when product is active/visible
+    timelineEntries.push({
+      label: isExpired ? 'Kiểm định hết hạn' : 'Hạn kiểm định',
       value: inspectionValidUntil,
-      tone: hasExpiredInspection(product, now) ? 'warning' : 'neutral',
+      tone: isExpired ? 'warning' : 'neutral',
     })
   }
 
@@ -83,6 +97,8 @@ export function getProductTimelineEntries(product: Product, now = new Date()): P
 
   return timelineEntries
 }
+
+
 
 export function getPublicVisibilityHint(product: Product, now = new Date()): string | null {
   if (!isBlockedFromPublicVisibility(product)) {
