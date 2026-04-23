@@ -122,11 +122,17 @@ export function ReportModal({ open, onOpenChange, targetId, targetType, targetNa
           <div className="space-y-5 py-2">
             <div className="space-y-2">
               <label className="text-sm font-medium">Lý do báo cáo</label>
-              <Select value={reason} onValueChange={(val) => setReason(val as ReportReason)}>
+              <Select 
+                value={reason || undefined} 
+                onValueChange={(val) => {
+                  console.log('Selected reason:', val);
+                  setReason(val as ReportReason);
+                }}
+              >
                 <SelectTrigger className="w-full">
                   <SelectValue placeholder="Chọn lý do vi phạm" />
                 </SelectTrigger>
-                <SelectContent>
+                <SelectContent position="popper" className="z-[9999]">
                   {REASON_OPTIONS.map((opt) => (
                     <SelectItem key={opt.value} value={opt.value}>
                       {opt.label}
