@@ -354,8 +354,6 @@ export default function AdminUsersPage() {
                                 ['Đơn đã bán', activityDialog.data.totalOrdersAsSeller],
                                 ['Báo cáo đã gửi', activityDialog.data.totalReportsSubmitted],
                                 ['Wishlist', activityDialog.data.totalWishlistItems],
-                                ['Cuộc hội thoại', activityDialog.data.totalConversations],
-                                ['Thông báo chưa đọc', activityDialog.data.unreadNotifications],
                             ].map(([label, val]) => (
                                 <div key={String(label)} className="flex justify-between border-b border-border pb-1">
                                     <span className="text-muted-foreground">{label}</span>

@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useMemo } from 'react';
 import {
   Clock3,
   DollarSign,
@@ -8,7 +8,24 @@ import {
   ShoppingCart,
   TrendingUp,
   Users,
+  BarChart3,
+  PieChart as PieChartIcon,
 } from 'lucide-react';
+import {
+  AreaChart,
+  Area,
+  XAxis,
+  YAxis,
+  CartesianGrid,
+  Tooltip,
+  ResponsiveContainer,
+  BarChart,
+  Bar,
+  PieChart,
+  Pie,
+  Cell,
+  Legend,
+} from 'recharts';
 import { StatCard } from '@/components/dashboard/StatCard';
 import { dashboardApi } from '@/api/dashboard.api';
 import type { DashboardStats } from '@/types/dashboard';
@@ -25,6 +42,13 @@ function formatCurrency(value: number) {
   return `${value} đ`;
 }
 
+function formatFullCurrency(value: number) {
+  return new Intl.NumberFormat('vi-VN', {
+    style: 'currency',
+    currency: 'VND',
+  }).format(value);
+}
+
 export default function AdminDashboardPage() {
   const [stats, setStats] = useState<DashboardStats | null>(null);
   const [loading, setLoading] = useState(true);
@@ -39,6 +63,51 @@ export default function AdminDashboardPage() {
   }, []);
 
   const currentMonthKey = getCurrentMonthKey();
+
+  // Memoized data for charts
+  const chartData = useMemo(() => {
+    if (!stats) return [];
+    
+    const monthlyGmv = stats.monthlyGmv ?? stats.monthlyRevenue ?? {};
+    const monthlyRevenue = stats.monthlyRecognizedPlatformRevenue ?? {};
+    const monthlyOrders = stats.monthlyOrders ?? {};
+    
+    // Generate last 6 months keys
+    const last6Months = [];
+    for (let i = 5; i >= 0; i--) {
+      const d = new Date();
+      d.setMonth(d.getMonth() - i);
+      const m = `${d.getMonth() + 1}`.padStart(2, '0');
+      last6Months.push(`${d.getFullYear()}-${m}`);
+    }
+    
+    // Get all unique month keys (merging last 6 months with any other existing data)
+    const allMonths = Array.from(new Set([
+      ...last6Months,
+      ...Object.keys(monthlyGmv),
+      ...Object.keys(monthlyRevenue),
+      ...Object.keys(monthlyOrders)
+    ])).sort();
+
+    return allMonths.map(month => {
+      const [year, m] = month.split('-');
+      return {
+        name: `T${m}/${year}`,
+        gmv: monthlyGmv[month] || 0,
+        revenue: monthlyRevenue[month] || 0,
+        orders: monthlyOrders[month] || 0,
+      };
+    });
+  }, [stats]);
+
+  const inspectionData = useMemo(() => {
+    if (!stats) return [];
+    return [
+      { name: 'Đạt', value: stats.passedInspections, color: '#10b981' },
+      { name: 'Không đạt', value: stats.failedInspections, color: '#ef4444' },
+    ];
+  }, [stats]);
+
   const monthlyGmv = stats?.monthlyGmv ?? stats?.monthlyRevenue ?? {};
   const monthlyRecognizedPlatformRevenue = stats?.monthlyRecognizedPlatformRevenue ?? {};
   const currentMonthlyGmv = monthlyGmv[currentMonthKey] ?? 0;
@@ -89,11 +158,11 @@ export default function AdminDashboardPage() {
     : [];
 
   return (
-    <div className="space-y-6">
-      <div>
-        <h2 className="text-2xl font-bold text-foreground">Tổng quan</h2>
+    <div className="space-y-8 pb-10">
+      <div className="flex flex-col gap-2">
+        <h2 className="text-3xl font-bold tracking-tight text-foreground">Bảng điều khiển</h2>
         <p className="text-muted-foreground">
-          Theo dõi quy mô giao dịch và doanh thu sàn theo đúng nghĩa dữ liệu.
+          Tổng quan về hoạt động kinh doanh, doanh thu và kiểm định trên hệ thống.
         </p>
       </div>
 
@@ -102,101 +171,220 @@ export default function AdminDashboardPage() {
           {[...Array(6)].map((_, index) => (
             <div
               key={index}
-              className="h-28 animate-pulse rounded-lg border border-border bg-card p-4"
+              className="h-32 animate-pulse rounded-xl border border-border bg-card p-4"
             />
           ))}
         </div>
       )}
 
       {error && (
-        <div className="rounded-lg bg-destructive/10 p-4 text-sm text-destructive">
+        <div className="rounded-lg bg-destructive/10 p-4 text-sm text-destructive border border-destructive/20">
           {error}
         </div>
       )}
 
       {!loading && !error && stats && (
         <>
+          {/* Main Stat Cards */}
           <div className="grid grid-cols-1 gap-4 md:grid-cols-2 xl:grid-cols-3">
             {statCards.map((stat) => (
               <StatCard key={stat.title} {...stat} />
             ))}
           </div>
 
-          <div className="grid grid-cols-1 gap-4 xl:grid-cols-4">
-            <div className="rounded-lg border border-border bg-card p-4">
-              <h3 className="font-semibold text-foreground">Kiểm định xe</h3>
-              <div className="mt-3 space-y-2 text-sm">
-                <div className="flex justify-between">
-                  <span className="text-muted-foreground">Tổng kiểm định</span>
-                  <span className="font-medium">{stats.totalInspections}</span>
+          {/* Charts Row 1: GMV & Revenue */}
+          <div className="grid grid-cols-1 gap-6 xl:grid-cols-3">
+            <div className="xl:col-span-2 rounded-xl border border-border bg-card p-6 shadow-sm">
+              <div className="mb-6 flex items-center justify-between">
+                <div>
+                  <h3 className="text-lg font-semibold flex items-center gap-2">
+                    <BarChart3 className="h-5 w-5 text-primary" />
+                    Doanh thu & GMV theo tháng
+                  </h3>
+                  <p className="text-sm text-muted-foreground">Theo dõi tăng trưởng giao dịch và phí sàn</p>
                 </div>
-                <div className="flex justify-between">
-                  <span className="text-green-600">Đạt</span>
-                  <span className="font-medium text-green-600">
-                    {stats.passedInspections}
-                  </span>
+                <div className="flex items-center gap-4 text-sm">
+                  <div className="flex items-center gap-1.5">
+                    <div className="h-3 w-3 rounded-full bg-primary" />
+                    <span>GMV</span>
+                  </div>
+                  <div className="flex items-center gap-1.5">
+                    <div className="h-3 w-3 rounded-full bg-emerald-500" />
+                    <span>Doanh thu</span>
+                  </div>
                 </div>
-                <div className="flex justify-between">
-                  <span className="text-red-600">Không đạt</span>
-                  <span className="font-medium text-red-600">
-                    {stats.failedInspections}
-                  </span>
-                </div>
+              </div>
+              <div className="h-[350px] w-full">
+                <ResponsiveContainer width="100%" height="100%">
+                  <BarChart data={chartData} margin={{ top: 10, right: 10, left: 0, bottom: 0 }} barGap={8}>
+                    <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="hsl(var(--border))" />
+                    <XAxis 
+                      dataKey="name" 
+                      axisLine={false} 
+                      tickLine={false} 
+                      tick={{ fill: 'hsl(var(--muted-foreground))', fontSize: 12 }} 
+                    />
+                    <YAxis 
+                      axisLine={false} 
+                      tickLine={false} 
+                      tickFormatter={(value) => formatCurrency(value)}
+                      tick={{ fill: 'hsl(var(--muted-foreground))', fontSize: 12 }} 
+                    />
+                    <Tooltip 
+                      cursor={{ fill: 'hsl(var(--muted)/0.2)' }}
+                      contentStyle={{ 
+                        backgroundColor: 'hsl(var(--card))', 
+                        borderColor: 'hsl(var(--border))',
+                        borderRadius: '12px',
+                        color: 'hsl(var(--foreground))',
+                        boxShadow: '0 10px 15px -3px rgb(0 0 0 / 0.1)'
+                      }}
+                      formatter={(value: number) => [formatFullCurrency(value), '']}
+                    />
+                    <Bar 
+                      dataKey="gmv" 
+                      name="GMV"
+                      fill="hsl(var(--primary))" 
+                      radius={[4, 4, 0, 0]}
+                      barSize={32}
+                    />
+                    <Bar 
+                      dataKey="revenue" 
+                      name="Doanh thu"
+                      fill="#10b981" 
+                      radius={[4, 4, 0, 0]}
+                      barSize={32}
+                    />
+                  </BarChart>
+                </ResponsiveContainer>
               </div>
             </div>
 
-            <div className="rounded-lg border border-border bg-card p-4">
-              <div className="flex items-center gap-2">
-                <Flag className="h-4 w-4 text-primary" />
-                <h3 className="font-semibold text-foreground">GMV tháng này</h3>
+            <div className="rounded-xl border border-border bg-card p-6 shadow-sm">
+              <h3 className="text-lg font-semibold mb-6 flex items-center gap-2">
+                <PieChartIcon className="h-5 w-5 text-primary" />
+                Tỷ lệ kiểm định
+              </h3>
+              <div className="h-[250px] w-full">
+                <ResponsiveContainer width="100%" height="100%">
+                  <PieChart>
+                    <Pie
+                      data={inspectionData}
+                      cx="50%"
+                      cy="50%"
+                      innerRadius={60}
+                      outerRadius={80}
+                      paddingAngle={5}
+                      dataKey="value"
+                    >
+                      {inspectionData.map((entry, index) => (
+                        <Cell key={`cell-${index}`} fill={entry.color} />
+                      ))}
+                    </Pie>
+                    <Tooltip 
+                       contentStyle={{ 
+                        backgroundColor: 'hsl(var(--card))', 
+                        borderColor: 'hsl(var(--border))',
+                        borderRadius: '8px',
+                        color: 'hsl(var(--foreground))'
+                      }}
+                    />
+                    <Legend verticalAlign="bottom" height={36}/>
+                  </PieChart>
+                </ResponsiveContainer>
               </div>
-              <p className="mt-3 text-2xl font-bold text-primary">
-                {formatCurrency(currentMonthlyGmv)}
-              </p>
-              <p className="mt-1 text-sm text-muted-foreground">
-                Chỉ lấy tháng hiện tại: {currentMonthKey}
-              </p>
-            </div>
-
-            <div className="rounded-lg border border-border bg-card p-4">
-              <div className="flex items-center gap-2">
-                <TrendingUp className="h-4 w-4 text-primary" />
-                <h3 className="font-semibold text-foreground">
-                  Doanh thu sàn tháng này
-                </h3>
+              <div className="mt-6 space-y-4">
+                <div className="flex items-center justify-between p-3 rounded-lg bg-emerald-500/5 border border-emerald-500/10">
+                  <div className="flex items-center gap-2">
+                    <div className="h-2 w-2 rounded-full bg-emerald-500" />
+                    <span className="text-sm font-medium text-emerald-700">Đạt yêu cầu</span>
+                  </div>
+                  <span className="font-bold text-emerald-700">{stats.passedInspections}</span>
+                </div>
+                <div className="flex items-center justify-between p-3 rounded-lg bg-rose-500/5 border border-rose-500/10">
+                  <div className="flex items-center gap-2">
+                    <div className="h-2 w-2 rounded-full bg-rose-500" />
+                    <span className="text-sm font-medium text-rose-700">Không đạt</span>
+                  </div>
+                  <span className="font-bold text-rose-700">{stats.failedInspections}</span>
+                </div>
               </div>
-              <p className="mt-3 text-2xl font-bold text-primary">
-                {formatCurrency(currentMonthlyPlatformRevenue)}
-              </p>
-              <p className="mt-1 text-sm text-muted-foreground">
-                Chỉ tính phần phí sàn đã được ghi nhận
-              </p>
-            </div>
-
-            <div className="rounded-lg border border-border bg-card p-4">
-              <div className="flex items-center gap-2">
-                <RotateCcw className="h-4 w-4 text-primary" />
-                <h3 className="font-semibold text-foreground">Phí sàn bị reverse</h3>
-              </div>
-              <p className="mt-3 text-2xl font-bold text-primary">
-                {formatCurrency(reversedPlatformFee)}
-              </p>
-              <p className="mt-1 text-sm text-muted-foreground">
-                Đơn hàng tháng này hoàn tất: {currentMonthlyOrders}
-              </p>
             </div>
           </div>
 
-          <div className="rounded-lg border border-border bg-muted/20 p-4">
-            <p className="font-semibold text-foreground">Lưu ý về số liệu</p>
-            <p className="mt-2 text-sm leading-6 text-muted-foreground">
-              GMV là tổng giá trị xe của các giao dịch hoàn tất. Doanh thu sàn chỉ
-              là phần phí sàn đã được ghi nhận sau khi giao dịch settled. Hai con số
-              này không có cùng ý nghĩa.
-            </p>
+          {/* Secondary Stats Row */}
+          <div className="grid grid-cols-1 gap-4 md:grid-cols-3">
+            <div className="rounded-xl border border-border bg-card p-5 shadow-sm hover:shadow-md transition-shadow">
+              <div className="flex items-center gap-3 mb-4">
+                <div className="p-2 bg-primary/10 rounded-lg">
+                  <Flag className="h-5 w-5 text-primary" />
+                </div>
+                <h3 className="font-semibold text-foreground">GMV tháng này</h3>
+              </div>
+              <div className="flex flex-col">
+                <span className="text-3xl font-bold text-primary">
+                  {formatCurrency(currentMonthlyGmv)}
+                </span>
+                <span className="text-xs text-muted-foreground mt-1">
+                   Tháng {currentMonthKey}
+                </span>
+              </div>
+            </div>
+
+            <div className="rounded-xl border border-border bg-card p-5 shadow-sm hover:shadow-md transition-shadow">
+              <div className="flex items-center gap-3 mb-4">
+                <div className="p-2 bg-emerald-500/10 rounded-lg">
+                  <TrendingUp className="h-5 w-5 text-emerald-600" />
+                </div>
+                <h3 className="font-semibold text-foreground">
+                  Doanh thu tháng này
+                </h3>
+              </div>
+              <div className="flex flex-col">
+                <span className="text-3xl font-bold text-emerald-600">
+                  {formatCurrency(currentMonthlyPlatformRevenue)}
+                </span>
+                <span className="text-xs text-muted-foreground mt-1">
+                  Đã ghi nhận trong tháng
+                </span>
+              </div>
+            </div>
+
+            <div className="rounded-xl border border-border bg-card p-5 shadow-sm hover:shadow-md transition-shadow">
+              <div className="flex items-center gap-3 mb-4">
+                <div className="p-2 bg-orange-500/10 rounded-lg">
+                  <RotateCcw className="h-5 w-5 text-orange-600" />
+                </div>
+                <h3 className="font-semibold text-foreground">Phí sàn bị hoàn</h3>
+              </div>
+              <div className="flex flex-col">
+                <span className="text-3xl font-bold text-orange-600">
+                  {formatCurrency(reversedPlatformFee)}
+                </span>
+                <span className="text-xs text-muted-foreground mt-1">
+                  Đơn hàng hoàn tất: {currentMonthlyOrders}
+                </span>
+              </div>
+            </div>
+          </div>
+
+          {/* Data Note */}
+          <div className="rounded-xl border border-border bg-muted/30 p-6 flex items-start gap-4">
+             <div className="p-2 bg-foreground/5 rounded-full mt-1">
+                <Clock3 className="h-4 w-4 text-muted-foreground" />
+             </div>
+             <div>
+                <p className="font-semibold text-foreground">Lưu ý về số liệu</p>
+                <p className="mt-1 text-sm leading-6 text-muted-foreground">
+                  GMV (Gross Merchandise Value) là tổng giá trị xe của các giao dịch hoàn tất. 
+                  Doanh thu sàn là phần phí dịch vụ đã được ghi nhận sau khi giao dịch thành công. 
+                  Dữ liệu được cập nhật theo thời gian thực từ hệ thống.
+                </p>
+             </div>
           </div>
         </>
       )}
     </div>
   );
 }
+
