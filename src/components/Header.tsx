@@ -7,6 +7,7 @@ import { NotificationDropdown } from '@/components/notifications/NotificationDro
 import { useAuth } from '@/contexts/AuthContext'
 import { ROUTES } from '@/constants/routes'
 import { useNotificationUnreadCount } from '@/lib/use-notification-unread-count'
+import { BRAND } from '@/constants/brand'
 import {
   canAccessSellerEntry,
   getAppHeaderNavigation,
@@ -40,7 +41,7 @@ export default function Header() {
       <div className="mx-auto grid max-w-7xl grid-cols-[1fr_auto_1fr] items-center gap-4 px-6 py-4 sm:px-8 lg:px-10">
         <Link to={ROUTES.HOME} className="flex items-center gap-3 justify-self-start">
           <Logo className="h-11 w-11 rounded-xl shadow-none" showText={false} />
-          <span className="text-lg font-semibold tracking-tight text-white">Market Bike</span>
+          <span className="text-lg font-semibold tracking-tight text-white">{BRAND.name}</span>
         </Link>
 
         <div className="hidden items-center gap-2 rounded-full px-1 py-1 text-sm md:flex">

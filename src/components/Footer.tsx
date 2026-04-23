@@ -1,6 +1,7 @@
 import { Link } from 'react-router-dom'
 import { ROUTES } from '@/constants/routes'
 import Logo from '@/components/Logo'
+import { BRAND } from '@/constants/brand'
 import { useAuth } from '@/contexts/AuthContext'
 import { canAccessSellerEntry, getSellEntryHref } from '@/layouts/app-header-visibility'
 
@@ -19,7 +20,7 @@ export default function Footer() {
           <div className="space-y-4">
             <div className="flex items-center gap-3">
               <Logo className="h-10 w-10" showText={false} />
-              <span className="text-lg font-semibold tracking-tight text-white">Market Bike</span>
+              <span className="text-lg font-semibold tracking-tight text-white">{BRAND.name}</span>
             </div>
             <p className="text-sm leading-6 text-slate-400">
               Nền tảng mua bán xe đạp thể thao cũ có kiểm định. Giao dịch an tâm với mọi tin đăng đã được kiểm tra kỹ lưỡng.
@@ -145,7 +146,7 @@ export default function Footer() {
 
         {/* Bottom Footer */}
         <div className="flex flex-col items-center justify-between gap-4 text-center text-sm text-slate-400 sm:flex-row">
-          <p>© {currentYear} Market Bike. Tất cả quyền được bảo lưu.</p>
+          <p>© {currentYear} {BRAND.name}. Tất cả quyền được bảo lưu.</p>
           <div className="flex gap-6">
             <a href="#privacy-footer" className="hover:text-sky-400 transition">
               Bảo mật

@@ -8,6 +8,7 @@ import { Textarea } from '@/components/ui/textarea'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { ROUTES } from '@/constants/routes'
 import { useAuth } from '@/contexts/AuthContext'
+import { shippingApi, type GhnProvince, type GhnDistrict, type GhnWard } from '@/api/shipping.api'
 import type { AppRole } from '@/types/auth'
 import type { CheckoutFormData } from '@/types/order'
 import type { Product } from '@/types/product'
@@ -75,14 +76,122 @@ export default function CheckoutPage() {
   })
   const [isSubmitting, setIsSubmitting] = useState(false)
 
+  // GHN Selection States
+  const [provinces, setProvinces] = useState<GhnProvince[]>([])
+  const [districts, setDistricts] = useState<GhnDistrict[]>([])
+  const [wards, setWards] = useState<GhnWard[]>([])
+
+  const [provinceId, setProvinceId] = useState<number | ''>('')
+  const [districtId, setDistrictId] = useState<number | ''>('')
+  const [wardCode, setWardCode] = useState<string>('')
+  const [specificAddress, setSpecificAddress] = useState('')
+  const [shippingFee, setShippingFee] = useState<number>(0)
+  const [isCalculatingFee, setIsCalculatingFee] = useState(false)
+  const [originDistrictId, setOriginDistrictId] = useState<number | null>(null)
+  const [originWardCode, setOriginWardCode] = useState<string | null>(null)
+
+  // Resolve Product Origin Location
+  useEffect(() => {
+    if (!product || provinces.length === 0) return
+
+    const resolveOrigin = async () => {
+      try {
+        // 1. Find Province
+        const targetProvince = provinces.find(p => 
+          p.ProvinceName.toLowerCase().includes(product.province?.toLowerCase() || '')
+        )
+        if (!targetProvince) return
+
+        // 2. Fetch Districts for that Province
+        const districtList = await shippingApi.getDistricts(targetProvince.ProvinceID)
+        
+        // 3. Find District
+        const targetDistrict = districtList.find(d => 
+          d.DistrictName.toLowerCase().includes(product.district?.toLowerCase() || '')
+        )
+        
+        if (targetDistrict) {
+          setOriginDistrictId(targetDistrict.DistrictID)
+          
+          // 4. Fetch Wards for the District to get a valid starting Ward (required by GHN if shop address is missing)
+          const wardList = await shippingApi.getWards(targetDistrict.DistrictID)
+          if (wardList.length > 0) {
+            setOriginWardCode(wardList[0].WardCode)
+          }
+        }
+      } catch (err) {
+        console.error('Failed to resolve origin location:', err)
+      }
+    }
+
+    resolveOrigin()
+  }, [product, provinces])
+
+  // Load Provinces
+  useEffect(() => {
+    shippingApi.getProvinces().then(setProvinces).catch(console.error)
+  }, [])
+
+  // Load Districts when Province changes
+  useEffect(() => {
+    setDistrictId('')
+    setWardCode('')
+    setDistricts([])
+    setWards([])
+    setShippingFee(0)
+    if (provinceId) {
+      shippingApi.getDistricts(Number(provinceId)).then(setDistricts).catch(console.error)
+    }
+  }, [provinceId])
+
+  // Load Wards when District changes
+  useEffect(() => {
+    setWardCode('')
+    setWards([])
+    setShippingFee(0)
+    if (districtId) {
+      shippingApi.getWards(Number(districtId)).then(setWards).catch(console.error)
+    }
+  }, [districtId])
+
+  // Calculate Shipping Fee when Ward changes
+  useEffect(() => {
+    if (districtId && wardCode) {
+      setIsCalculatingFee(true)
+      shippingApi.calculateFee({
+        from_district_id: originDistrictId || undefined,
+        from_ward_code: originWardCode || undefined,
+        to_district_id: Number(districtId),
+        to_ward_code: String(wardCode),
+        weight: 15000 // 15kg hardcoded for bicycles
+      })
+        .then(res => {
+          if (res && res.total) {
+            setShippingFee(res.total)
+          }
+        })
+        .catch(console.error)
+        .finally(() => setIsCalculatingFee(false))
+    }
+  }, [districtId, wardCode])
+
+  // Construct full delivery address
+  useEffect(() => {
+    const provinceText = provinces.find((p) => p.ProvinceID === Number(provinceId))?.ProvinceName || ''
+    const districtText = districts.find((d) => d.DistrictID === Number(districtId))?.DistrictName || ''
+    const wardText = wards.find((w) => w.WardCode === wardCode)?.WardName || ''
+    const parts = [specificAddress, wardText, districtText, provinceText].filter(Boolean)
+    const fullAddress = parts.join(', ')
+    setFormData((prev) => ({ ...prev, deliveryAddress: fullAddress }))
+  }, [provinceId, districtId, wardCode, specificAddress, provinces, districts, wards])
+
   useEffect(() => {
     setFormData((currentValue) => ({
       ...currentValue,
       deliveryName: currentValue.deliveryName || user?.name || '',
       deliveryPhone: currentValue.deliveryPhone || user?.phone || '',
-      deliveryAddress: currentValue.deliveryAddress || user?.defaultAddress || user?.address || '',
     }))
-  }, [user?.address, user?.defaultAddress, user?.name, user?.phone])
+  }, [user?.name, user?.phone])
 
   useEffect(() => {
     if (!id) {
@@ -213,7 +322,7 @@ export default function CheckoutPage() {
 
     setIsSubmitting(true)
     navigate(`/thanh-toan/${product.id}`, {
-      state: { checkoutData: formData, product },
+      state: { checkoutData: formData, product, shippingFee },
     })
   }
 
@@ -261,19 +370,63 @@ export default function CheckoutPage() {
                   />
                 </div>
 
-                <div>
-                  <Label htmlFor="deliveryAddress" className="text-sm font-medium text-slate-900">
-                    Địa chỉ giao hàng *
-                  </Label>
+                <div className="space-y-4">
+                  <Label className="text-sm font-medium text-slate-900">Địa chỉ giao hàng (GHN) *</Label>
+                  <div className="grid grid-cols-1 gap-4 sm:grid-cols-3">
+                    <select
+                      className="flex h-10 w-full rounded-md border border-slate-300 bg-slate-50 px-3 py-2 text-sm ring-offset-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-sky-400 focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
+                      value={provinceId}
+                      onChange={(e) => setProvinceId(e.target.value ? Number(e.target.value) : '')}
+                      required
+                    >
+                      <option value="">Chọn Tỉnh/Thành</option>
+                      {provinces.map((p) => (
+                        <option key={p.ProvinceID} value={p.ProvinceID}>{p.ProvinceName}</option>
+                      ))}
+                    </select>
+
+                    <select
+                      className="flex h-10 w-full rounded-md border border-slate-300 bg-slate-50 px-3 py-2 text-sm ring-offset-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-sky-400 focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
+                      value={districtId}
+                      onChange={(e) => setDistrictId(e.target.value ? Number(e.target.value) : '')}
+                      disabled={!provinceId}
+                      required
+                    >
+                      <option value="">Chọn Quận/Huyện</option>
+                      {districts.map((d) => (
+                        <option key={d.DistrictID} value={d.DistrictID}>{d.DistrictName}</option>
+                      ))}
+                    </select>
+
+                    <select
+                      className="flex h-10 w-full rounded-md border border-slate-300 bg-slate-50 px-3 py-2 text-sm ring-offset-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-sky-400 focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
+                      value={wardCode}
+                      onChange={(e) => setWardCode(e.target.value)}
+                      disabled={!districtId}
+                      required
+                    >
+                      <option value="">Chọn Phường/Xã</option>
+                      {wards.map((w) => (
+                        <option key={w.WardCode} value={w.WardCode}>{w.WardName}</option>
+                      ))}
+                    </select>
+                  </div>
+
                   <Textarea
-                    id="deliveryAddress"
-                    name="deliveryAddress"
-                    value={formData.deliveryAddress}
-                    onChange={handleInputChange}
-                    placeholder="Nhập địa chỉ giao hàng"
+                    id="specificAddress"
+                    name="specificAddress"
+                    value={specificAddress}
+                    onChange={(e) => setSpecificAddress(e.target.value)}
+                    placeholder="Số nhà, Tên đường (Ví dụ: 123 Đường Nguyễn Văn Cừ)"
                     className="mt-2 border-slate-300 bg-slate-50 focus:border-sky-400 focus:ring-sky-400/30"
-                    rows={3}
+                    rows={2}
+                    required
                   />
+                  {formData.deliveryAddress && specificAddress && (
+                    <p className="text-sm text-slate-500">
+                      <strong>Địa chỉ đầy đủ: </strong> {formData.deliveryAddress}
+                    </p>
+                  )}
                 </div>
 
                 <div>
@@ -335,8 +488,12 @@ export default function CheckoutPage() {
                     <span className="font-medium text-slate-900">{formatCurrency(product.price)}</span>
                   </div>
                   <div className="flex justify-between text-sm">
-                    <span className="text-slate-600">Phí giao hàng</span>
-                    <span className="font-medium text-slate-900">{formatCurrency(0)}</span>
+                    <span className="text-slate-600">Phí giao hàng (GHN)</span>
+                    <span className="font-medium text-slate-900 text-right">
+                      {isCalculatingFee ? <span className="text-slate-400">Đang tính...</span> : (shippingFee > 0 ? formatCurrency(shippingFee) : '0 ₫')}
+                      <br />
+                      <span className="text-xs text-amber-600">(Thanh toán cho shipper khi nhận xe)</span>
+                    </span>
                   </div>
                   <div className="flex justify-between text-sm">
                     <span className="text-slate-600">Phí dịch vụ</span>

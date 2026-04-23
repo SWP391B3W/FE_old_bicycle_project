@@ -12,6 +12,7 @@ interface OrderConfirmationState {
   order?: Order
   product?: Product
   checkoutData?: CheckoutFormData
+  shippingFee?: number
 }
 
 const SHIPPING_FEE_PENDING_LABEL = 'Đang tính toán...'
@@ -43,6 +44,7 @@ export default function OrderConfirmationPage() {
   const order = locationState.order
   const product = locationState.product
   const checkoutData = locationState.checkoutData
+  const shippingFee = locationState.shippingFee ?? 0
 
   useEffect(() => {
     if (!order?.id) {
@@ -164,11 +166,15 @@ export default function OrderConfirmationPage() {
                 </div>
                 <div>
                   <p className="text-sm text-slate-600">Phí vận chuyển</p>
-                  <p className="mt-1 font-medium text-slate-900">{SHIPPING_FEE_PENDING_LABEL}</p>
+                  <p className="mt-1 font-medium text-slate-900 text-right">
+                    {formatCurrency(shippingFee)}
+                    <br />
+                    <span className="text-xs text-amber-600">(Thanh toán cho shipper khi nhận xe)</span>
+                  </p>
                 </div>
                 <div className="flex justify-between rounded-xl bg-slate-100 p-4">
                   <span className="font-semibold text-slate-900">Tổng thanh toán qua SePay</span>
-                  <span className="text-lg font-bold text-sky-600">{SHIPPING_FEE_PENDING_LABEL}</span>
+                  <span className="text-lg font-bold text-sky-600">{formatCurrency(product.price)}</span>
                 </div>
               </CardContent>
             </Card>
