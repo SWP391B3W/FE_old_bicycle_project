@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react'
 import { Link } from 'react-router-dom'
-import { CheckCircle, Loader2, ShoppingBag, Wallet, XCircle, Star } from 'lucide-react'
+import { CheckCircle, Loader2, ShoppingBag, Wallet, XCircle, Star, RotateCcw } from 'lucide-react'
 import { ordersApi } from '@/api/orders.api'
 import { OrderEvidenceDialog } from '@/components/profile/OrderEvidenceDialog'
 import { OrderEvidenceSection } from '@/components/profile/OrderEvidenceSection'
@@ -335,8 +335,7 @@ export function BuyerOrdersSection({ buyerId }: BuyerOrdersSectionProps) {
 
                           {canBuyerConfirmReceived(order) && (
                             <Button
-                              variant="outline"
-                              className="gap-1.5 border-green-200 text-green-700 hover:bg-green-50 dark:border-green-900/50 dark:text-green-400 dark:hover:bg-green-950/30"
+                              className="gap-1.5 bg-green-600 hover:bg-green-700 text-white"
                               onClick={() => {
                                 setSelectedOrderForReceiveConfirm(order)
                                 setDeliveryError(null)
@@ -348,14 +347,25 @@ export function BuyerOrdersSection({ buyerId }: BuyerOrdersSectionProps) {
                               ) : (
                                 <CheckCircle className="h-4 w-4" />
                               )}
-                              Xác nhận đã nhận xe
+                              Đã nhận được xe
+                            </Button>
+                          )}
+
+                          {canBuyerConfirmReceived(order) && (
+                            <Button
+                              variant="outline"
+                              className="gap-1.5 border-red-200 text-red-600 hover:bg-red-50"
+                              onClick={() => setSelectedOrderForReport(order)}
+                            >
+                              <Flag className="h-4 w-4" />
+                              Khiếu nại / Hoàn tiền
                             </Button>
                           )}
 
                           {canCancelOpenOrder(order, nowMs) && (
                             <Button
                               variant="outline"
-                              className="gap-1.5 border-red-200 text-red-600 hover:bg-red-50 hover:text-red-700 dark:border-red-900/50 dark:text-red-400 dark:hover:bg-red-950/30"
+                              className="gap-1.5 border-slate-200 text-slate-600 hover:bg-slate-50"
                               onClick={() => void runOrderAction(order, 'cancel')}
                               disabled={actionLoadingKey === `cancel:${order.id}`}
                             >
@@ -368,26 +378,35 @@ export function BuyerOrdersSection({ buyerId }: BuyerOrdersSectionProps) {
                             </Button>
                           )}
 
+                          {canBuyerRequestRefund(order) && !canBuyerConfirmReceived(order) && (
+                            <Button
+                              variant="outline"
+                              className="gap-1.5 border-red-200 text-red-600 hover:bg-red-50"
+                              onClick={() => {
+                                // Reuse cancel action for refund request if implemented in API
+                                void runOrderAction(order, 'cancel')
+                              }}
+                              disabled={actionLoadingKey === `cancel:${order.id}`}
+                            >
+                              {actionLoadingKey === `cancel:${order.id}` ? (
+                                <Loader2 className="h-4 w-4 animate-spin" />
+                              ) : (
+                                <RotateCcw className="h-4 w-4" />
+                              )}
+                              Yêu cầu hoàn tiền
+                            </Button>
+                          )}
+
                           {canBuyerSubmitReview(order) && (
                             <Button
                               variant="outline"
-                              className="gap-1.5 border-amber-200 text-amber-700 hover:bg-amber-50 dark:border-amber-900/50 dark:text-amber-400 dark:hover:bg-amber-950/30"
+                              className="gap-1.5 border-amber-200 text-amber-700 hover:bg-amber-50"
                               onClick={() => setSelectedOrderForReview(order)}
                             >
                               <Star className="h-4 w-4" />
                               Đánh giá ngay
                             </Button>
                           )}
-
-                          <Button
-                            variant="ghost"
-                            size="sm"
-                            className="gap-1.5 text-muted-foreground hover:text-destructive"
-                            onClick={() => setSelectedOrderForReport(order)}
-                          >
-                            <Flag className="h-3.5 w-3.5" />
-                            Báo cáo
-                          </Button>
                         </div>
                       </div>
                     </div>
