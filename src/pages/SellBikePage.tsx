@@ -366,7 +366,14 @@ export default function SellBikePage() {
       return
     }
 
-    setIsSubmitting(true)
+    // Confirm popup — remind seller that listing is immutable after submission
+    const confirmed = window.confirm(
+      'Bạn có chắc chắn thông tin đã chính xác?\n\n' +
+      'Lưu ý: Sau khi đăng, bạn KHÔNG THỂ chỉnh sửa hình ảnh, giá bán hay bất kỳ thông tin nào. ' +
+      'Vui lòng kiểm tra kỹ trước khi xác nhận.'
+    )
+    if (!confirmed) return
+
     setSubmitError(null)
 
     const payload: ProductMutationInput = {
@@ -759,6 +766,21 @@ export default function SellBikePage() {
                   {submitError}
                 </div>
               )}
+
+              {/* Immutability warning — shown only on the final step */}
+              <div className="flex gap-3 rounded-lg border-2 border-red-500 bg-red-50 p-4 dark:bg-red-950/30">
+                <span className="mt-0.5 text-xl leading-none">⚠️</span>
+                <div className="text-sm">
+                  <p className="font-bold text-red-600 dark:text-red-400">
+                    Lưu ý: Sau khi Inspector kiểm định xong, bạn sẽ không thể chỉnh sửa!
+                  </p>
+                  <p className="mt-1 text-red-600/80 dark:text-red-400/80">
+                    Bạn có thể chỉnh sửa tin trong lúc đang chờ Inspector. Tuy nhiên khi Inspector đã duyệt,
+                    thông tin sẽ bị <strong>khóa vĩnh viễn</strong> để đảm bảo minh bạch và chống gian lận.
+                    Vui lòng kiểm tra kỹ hình ảnh và giá bán trước khi đăng.
+                  </p>
+                </div>
+              </div>
             </CardContent>
           </Card>
         )}

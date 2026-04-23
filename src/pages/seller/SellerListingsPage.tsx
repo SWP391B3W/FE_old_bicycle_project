@@ -184,24 +184,24 @@ export default function SellerListingsPage() {
               ) : (
                 filteredProducts.map((product) => {
                   const isActing = actionLoading === product.id
-                  const isInspected = 
-                    product.status === 'inspected_passed' || 
-                    product.status === 'inspected_failed'
 
-                  const canEdit = 
-                    product.status !== 'sold' && 
-                    !product.sellerActionLocked && 
-                    !isInspected
-                  
+                  // Only allow editing while waiting for inspector — once inspected, listing is locked
+                  const canEdit =
+                    product.status === 'pending_inspection' &&
+                    !product.sellerActionLocked
+
                   const canDelete =
                     product.status !== 'sold' &&
                     product.status !== 'pending_inspection' &&
-                    !product.sellerActionLocked &&
-                    !isInspected
+                    product.status !== 'inspected_passed' &&
+                    product.status !== 'inspected_failed' &&
+                    !product.sellerActionLocked
                   const statusPresentation = getSellerListingStatusPresentation(product)
+                  // Hide is available for any posted listing (not hidden/sold/locked)
                   const canHide =
-                    (product.status === 'active' || product.status === 'inspected_passed') &&
-                    statusPresentation.isPubliclyVisible &&
+                    product.status !== 'hidden' &&
+                    product.status !== 'sold' &&
+                    product.status !== 'rejected' &&
                     !product.sellerActionLocked
                   const canShow = product.status === 'hidden' && !product.sellerActionLocked
                   const timelineEntries = getProductTimelineEntries(product)
@@ -268,7 +268,7 @@ export default function SellerListingsPage() {
                             <>
                               {canEdit && (
                                 <Link to={buildRoute.sellerEditProduct(product.id)}>
-                                  <Button variant="ghost" size="icon" title="Chỉnh sửa">
+                                  <Button variant="ghost" size="icon" title="Chỉnh sửa (trước khi kiểm định)">
                                     <PenSquare className="h-4 w-4" />
                                   </Button>
                                 </Link>
