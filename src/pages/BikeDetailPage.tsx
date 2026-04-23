@@ -1,10 +1,12 @@
 import { useEffect, useMemo, useState } from 'react'
-import { Link, useParams } from 'react-router-dom'
-import { ChevronLeft, ChevronRight, Loader2 } from 'lucide-react'
+import { useParams, Link } from 'react-router-dom'
+import { ChevronLeft, ChevronRight, Loader2, Heart } from 'lucide-react'
+import { cn } from '@/lib/utils'
 import { adminProductsApi } from '@/api/admin-products.api'
 import { productsApi } from '@/api/products.api'
 import { reviewApi, type Review } from '@/api/review.api'
 import { ReviewList } from '@/components/reviews/ReviewList'
+import { wishlistApi } from '@/api/wishlist.api'
 import { Button } from '@/components/ui/button'
 import { ROUTES, buildRoute } from '@/constants/routes'
 import { useAuth } from '@/contexts/AuthContext'
@@ -184,7 +186,35 @@ export default function BikeDetailPage() {
                 ← Quay lại thị trường
               </Link>
             </div>
-            <h1 className="text-3xl font-semibold tracking-tight text-slate-950">{bike.title}</h1>
+            <div className="flex items-start justify-between gap-4">
+              <h1 className="text-3xl font-semibold tracking-tight text-slate-950">{bike.title}</h1>
+              {isAuthenticated && (
+                <Button
+                  variant="ghost"
+                  size="icon"
+                  className={cn(
+                    "h-12 w-12 rounded-full border border-slate-200 bg-white shadow-sm transition-all hover:bg-slate-50",
+                    bike.isFavorite ? "text-red-500 hover:text-red-600" : "text-slate-400 hover:text-slate-600"
+                  )}
+                  onClick={async () => {
+                    if (!bike) return
+                    try {
+                      if (bike.isFavorite) {
+                        await wishlistApi.removeFromWishlist(bike.id)
+                        setBike({ ...bike, isFavorite: false })
+                      } else {
+                        await wishlistApi.addToWishlist(bike.id)
+                        setBike({ ...bike, isFavorite: true })
+                      }
+                    } catch (err) {
+                      console.error('Failed to update wishlist:', err)
+                    }
+                  }}
+                >
+                  <Heart className={cn("h-6 w-6", bike.isFavorite && "fill-current")} />
+                </Button>
+              )}
+            </div>
             <p className="text-sm text-slate-600">
               {locationLabel}
               {bike.createdAt

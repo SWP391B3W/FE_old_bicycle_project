@@ -28,10 +28,10 @@ export function getSellerListingStatusPresentation(product: Product): SellerList
 
   if (product.status === 'inspected_passed') {
     return {
-      label: 'Chờ thanh toán phí',
+      label: 'Đã kiểm định (Đạt)',
       className: 'bg-blue-100 text-blue-800 dark:bg-blue-900/40 dark:text-blue-300',
       isPubliclyVisible: false,
-      hint: 'Xe đạt chuẩn! Hãy thanh toán phí để tin được hiển thị.',
+      hint: 'Xe đạt chuẩn! Thông tin đã được khóa và không thể chỉnh sửa.',
     }
   }
 
@@ -40,6 +40,7 @@ export function getSellerListingStatusPresentation(product: Product): SellerList
       label: 'Đang hiển thị',
       className: 'bg-emerald-100 text-emerald-800 dark:bg-emerald-900/40 dark:text-emerald-300',
       isPubliclyVisible: true,
+      hint: 'Sản phẩm đã được kiểm định và đang bán. Thông tin đã được khóa.',
     }
   }
 
@@ -65,7 +66,7 @@ export function getSellerListingStatusPresentation(product: Product): SellerList
       label: 'Kiểm định thất bại',
       className: 'bg-orange-100 text-orange-800 dark:bg-orange-900/40 dark:text-orange-300',
       isPubliclyVisible: false,
-      hint: 'Xe không đạt tiêu chuẩn kỹ thuật của BikeExchange.',
+      hint: 'Xe không đạt tiêu chuẩn kỹ thuật. Thông tin đã được khóa.',
     }
   }
 

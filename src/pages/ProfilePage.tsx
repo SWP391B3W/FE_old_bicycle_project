@@ -8,6 +8,7 @@ import { ProfileSidebar } from './profile/ProfileSidebar'
 import { useProfilePage } from './profile/useProfilePage'
 import { ReviewList } from '@/components/reviews/ReviewList'
 import { SellerListingsSection } from './profile/SellerListingsSection'
+import { BuyerWishlistSection } from './profile/BuyerWishlistSection'
 
 interface PlaceholderSectionProps {
   title: string
@@ -87,10 +88,7 @@ export default function ProfilePage() {
             ) : null}
 
             {profilePage.activeTab === 'wishlist' ? (
-              <PlaceholderSection
-                title="Yêu thích"
-                description="Danh sách xe yêu thích của bạn sẽ hiển thị tại đây."
-              />
+              <BuyerWishlistSection />
             ) : null}
 
             {profilePage.activeTab === 'reviews' ? (

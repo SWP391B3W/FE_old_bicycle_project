@@ -15,6 +15,7 @@ export const OrderConfirmationPage = lazy(() => import('../pages/OrderConfirmati
 export const ProfilePage = lazy(() => import('../pages/ProfilePage'));
 export const PublicProfilePage = lazy(() => import('../pages/PublicProfilePage'));
 export const PayoutPage = lazy(() => import('../pages/PayoutPage'));
+export const WishlistPage = lazy(() => import('../pages/WishlistPage'));
 
 // Admin Pages
 export const AdminCategoriesPage = lazy(() => import('../pages/admin/AdminCategoriesPage'));

@@ -168,6 +168,12 @@ export default function SellerEditProductPage() {
         setFrameMaterials(loadedFrameMaterials)
         setGroupsets(loadedGroupsets)
 
+        if (product.status === 'sold' || product.status === 'inspected_passed' || product.status === 'inspected_failed') {
+          setSubmitError('Sản phẩm đã được kiểm định hoặc đã bán, không thể chỉnh sửa thông tin.')
+          setFormData((current) => ({ ...current, title: '' })) // Trigger error view
+          return
+        }
+
         const matchedCategory = loadedCategories.find((category) => category.name === product.categoryName)
         const matchedBrand = loadedBrands.find((brand) => brand.name === product.brandName)
         const matchedBrakeType = loadedBrakeTypes.find((brakeType) => brakeType.name === product.brakeTypeName)

@@ -14,6 +14,7 @@ import {
   getRoleDashboardEntry,
   getSellEntryHref,
 } from '@/layouts/app-header-visibility'
+import { Heart } from 'lucide-react'
 
 export default function Header() {
   const { user, isAuthenticated } = useAuth()
