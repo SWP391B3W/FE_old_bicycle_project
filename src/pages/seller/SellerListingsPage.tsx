@@ -187,8 +187,9 @@ export default function SellerListingsPage() {
                   const canDelete =
                     product.status !== 'sold' &&
                     product.status !== 'pending_inspection' &&
-                    !product.sellerActionLocked &&
-                    !isInspected
+                    product.status !== 'inspected_passed' &&
+                    product.status !== 'inspected_failed' &&
+                    !product.sellerActionLocked
                   const statusPresentation = getSellerListingStatusPresentation(product)
                   const canHide =
                     (product.status === 'active' || product.status === 'inspected_passed') &&
