@@ -122,17 +122,31 @@ export function SellerListingsSection({}: SellerListingsSectionProps) {
                   <div className="flex-1 space-y-1">
                     <div className="flex items-center gap-2">
                       <h3 className="font-semibold text-foreground line-clamp-1">{product.title}</h3>
-                      {product.isHidden && (
-                        <Badge variant="secondary" className="text-[10px] uppercase">Đang ẩn</Badge>
-                      )}
+                      {(() => {
+                        const isExpired = product.inspection?.validUntil && new Date(product.inspection.validUntil) < new Date()
+                        
+                        if (product.status === 'sold') return <Badge variant="outline" className="bg-slate-100">Đã bán</Badge>
+                        if (product.isHidden) return <Badge variant="secondary">Đang ẩn</Badge>
+                        if (product.status === 'pending_inspection') return <Badge variant="outline" className="bg-amber-50 text-amber-600 border-amber-200">Đang chờ kiểm định</Badge>
+                        if (product.status === 'pending') return <Badge variant="outline" className="bg-blue-50 text-blue-600 border-blue-200">Đang chờ duyệt</Badge>
+                        if (product.status === 'inspected_failed') return <Badge variant="destructive">Kiểm định thất bại</Badge>
+                        if (isExpired) return <Badge variant="destructive" className="bg-red-50 text-red-600 border-red-200">Hết hạn kiểm định</Badge>
+                        if (product.isVerified) return <Badge variant="outline" className="bg-green-50 text-green-600 border-green-200">Đang hiển thị</Badge>
+                        
+                        return <Badge variant="outline">{product.status}</Badge>
+                      })()}
                     </div>
                     <div className="text-sm font-bold text-primary">
                       {new Intl.NumberFormat('vi-VN', { style: 'currency', currency: 'VND' }).format(product.price)}
                     </div>
-                    <div className="flex gap-4 text-xs text-muted-foreground">
+                    <div className="flex flex-wrap gap-x-4 gap-y-1 text-xs text-muted-foreground">
                       <span>Loại: {product.categoryName}</span>
-                      <span>•</span>
                       <span>Hãng: {product.brandName}</span>
+                      {product.inspection?.validUntil && (
+                        <span className={new Date(product.inspection.validUntil) < new Date() ? 'text-red-500 font-medium' : ''}>
+                          Hạn kiểm định: {new Date(product.inspection.validUntil).toLocaleDateString('vi-VN')}
+                        </span>
+                      )}
                     </div>
                   </div>
 
