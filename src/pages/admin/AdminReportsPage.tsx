@@ -385,21 +385,18 @@ export default function AdminReportsPage() {
           <div className="space-y-4">
             <div>
               <label className="mb-1 block text-sm font-medium">Kết quả xử lý</label>
-              <Select
+              <select
                 value={processDialog.status}
-                onValueChange={(value) => setProcessDialog((prev) => ({ ...prev, status: value as ReportStatus }))}
+                onChange={(e) => setProcessDialog((prev) => ({ ...prev, status: e.target.value as ReportStatus }))}
+                className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
               >
-                <SelectTrigger>
-                  <SelectValue placeholder="Chọn kết quả xử lý" />
-                </SelectTrigger>
-                <SelectContent>
-                  {processDialog.currentStatus === 'pending' && (
-                    <SelectItem value="investigating">Chuyển sang đang điều tra</SelectItem>
-                  )}
-                  <SelectItem value="resolved_upheld">Xác nhận vi phạm</SelectItem>
-                  <SelectItem value="resolved_dismissed">Bác bỏ báo cáo</SelectItem>
-                </SelectContent>
-              </Select>
+                <option value="" disabled>Chọn kết quả xử lý</option>
+                {processDialog.currentStatus === 'pending' && (
+                  <option value="investigating">Chuyển sang đang điều tra</option>
+                )}
+                <option value="resolved_upheld">Xác nhận vi phạm</option>
+                <option value="resolved_dismissed">Bác bỏ báo cáo</option>
+              </select>
             </div>
 
             <div>
