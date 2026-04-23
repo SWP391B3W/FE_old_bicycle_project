@@ -9,6 +9,7 @@ import { useProfilePage } from './profile/useProfilePage'
 import { ReviewList } from '@/components/reviews/ReviewList'
 import { SellerListingsSection } from './profile/SellerListingsSection'
 import { BuyerWishlistSection } from './profile/BuyerWishlistSection'
+import { BuyerReportsSection } from './profile/BuyerReportsSection'
 
 interface PlaceholderSectionProps {
   title: string
@@ -89,6 +90,10 @@ export default function ProfilePage() {
 
             {profilePage.activeTab === 'wishlist' ? (
               <BuyerWishlistSection />
+            ) : null}
+
+            {profilePage.activeTab === 'reports' ? (
+              <BuyerReportsSection />
             ) : null}
 
             {profilePage.activeTab === 'reviews' ? (

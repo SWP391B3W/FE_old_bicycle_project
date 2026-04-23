@@ -1,4 +1,4 @@
-import { CreditCard, Heart, Lock, Package, ShoppingBag, Star, User, type LucideIcon } from 'lucide-react'
+import { CreditCard, Flag, Heart, Lock, Package, ShoppingBag, Star, User, type LucideIcon } from 'lucide-react'
 import type { AppRole } from '@/types/auth'
 import type { ProfileTabId } from './profile.types'
 
@@ -15,6 +15,7 @@ export const PROFILE_TABS: ProfileTabDefinition[] = [
   { id: 'wishlist', label: 'Yêu thích', icon: Heart },
   { id: 'reviews', label: 'Đánh giá', icon: Star },
   { id: 'payout', label: 'Nhận tiền', icon: CreditCard },
+  { id: 'reports', label: 'Báo cáo', icon: Flag },
   { id: 'security', label: 'Bảo mật', icon: Lock },
 ]
 

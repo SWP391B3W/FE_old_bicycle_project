@@ -1,6 +1,6 @@
 import type { AuthUser } from '@/types/auth'
 
-export type ProfileTabId = 'profile' | 'orders' | 'listings' | 'wishlist' | 'reviews' | 'payout' | 'security'
+export type ProfileTabId = 'profile' | 'orders' | 'listings' | 'wishlist' | 'reviews' | 'payout' | 'security' | 'reports'
 
 export interface ProfileFormData {
   firstName: string

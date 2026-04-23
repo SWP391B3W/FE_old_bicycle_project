@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useState } from 'react'
 import { useParams, Link } from 'react-router-dom'
-import { ChevronLeft, ChevronRight, Loader2, Heart } from 'lucide-react'
+import { ChevronLeft, ChevronRight, Loader2, Heart, Flag } from 'lucide-react'
 import { cn } from '@/lib/utils'
 import { adminProductsApi } from '@/api/admin-products.api'
 import { productsApi } from '@/api/products.api'
@@ -8,6 +8,7 @@ import { reviewApi, type Review } from '@/api/review.api'
 import { ReviewList } from '@/components/reviews/ReviewList'
 import { wishlistApi } from '@/api/wishlist.api'
 import { Button } from '@/components/ui/button'
+import { ReportModal } from '@/components/common/ReportModal'
 import { ROUTES, buildRoute } from '@/constants/routes'
 import { useAuth } from '@/contexts/AuthContext'
 import { canAccessSellerEntry, getSellEntryHref } from '@/layouts/app-header-visibility'
@@ -28,6 +29,7 @@ export default function BikeDetailPage() {
   const [isReviewsLoading, setIsReviewsLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
   const [selectedImage, setSelectedImage] = useState('')
+  const [isReportModalOpen, setIsReportModalOpen] = useState(false)
 
   useEffect(() => {
     if (!bike?.seller?.id) return
@@ -374,7 +376,20 @@ export default function BikeDetailPage() {
             <h2 className="text-xl font-semibold text-slate-950">Thông tin người bán</h2>
             <div className="mt-5 grid gap-4 md:grid-cols-3">
               <div className="rounded-3xl bg-slate-50 p-5">
-                <p className="text-sm text-slate-600">Người đăng</p>
+                <div className="flex items-center justify-between">
+                  <p className="text-sm text-slate-600">Người đăng</p>
+                  {isAuthenticated && user?.id !== bike.seller?.id && (
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      className="h-7 px-2 text-[10px] text-slate-400 hover:text-amber-600"
+                      onClick={() => setIsReportModalOpen(true)}
+                    >
+                      <Flag className="mr-1 h-3 w-3" />
+                      Báo cáo
+                    </Button>
+                  )}
+                </div>
                 <Link 
                   to={buildRoute.publicProfile(bike.seller!.id)} 
                   className="mt-2 block text-lg font-semibold text-sky-600 hover:text-sky-500 hover:underline transition-all"
@@ -382,6 +397,15 @@ export default function BikeDetailPage() {
                   {sellerName}
                 </Link>
               </div>
+
+              {/* Report Modal */}
+              <ReportModal
+                open={isReportModalOpen}
+                onOpenChange={setIsReportModalOpen}
+                targetId={bike.id}
+                targetType="PRODUCT"
+                targetName={bike.title}
+              />
               <div className="rounded-3xl bg-slate-50 p-5">
                 <p className="text-sm text-slate-600">Được đăng từ</p>
                 <p className="mt-2 text-lg font-semibold text-slate-950">
