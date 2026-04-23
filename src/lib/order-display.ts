@@ -257,6 +257,23 @@ export function getOrderStatusMeta(order: Order, nowMs = Date.now()): OrderStatu
     }
   }
 
+  // Handle case where product is unavailable during payment phase
+  if (order.status === 'pending' && order.fundingStatus === 'awaiting_payment') {
+    const productHidden = order.productStatus === 'hidden'
+    const productSold = order.productStatus === 'sold'
+    const productUnverified = order.productIsVerified === false
+
+    if (productHidden || productSold || productUnverified) {
+      return {
+        label: 'Sản phẩm không khả dụng',
+        helperText: productSold 
+          ? 'Sản phẩm này đã được bán cho người khác. Đơn hàng sẽ sớm được hệ thống xử lý hủy.' 
+          : 'Sản phẩm này hiện đã bị ẩn hoặc hết hạn kiểm định. Bạn không thể tiếp tục thanh toán lúc này.',
+        tone: 'danger',
+      }
+    }
+  }
+
   return {
     label: 'Đang xử lý',
     helperText: 'Đơn hàng đang ở trạng thái trung gian.',
@@ -289,11 +306,16 @@ export function canCancelOpenOrder(order: Order, nowMs = Date.now()) {
 }
 
 export function canBuyerRequestPayment(order: Order, nowMs = Date.now()) {
+  const isProductAvailable = order.productStatus !== 'hidden' 
+    && order.productStatus !== 'sold' 
+    && order.productIsVerified !== false
+
   return (
     order.status === 'pending' &&
     order.fundingStatus === 'awaiting_payment' &&
     order.paymentMethod !== 'cash' &&
-    !isPaymentDeadlineExpired(order, nowMs)
+    !isPaymentDeadlineExpired(order, nowMs) &&
+    isProductAvailable
   )
 }
 
