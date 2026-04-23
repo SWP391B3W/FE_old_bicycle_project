@@ -109,6 +109,45 @@ export function BuyerOrdersSection({ buyerId }: BuyerOrdersSectionProps) {
     }
   }, [])
 
+  // Auto-polling when there are active payment requests
+  useEffect(() => {
+    const hasActivePayment = Object.keys(paymentRequestsByOrderId).length > 0
+    if (!hasActivePayment) return
+
+    const pollInterval = window.setInterval(async () => {
+      try {
+        const result = await ordersApi.getMine()
+        const myOrders = result.filter((item) => item.buyerId === buyerId)
+        
+        // Check if any order that had a payment request has now changed status
+        let shouldClearRequests = false
+        myOrders.forEach(order => {
+          if (paymentRequestsByOrderId[order.id] && order.fundingStatus !== 'awaiting_payment') {
+            shouldClearRequests = true
+          }
+        })
+
+        setOrders(myOrders)
+
+        if (shouldClearRequests) {
+          setPaymentRequestsByOrderId(prev => {
+            const next = { ...prev }
+            myOrders.forEach(order => {
+              if (order.fundingStatus !== 'awaiting_payment') {
+                delete next[order.id]
+              }
+            })
+            return next
+          })
+        }
+      } catch (err) {
+        console.error('Polling failed:', err)
+      }
+    }, 8000) // Poll every 8 seconds
+
+    return () => window.clearInterval(pollInterval)
+  }, [buyerId, paymentRequestsByOrderId])
+
   useEffect(() => {
     let cancelled = false
 
