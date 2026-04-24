@@ -31,7 +31,7 @@ const CONDITION_OPTIONS = [
 interface ImageEntry {
   file: File
   preview: string
-  type: 'main' | 'serial' | 'other'
+  type: 'main' | 'groupset' | 'serial' | 'other'
 }
 
 interface FormState {
@@ -53,6 +53,7 @@ interface FormState {
 
 const REQUIRED_IMAGE_TYPES: { type: ImageEntry['type']; label: string }[] = [
   { type: 'main', label: 'Ảnh toàn thân xe' },
+  { type: 'groupset', label: 'Ảnh bộ truyền động' },
   { type: 'serial', label: 'Ảnh số khung (serial)' },
 ]
 
@@ -605,6 +606,7 @@ export default function SellBikePage() {
                   <p className="font-medium text-foreground">Yêu cầu hình ảnh</p>
                   <ul className="mt-1 list-inside list-disc text-muted-foreground">
                     <li>Ảnh toàn thân xe (bắt buộc)</li>
+                    <li>Ảnh bộ truyền động (bắt buộc)</li>
                     <li>Ảnh số khung serial (bắt buộc)</li>
                   </ul>
                 </div>
