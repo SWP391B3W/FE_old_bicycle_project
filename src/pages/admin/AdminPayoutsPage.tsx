@@ -34,8 +34,8 @@ const PAGE_SIZE = 10
 
 const TYPE_FILTER_MAP: Record<string, string> = {
   'Tất cả payout': 'all',
-  'Hoàn tiền buyer': 'refund',
-  'Giải ngân seller': 'seller_release',
+  'Hoàn tiền cho người mua': 'refund',
+  'Giải ngân cho người bán': 'seller_release',
 }
 
 const STATUS_FILTER_MAP: Record<string, string> = {
@@ -57,8 +57,8 @@ const statusLabelMap: Record<PayoutStatus, string> = {
 }
 
 const typeLabelMap: Record<PayoutType, string> = {
-  refund: 'Hoàn tiền buyer',
-  seller_release: 'Giải ngân seller',
+  refund: 'Hoàn tiền cho người mua',
+  seller_release: 'Giải ngân cho người bán',
 }
 
 function getErrorMessage(error: unknown, fallback: string) {
@@ -295,8 +295,8 @@ export default function AdminPayoutsPage() {
           <p className="font-medium">{row.original.recipientName}</p>
           <p className="text-xs text-muted-foreground">
             {row.original.type === 'refund'
-              ? `Buyer: ${row.original.buyerName ?? '—'}`
-              : `Seller: ${row.original.sellerName ?? '—'}`}
+              ? `Người mua: ${row.original.buyerName ?? '—'}`
+              : `Người bán: ${row.original.sellerName ?? '—'}`}
           </p>
         </div>
       ),
@@ -313,15 +313,15 @@ export default function AdminPayoutsPage() {
     },
     {
       accessorKey: 'amount',
-      header: 'Gross / Fee / Net',
+      header: 'Tổng / Phí / Thực nhận',
       cell: ({ row }) => (
         <div className="space-y-1 text-sm">
           <p className="font-semibold text-foreground">{formatCurrency(getNetAmount(row.original))}</p>
           <p className="text-xs text-muted-foreground">
-            Tổng số tiền: {formatCurrency(getGrossAmount(row.original))}
+            Tổng tiền: {formatCurrency(getGrossAmount(row.original))}
           </p>
           <p className="text-xs text-muted-foreground">
-            Khoản phí khấu trừ: {formatCurrency(getFeeDeductionAmount(row.original))}
+            Phí khấu trừ: {formatCurrency(getFeeDeductionAmount(row.original))}
           </p>
         </div>
       ),
@@ -399,7 +399,7 @@ export default function AdminPayoutsPage() {
         <div className="relative max-w-sm flex-1">
           <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
           <Input
-            placeholder="Tìm theo sản phẩm, order, buyer, seller..."
+            placeholder="Tìm theo sản phẩm, đơn hàng, người mua, người bán..."
             value={searchQuery}
             onChange={(event) => {
               setSearchQuery(event.target.value)
@@ -524,10 +524,10 @@ export default function AdminPayoutsPage() {
                   ['Người nhận', detailDialog.payout.recipientName],
                   ['Sản phẩm', detailDialog.payout.productTitle ?? '—'],
                   ['Đơn hàng', detailDialog.payout.orderId ?? '—'],
-                  ['Refund request', detailDialog.payout.refundRequestId ?? '—'],
-                  ['Tổng số tiền', formatCurrency(getGrossAmount(detailDialog.payout))],
-                  ['Khoản phí khấu trừ', formatCurrency(getFeeDeductionAmount(detailDialog.payout))],
-                  ['Số tiền thực nhận', formatCurrency(getNetAmount(detailDialog.payout))],
+                  ['Yêu cầu hoàn tiền', detailDialog.payout.refundRequestId ?? '—'],
+                  ['Tổng tiền', formatCurrency(getGrossAmount(detailDialog.payout))],
+                  ['Phí khấu trừ', formatCurrency(getFeeDeductionAmount(detailDialog.payout))],
+                  ['Thực nhận', formatCurrency(getNetAmount(detailDialog.payout))],
                   ['Ngân hàng', detailDialog.payout.bankCode ?? '—'],
                   ['Bank BIN', detailDialog.payout.bankBin ?? '—'],
                   ['Số tài khoản', detailDialog.payout.accountNumber ?? '—'],
@@ -610,10 +610,10 @@ export default function AdminPayoutsPage() {
               <div className="rounded-lg border bg-muted/40 px-4 py-3 text-sm">
                 <p className="font-medium text-foreground">{completeDialog.payout.recipientName}</p>
                 <p className="mt-1 text-muted-foreground">
-                  {typeLabelMap[completeDialog.payout.type]} • Số tiền thực nhận: {formatCurrency(getNetAmount(completeDialog.payout))}
+                  {typeLabelMap[completeDialog.payout.type]} • Thực nhận: {formatCurrency(getNetAmount(completeDialog.payout))}
                 </p>
                 <p className="mt-1 text-muted-foreground">
-                  Tổng số tiền: {formatCurrency(getGrossAmount(completeDialog.payout))} • Khoản phí khấu trừ:{' '}
+                  Tổng tiền: {formatCurrency(getGrossAmount(completeDialog.payout))} • Phí khấu trừ:{' '}
                   {formatCurrency(getFeeDeductionAmount(completeDialog.payout))}
                 </p>
                 <p className="mt-1 text-muted-foreground">
