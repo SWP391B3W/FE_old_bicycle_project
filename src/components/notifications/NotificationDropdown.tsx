@@ -12,6 +12,7 @@ import { ROUTES } from '@/constants/routes'
 import { emitNotificationsUpdated, NOTIFICATIONS_UPDATED_EVENT } from '@/lib/notification-unread'
 import { formatNotificationRelativeTime } from '@/lib/notification-time'
 import type { NotificationItem } from '@/types/notification'
+import { useAuth } from '@/contexts/AuthContext'
 import { NotificationBellButton } from './NotificationBellButton'
 
 const PREVIEW_SIZE = 8
@@ -45,6 +46,7 @@ interface NotificationDropdownProps {
 }
 
 export function NotificationDropdown({ unreadCount, className }: NotificationDropdownProps) {
+  const { user } = useAuth()
   const navigate = useNavigate()
   const [open, setOpen] = useState(false)
   const [notifications, setNotifications] = useState<NotificationItem[]>([])
@@ -93,19 +95,68 @@ export function NotificationDropdown({ unreadCount, className }: NotificationDro
     }
   }, [fetchNotifications, open])
 
-  const handleMarkRead = async (notification: NotificationItem) => {
-    if (notification.isRead) {
+  const handleNotificationClick = async (notification: NotificationItem) => {
+    if (!notification.isRead) {
+      try {
+        await notificationsApi.markAsRead(notification.id)
+        setNotifications((current) =>
+          current.map((item) => (item.id === notification.id ? { ...item, isRead: true } : item)),
+        )
+        emitNotificationsUpdated()
+      } catch {
+        // Keep the dropdown usable even if marking a single notification as read fails.
+      }
+    }
+
+    setOpen(false)
+
+    if (notification.type === 'system') {
       return
     }
 
-    try {
-      await notificationsApi.markAsRead(notification.id)
-      setNotifications((current) =>
-        current.map((item) => (item.id === notification.id ? { ...item, isRead: true } : item)),
-      )
-      emitNotificationsUpdated()
-    } catch {
-      // Keep the dropdown usable even if marking a single notification as read fails.
+    switch (notification.type) {
+      case 'order': {
+        if (user?.role === 'admin') {
+          navigate(ROUTES.ADMIN_ORDERS)
+        } else if (user?.role === 'seller') {
+          navigate(ROUTES.SELLER_ORDERS)
+        } else {
+          navigate(`${ROUTES.PROFILE}?tab=orders`)
+        }
+        break
+      }
+      case 'chat': {
+        navigate(ROUTES.MESSAGES)
+        break
+      }
+      case 'inspection': {
+        if (user?.role === 'inspector') {
+          navigate(ROUTES.INSPECTOR_HISTORY)
+        } else if (user?.role === 'seller') {
+          navigate(`${ROUTES.PROFILE}?tab=listings`)
+        } else if (user?.role === 'admin') {
+          navigate(ROUTES.ADMIN_LISTINGS)
+        } else {
+          navigate(ROUTES.HOME)
+        }
+        break
+      }
+      case 'promotion': {
+        navigate(ROUTES.HOME)
+        break
+      }
+      case 'payout': {
+        if (user?.role === 'admin') {
+          navigate(ROUTES.ADMIN_PAYOUTS)
+        } else {
+          navigate(ROUTES.PAYOUT)
+        }
+        break
+      }
+      case 'wishlist': {
+        navigate(ROUTES.WISHLIST)
+        break
+      }
     }
   }
 
@@ -174,7 +225,7 @@ export function NotificationDropdown({ unreadCount, className }: NotificationDro
                 <button
                   key={notification.id}
                   type="button"
-                  onClick={() => void handleMarkRead(notification)}
+                  onClick={() => void handleNotificationClick(notification)}
                   className={`flex w-full items-start gap-3 px-4 py-3 text-left transition-colors hover:bg-muted/40 ${
                     !notification.isRead ? 'bg-primary/5' : ''
                   }`}

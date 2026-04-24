@@ -325,7 +325,7 @@ export default function InspectionFormPage() {
     const average = scores.reduce((total, item) => total + item.score, 0) / scores.length
     const wear = Math.min(100, Math.max(0, Number(wearPercentage) || 0))
     const adjusted = average * (1 - wear / 100)
-    return Math.max(0, adjusted).toFixed(1)
+    return (Math.round(Math.max(0, adjusted) * 10) / 10).toFixed(1)
   }, [scores, wearPercentage])
 
   function handleScoreChange(scoreId: ScoreItem['id'], value: number) {
