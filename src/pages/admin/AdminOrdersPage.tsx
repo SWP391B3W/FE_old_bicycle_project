@@ -17,7 +17,7 @@ import type { Order } from '@/types/order'
 type StatusFilter =
   | 'Tất cả trạng thái đơn'
   | 'Chờ xử lý'
-  | 'Đã đặt cọc'
+  | 'Đã thanh toán'
   | 'Chờ người mua xác nhận'
   | 'Hoàn tất'
   | 'Đã hủy'
@@ -36,7 +36,7 @@ type FundingFilter =
 const STATUS_MAP: Record<StatusFilter, string> = {
   'Tất cả trạng thái đơn': 'all',
   'Chờ xử lý': 'pending',
-  'Đã đặt cọc': 'deposited',
+  'Đã thanh toán': 'deposited',
   'Chờ người mua xác nhận': 'awaiting_buyer_confirmation',
   'Hoàn tất': 'completed',
   'Đã hủy': 'cancelled',
@@ -57,7 +57,7 @@ const FUNDING_MAP: Record<FundingFilter, string> = {
 const statusOptions: Array<{ value: StatusFilter; label: string }> = [
   { value: 'Tất cả trạng thái đơn', label: 'Tất cả trạng thái đơn' },
   { value: 'Chờ xử lý', label: 'Chờ xử lý' },
-  { value: 'Đã đặt cọc', label: 'Đã đặt cọc' },
+  { value: 'Đã thanh toán', label: 'Đã thanh toán' },
   { value: 'Chờ người mua xác nhận', label: 'Chờ người mua xác nhận' },
   { value: 'Hoàn tất', label: 'Hoàn tất' },
   { value: 'Đã hủy', label: 'Đã hủy' },

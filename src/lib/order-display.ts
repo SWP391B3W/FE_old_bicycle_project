@@ -225,7 +225,7 @@ export function getOrderStatusMeta(order: Order, nowMs = Date.now()): OrderStatu
 
   if (order.status === 'deposited' && order.fundingStatus === 'held') {
     return {
-      label: 'Đã đặt cọc',
+      label: 'Đã thanh toán',
       helperText: 'Hệ thống đã giữ khoản thanh toán hiện tại và đang chờ người bán xác nhận gửi hàng.',
       tone: 'info',
     }

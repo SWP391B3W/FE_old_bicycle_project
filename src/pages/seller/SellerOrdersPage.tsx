@@ -206,7 +206,7 @@ export default function SellerOrdersPage() {
   return (
     <div className="space-y-6">
       <div>
-        <h2 className="text-2xl font-bold tracking-tight">Quản lý đơn cọc / mua</h2>
+        <h2 className="text-2xl font-bold tracking-tight">Quản lý đơn hàng</h2>
         <p className="text-muted-foreground">
           Theo dõi đơn hàng của người mua, chấp nhận giao dịch online và xác nhận đã gửi hàng để người mua kiểm tra xe.
         </p>
@@ -304,10 +304,6 @@ export default function SellerOrdersPage() {
                         </p>
                         <p>
                           Hình thức: <span className="font-medium text-foreground">{getPaymentOptionLabel(order)}</span>
-                        </p>
-                        <p>
-                          Ứng trước:{' '}
-                          <span className="font-medium text-foreground">{formatOrderCurrency(order.requiredUpfrontAmount ?? 0)}</span>
                         </p>
                         <p>
                           Đã thanh toán:{' '}
