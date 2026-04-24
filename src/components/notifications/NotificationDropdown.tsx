@@ -114,6 +114,15 @@ export function NotificationDropdown({ unreadCount, className }: NotificationDro
       return
     }
 
+    let metadataObj: Record<string, string | null> | null = null
+    if (notification.metadata) {
+      try {
+        metadataObj = JSON.parse(notification.metadata) as Record<string, string | null>
+      } catch {
+        // Ignore parse error
+      }
+    }
+
     switch (notification.type) {
       case 'order': {
         if (metadataObj && metadataObj.payoutId) {
@@ -121,6 +130,15 @@ export function NotificationDropdown({ unreadCount, className }: NotificationDro
             navigate(ROUTES.ADMIN_PAYOUTS)
           } else {
             navigate(ROUTES.PAYOUT)
+          }
+          break
+        }
+
+        if (metadataObj && metadataObj.refundId) {
+          if (user?.role === 'admin') {
+            navigate(ROUTES.ADMIN_DISPUTES)
+          } else {
+            navigate(`${ROUTES.PROFILE}?tab=orders`)
           }
           break
         }
