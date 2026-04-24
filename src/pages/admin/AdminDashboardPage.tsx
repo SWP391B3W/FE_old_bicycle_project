@@ -108,13 +108,14 @@ export default function AdminDashboardPage() {
     ];
   }, [stats]);
 
-  const monthlyGmv = stats?.monthlyGmv ?? stats?.monthlyRevenue ?? {};
-  const monthlyRecognizedPlatformRevenue = stats?.monthlyRecognizedPlatformRevenue ?? {};
-  const currentMonthlyGmv = monthlyGmv[currentMonthKey] ?? 0;
-  const currentMonthlyPlatformRevenue =
-    monthlyRecognizedPlatformRevenue[currentMonthKey] ?? 0;
+  const monthlyGmvMap = stats?.monthlyGmv ?? stats?.monthlyRevenue ?? {};
+  const monthlyRecognizedPlatformRevenueMap = stats?.monthlyRecognizedPlatformRevenue ?? {};
+  
+  const currentMonthlyGmv = monthlyGmvMap[currentMonthKey] ?? 0;
+  const currentMonthlyRevenue = monthlyRecognizedPlatformRevenueMap[currentMonthKey] ?? 0;
+  
   const currentMonthlyOrders = stats?.monthlyOrders?.[currentMonthKey] ?? 0;
-  const totalGmv = stats?.totalGmv ?? stats?.totalRevenue ?? 0;
+  const totalGmv = stats?.totalGmv ?? 0;
   const pendingPlatformFee = stats?.pendingPlatformFee ?? 0;
   const recognizedPlatformRevenue = stats?.recognizedPlatformRevenue ?? 0;
   const reversedPlatformFee = stats?.reversedPlatformFee ?? 0;
@@ -326,7 +327,7 @@ export default function AdminDashboardPage() {
                   {formatCurrency(currentMonthlyGmv)}
                 </span>
                 <span className="text-xs text-muted-foreground mt-1">
-                   Tháng {currentMonthKey}
+                  Tháng {currentMonthKey.split('-')[1]}/{currentMonthKey.split('-')[0]}
                 </span>
               </div>
             </div>
@@ -342,7 +343,7 @@ export default function AdminDashboardPage() {
               </div>
               <div className="flex flex-col">
                 <span className="text-3xl font-bold text-emerald-600">
-                  {formatCurrency(currentMonthlyPlatformRevenue)}
+                  {formatCurrency(currentMonthlyRevenue)}
                 </span>
                 <span className="text-xs text-muted-foreground mt-1">
                   Đã ghi nhận trong tháng
@@ -350,22 +351,6 @@ export default function AdminDashboardPage() {
               </div>
             </div>
 
-            <div className="rounded-xl border border-border bg-card p-5 shadow-sm hover:shadow-md transition-shadow">
-              <div className="flex items-center gap-3 mb-4">
-                <div className="p-2 bg-orange-500/10 rounded-lg">
-                  <RotateCcw className="h-5 w-5 text-orange-600" />
-                </div>
-                <h3 className="font-semibold text-foreground">Phí sàn bị hoàn</h3>
-              </div>
-              <div className="flex flex-col">
-                <span className="text-3xl font-bold text-orange-600">
-                  {formatCurrency(reversedPlatformFee)}
-                </span>
-                <span className="text-xs text-muted-foreground mt-1">
-                  Đơn hàng hoàn tất: {currentMonthlyOrders}
-                </span>
-              </div>
-            </div>
           </div>
 
           {/* Data Note */}

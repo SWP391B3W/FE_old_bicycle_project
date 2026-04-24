@@ -54,6 +54,25 @@ const FUNDING_MAP: Record<FundingFilter, string> = {
   'Đã hoàn tiền': 'refunded',
 }
 
+const STATUS_DISPLAY: Record<string, string> = {
+  pending: 'Chờ xử lý',
+  deposited: 'Đã thanh toán',
+  awaiting_buyer_confirmation: 'Chờ người mua xác nhận',
+  completed: 'Hoàn tất',
+  cancelled: 'Đã hủy',
+}
+
+const FUNDING_DISPLAY: Record<string, string> = {
+  unpaid: 'Chưa thanh toán',
+  awaiting_payment: 'Chờ thanh toán',
+  held: 'Đang tạm giữ',
+  seller_payout_pending: 'Chờ quyết toán người bán',
+  released: 'Đã giải ngân',
+  refund_pending: 'Chờ hoàn tiền',
+  refund_pending_transfer: 'Chờ chuyển khoản hoàn tiền',
+  refunded: 'Đã hoàn tiền',
+}
+
 const statusOptions: Array<{ value: StatusFilter; label: string }> = [
   { value: 'Tất cả trạng thái đơn', label: 'Tất cả trạng thái đơn' },
   { value: 'Chờ xử lý', label: 'Chờ xử lý' },
@@ -311,10 +330,10 @@ export default function AdminOrdersPage() {
 
                           <div className="flex flex-wrap gap-x-4 gap-y-1 text-sm text-muted-foreground">
                             <span>
-                              Buyer: <span className="font-medium text-foreground">{order.buyerName}</span>
+                              Người mua: <span className="font-medium text-foreground">{order.buyerName}</span>
                             </span>
                             <span>
-                              Seller: <span className="font-medium text-foreground">{order.sellerName}</span>
+                              Người bán: <span className="font-medium text-foreground">{order.sellerName}</span>
                             </span>
                             <span>Tạo lúc: {formatOrderDate(order.createdAt)}</span>
                           </div>
@@ -332,10 +351,10 @@ export default function AdminOrdersPage() {
                               Hình thức: <span className="font-medium text-foreground">{getPaymentOptionLabel(order)}</span>
                             </p>
                             <p>
-                              Trạng thái đơn: <span className="font-medium text-foreground">{order.status}</span>
+                              Trạng thái đơn: <span className="font-medium text-foreground">{STATUS_DISPLAY[order.status] || order.status}</span>
                             </p>
                             <p>
-                              Trạng thái tiền: <span className="font-medium text-foreground">{order.fundingStatus}</span>
+                              Trạng thái tiền: <span className="font-medium text-foreground">{FUNDING_DISPLAY[order.fundingStatus] || order.fundingStatus}</span>
                             </p>
                           </div>
                         </div>
@@ -344,10 +363,10 @@ export default function AdminOrdersPage() {
                           <p className="text-sm text-muted-foreground">Tổng giá trị</p>
                           <p className="text-2xl font-bold text-primary">{formatOrderCurrency(order.totalAmount)}</p>
                           <p className="text-sm text-muted-foreground">
-                            Buyer trả hiện tại: {formatOrderCurrency(order.buyerChargeAmount ?? order.paidAmount ?? 0)}
+                            Người mua đã trả: {formatOrderCurrency(order.buyerChargeAmount ?? order.paidAmount ?? 0)}
                           </p>
                           <p className="text-sm text-muted-foreground">
-                            Seller net: {formatOrderCurrency(order.sellerNetPayoutAmount ?? 0)}
+                            Người bán nhận: {formatOrderCurrency(order.sellerNetPayoutAmount ?? 0)}
                           </p>
                         </div>
                       </div>

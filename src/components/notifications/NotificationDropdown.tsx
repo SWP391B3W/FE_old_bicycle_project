@@ -208,18 +208,6 @@ export function NotificationDropdown({ unreadCount, className }: NotificationDro
           )}
         </div>
 
-        <div className="border-t border-border p-2">
-          <Button
-            variant="ghost"
-            className="w-full justify-center"
-            onClick={() => {
-              setOpen(false)
-              navigate(ROUTES.NOTIFICATIONS)
-            }}
-          >
-            Xem tất cả thông báo
-          </Button>
-        </div>
       </DropdownMenuContent>
     </DropdownMenu>
   )
