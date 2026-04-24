@@ -31,7 +31,7 @@ const CONDITION_OPTIONS = [
 interface ImageEntry {
   file: File
   preview: string
-  type: 'main' | 'groupset' | 'serial' | 'other'
+  type: 'main' | 'serial' | 'other'
 }
 
 interface FormState {
@@ -40,7 +40,6 @@ interface FormState {
   brandId: string
   frameSize: string
   wheelSize: string
-  groupsetId: string
   brakeTypeId: string
   frameMaterialId: string
   condition: string
@@ -54,7 +53,6 @@ interface FormState {
 
 const REQUIRED_IMAGE_TYPES: { type: ImageEntry['type']; label: string }[] = [
   { type: 'main', label: 'Ảnh toàn thân xe' },
-  { type: 'groupset', label: 'Ảnh bộ truyền động' },
   { type: 'serial', label: 'Ảnh số khung (serial)' },
 ]
 
@@ -64,7 +62,6 @@ const EMPTY_FORM: FormState = {
   brandId: '',
   frameSize: '',
   wheelSize: '',
-  groupsetId: '',
   brakeTypeId: '',
   frameMaterialId: '',
   condition: '',
@@ -237,7 +234,6 @@ export default function SellBikePage() {
   const [categories, setCategories] = useState<Category[]>([])
   const [brakeTypes, setBrakeTypes] = useState<ReferenceValue[]>([])
   const [frameMaterials, setFrameMaterials] = useState<ReferenceValue[]>([])
-  const [groupsets, setGroupsets] = useState<ReferenceValue[]>([])
   const [referenceLoading, setReferenceLoading] = useState(true)
 
   // Default mock data khi API chưa sẵn sàng
@@ -262,14 +258,12 @@ export default function SellBikePage() {
       referenceDataApi.getCategories(),
       referenceDataApi.getBrakeTypes(),
       referenceDataApi.getFrameMaterials(),
-      referenceDataApi.getGroupsets(),
     ])
-      .then(([loadedBrands, loadedCategories, loadedBrakeTypes, loadedFrameMaterials, loadedGroupsets]) => {
+      .then(([loadedBrands, loadedCategories, loadedBrakeTypes, loadedFrameMaterials]) => {
         setBrands(loadedBrands)
         setCategories(loadedCategories)
         setBrakeTypes(loadedBrakeTypes)
         setFrameMaterials(loadedFrameMaterials)
-        setGroupsets(loadedGroupsets)
       })
       .catch(() => {
         // Sử dụng default data khi API fails
@@ -277,7 +271,6 @@ export default function SellBikePage() {
         setCategories([])
         setBrakeTypes([])
         setFrameMaterials([])
-        setGroupsets([])
       })
       .finally(() => setReferenceLoading(false))
   }, [])
@@ -385,7 +378,6 @@ export default function SellBikePage() {
       categoryId: formData.categoryId || undefined,
       brakeTypeId: formData.brakeTypeId || undefined,
       frameMaterialId: formData.frameMaterialId || undefined,
-      groupsetId: formData.groupsetId || undefined,
       frameSize: formData.frameSize || undefined,
       wheelSize: formData.wheelSize || undefined,
       condition: (formData.condition as ProductMutationInput['condition']) || undefined,
@@ -596,22 +588,6 @@ export default function SellBikePage() {
                   loading={referenceLoading}
                 />
               </div>
-
-              <div className="space-y-2">
-                <label className="text-sm font-medium">Bộ truyền động (Groupset)</label>
-                <select
-                  className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-ring"
-                  value={formData.groupsetId}
-                  onChange={(event) => handleChange('groupsetId', event.target.value)}
-                >
-                  <option value="">Chọn groupset</option>
-                  {groupsets.map((groupset) => (
-                    <option key={groupset.id} value={groupset.id}>
-                      {groupset.name}
-                    </option>
-                  ))}
-                </select>
-              </div>
             </CardContent>
           </Card>
         )}
@@ -629,7 +605,6 @@ export default function SellBikePage() {
                   <p className="font-medium text-foreground">Yêu cầu hình ảnh</p>
                   <ul className="mt-1 list-inside list-disc text-muted-foreground">
                     <li>Ảnh toàn thân xe (bắt buộc)</li>
-                    <li>Ảnh bộ truyền động (bắt buộc)</li>
                     <li>Ảnh số khung serial (bắt buộc)</li>
                   </ul>
                 </div>

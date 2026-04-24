@@ -43,7 +43,6 @@ interface FormState {
   brandId: string
   frameSize: string
   wheelSize: string
-  groupsetId: string
   brakeTypeId: string
   frameMaterialId: string
   condition: string
@@ -113,7 +112,6 @@ export default function SellerEditProductPage() {
     brandId: '',
     frameSize: '',
     wheelSize: '',
-    groupsetId: '',
     brakeTypeId: '',
     frameMaterialId: '',
     condition: '',
@@ -129,7 +127,6 @@ export default function SellerEditProductPage() {
   const [categories, setCategories] = useState<Category[]>([])
   const [brakeTypes, setBrakeTypes] = useState<ReferenceValue[]>([])
   const [frameMaterials, setFrameMaterials] = useState<ReferenceValue[]>([])
-  const [groupsets, setGroupsets] = useState<ReferenceValue[]>([])
   const [referenceLoading, setReferenceLoading] = useState(true)
 
   // Default mock data khi API chưa sẵn sàng
@@ -158,15 +155,13 @@ export default function SellerEditProductPage() {
       referenceDataApi.getCategories(),
       referenceDataApi.getBrakeTypes(),
       referenceDataApi.getFrameMaterials(),
-      referenceDataApi.getGroupsets(),
       productsApi.getMineById(id),
     ])
-      .then(([loadedBrands, loadedCategories, loadedBrakeTypes, loadedFrameMaterials, loadedGroupsets, product]) => {
+      .then(([loadedBrands, loadedCategories, loadedBrakeTypes, loadedFrameMaterials, product]) => {
         setBrands(loadedBrands)
         setCategories(loadedCategories)
         setBrakeTypes(loadedBrakeTypes)
         setFrameMaterials(loadedFrameMaterials)
-        setGroupsets(loadedGroupsets)
 
         if (product.status === 'sold' || product.status === 'inspected_passed' || product.status === 'inspected_failed') {
           setSubmitError('Sản phẩm đã được kiểm định hoặc đã bán, không thể chỉnh sửa thông tin.')
@@ -178,9 +173,6 @@ export default function SellerEditProductPage() {
         const matchedBrand = loadedBrands.find((brand) => brand.name === product.brandName)
         const matchedBrakeType = loadedBrakeTypes.find((brakeType) => brakeType.name === product.brakeTypeName)
         const matchedMaterial = loadedFrameMaterials.find((material) => material.name === product.frameMaterialName)
-        const matchedGroupset = product.groupsetId
-          ? loadedGroupsets.find((groupset) => groupset.id === product.groupsetId)
-          : loadedGroupsets.find((groupset) => groupset.name === product.groupset)
 
         setFormData({
           title: product.title ?? '',
@@ -188,7 +180,6 @@ export default function SellerEditProductPage() {
           brandId: matchedBrand?.id ?? '',
           frameSize: product.frameSize ?? '',
           wheelSize: product.wheelSize ?? '',
-          groupsetId: matchedGroupset?.id ?? '',
           brakeTypeId: matchedBrakeType?.id ?? '',
           frameMaterialId: matchedMaterial?.id ?? '',
           condition: product.condition ?? '',
@@ -214,7 +205,6 @@ export default function SellerEditProductPage() {
         setCategories([])
         setBrakeTypes([])
         setFrameMaterials([])
-        setGroupsets([])
 
         if (code === 1009 || backendMessage?.toLowerCase().includes('not found')) {
           setSubmitError('Sản phẩm đang ở trạng thái chờ duyệt hoặc không tồn tại. Không thể chỉnh sửa.')
@@ -312,7 +302,6 @@ export default function SellerEditProductPage() {
       categoryId: formData.categoryId || undefined,
       brakeTypeId: formData.brakeTypeId || undefined,
       frameMaterialId: formData.frameMaterialId || undefined,
-      groupsetId: formData.groupsetId || undefined,
       frameSize: formData.frameSize || undefined,
       wheelSize: formData.wheelSize || undefined,
       condition: (formData.condition as ProductMutationInput['condition']) || undefined,
@@ -536,22 +525,6 @@ export default function SellerEditProductPage() {
                   placeholder="Chọn chất liệu"
                   loading={referenceLoading}
                 />
-              </div>
-
-              <div className="space-y-2">
-                <label className="text-sm font-medium">Bộ truyền động</label>
-                <select
-                  className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-ring"
-                  value={formData.groupsetId}
-                  onChange={(event) => handleChange('groupsetId', event.target.value)}
-                >
-                  <option value="">Chọn groupset</option>
-                  {groupsets.map((groupset) => (
-                    <option key={groupset.id} value={groupset.id}>
-                      {groupset.name}
-                    </option>
-                  ))}
-                </select>
               </div>
             </CardContent>
           </Card>
