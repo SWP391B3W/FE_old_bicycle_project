@@ -5,6 +5,7 @@ export type NotificationType =
   | 'inspection'
   | 'promotion'
   | 'wishlist'
+  | 'payout'
 
 export interface NotificationItem {
   id: string

@@ -145,6 +145,14 @@ export function NotificationDropdown({ unreadCount, className }: NotificationDro
         navigate(ROUTES.HOME)
         break
       }
+      case 'payout': {
+        if (user?.role === 'admin') {
+          navigate(ROUTES.ADMIN_PAYOUTS)
+        } else {
+          navigate(ROUTES.PAYOUT)
+        }
+        break
+      }
       case 'wishlist': {
         navigate(ROUTES.WISHLIST)
         break
