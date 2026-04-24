@@ -157,8 +157,9 @@ export function NotificationDropdown({ unreadCount, className }: NotificationDro
         break
       }
       case 'inspection': {
+        // Here we default to requests since inspector notifications are typically for new requests
         if (user?.role === 'inspector') {
-          navigate(ROUTES.INSPECTOR_HISTORY)
+          navigate(ROUTES.INSPECTOR_REQUESTS)
         } else if (user?.role === 'seller') {
           navigate(`${ROUTES.PROFILE}?tab=listings`)
         } else if (user?.role === 'admin') {
