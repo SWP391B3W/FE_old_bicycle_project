@@ -116,6 +116,15 @@ export function NotificationDropdown({ unreadCount, className }: NotificationDro
 
     switch (notification.type) {
       case 'order': {
+        if (metadataObj && metadataObj.payoutId) {
+          if (user?.role === 'admin') {
+            navigate(ROUTES.ADMIN_PAYOUTS)
+          } else {
+            navigate(ROUTES.PAYOUT)
+          }
+          break
+        }
+
         if (user?.role === 'admin') {
           navigate(ROUTES.ADMIN_ORDERS)
         } else if (user?.role === 'seller') {
