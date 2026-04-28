@@ -67,11 +67,11 @@ export default function AdminDashboardPage() {
   // Memoized data for charts
   const chartData = useMemo(() => {
     if (!stats) return [];
-    
+
     const monthlyGmv = stats.monthlyGmv ?? stats.monthlyRevenue ?? {};
     const monthlyRevenue = stats.monthlyRecognizedPlatformRevenue ?? {};
     const monthlyOrders = stats.monthlyOrders ?? {};
-    
+
     // Generate last 6 months keys
     const last6Months: string[] = [];
     for (let i = 5; i >= 0; i--) {
@@ -80,7 +80,7 @@ export default function AdminDashboardPage() {
       const m = `${d.getMonth() + 1}`.padStart(2, '0');
       last6Months.push(`${d.getFullYear()}-${m}`);
     }
-    
+
     // Get all unique month keys (merging last 6 months with any other existing data)
     const allMonths = Array.from(new Set([
       ...last6Months,
@@ -110,52 +110,45 @@ export default function AdminDashboardPage() {
 
   const monthlyGmvMap = stats?.monthlyGmv ?? stats?.monthlyRevenue ?? {};
   const monthlyRecognizedPlatformRevenueMap = stats?.monthlyRecognizedPlatformRevenue ?? {};
-  
+
   const currentMonthlyGmv = monthlyGmvMap[currentMonthKey] ?? 0;
   const currentMonthlyRevenue = monthlyRecognizedPlatformRevenueMap[currentMonthKey] ?? 0;
-  
+
   const currentMonthlyOrders = stats?.monthlyOrders?.[currentMonthKey] ?? 0;
   const totalGmv = stats?.totalGmv ?? 0;
-  const pendingPlatformFee = stats?.pendingPlatformFee ?? 0;
   const recognizedPlatformRevenue = stats?.recognizedPlatformRevenue ?? 0;
-  const reversedPlatformFee = stats?.reversedPlatformFee ?? 0;
 
   const statCards = stats
     ? [
-        {
-          title: 'Tổng người dùng',
-          value: stats.totalUsers.toLocaleString('vi-VN'),
-          icon: Users,
-        },
-        {
-          title: 'Tổng sản phẩm',
-          value: stats.totalProducts.toLocaleString('vi-VN'),
-          icon: FileText,
-        },
-        {
-          title: 'Tổng đơn hàng',
-          value: stats.totalOrders.toLocaleString('vi-VN'),
-          icon: ShoppingCart,
-        },
-        {
-          title: 'Tổng GMV',
-          value: formatCurrency(totalGmv),
-          icon: DollarSign,
-          description: 'Tổng giá trị xe của các giao dịch hoàn tất',
-        },
-        {
-          title: 'Phí sàn chờ ghi nhận',
-          value: formatCurrency(pendingPlatformFee),
-          icon: Clock3,
-          description: 'Đã thu nhưng chưa được ghi nhận là doanh thu',
-        },
-        {
-          title: 'Doanh thu sàn đã ghi nhận',
-          value: formatCurrency(recognizedPlatformRevenue),
-          icon: TrendingUp,
-          description: 'Chỉ tính phần phí sàn đã settled',
-        },
-      ]
+      {
+        title: 'Tổng người dùng',
+        value: stats.totalUsers.toLocaleString('vi-VN'),
+        icon: Users,
+      },
+      {
+        title: 'Tổng sản phẩm',
+        value: stats.totalProducts.toLocaleString('vi-VN'),
+        icon: FileText,
+      },
+      {
+        title: 'Tổng đơn hàng',
+        value: stats.totalOrders.toLocaleString('vi-VN'),
+        icon: ShoppingCart,
+      },
+      {
+        title: 'Tổng GMV',
+        value: formatCurrency(totalGmv),
+        icon: DollarSign,
+        description: 'Tổng giá trị xe của các giao dịch hoàn tất',
+      },
+
+      {
+        title: 'Doanh thu sàn đã ghi nhận',
+        value: formatCurrency(recognizedPlatformRevenue),
+        icon: TrendingUp,
+        description: 'Chỉ tính phần phí sàn đã thu',
+      },
+    ]
     : [];
 
   return (
@@ -219,22 +212,22 @@ export default function AdminDashboardPage() {
                 <ResponsiveContainer width="100%" height="100%">
                   <BarChart data={chartData} margin={{ top: 10, right: 10, left: 0, bottom: 0 }} barGap={8}>
                     <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="hsl(var(--border))" />
-                    <XAxis 
-                      dataKey="name" 
-                      axisLine={false} 
-                      tickLine={false} 
-                      tick={{ fill: 'hsl(var(--muted-foreground))', fontSize: 12 }} 
+                    <XAxis
+                      dataKey="name"
+                      axisLine={false}
+                      tickLine={false}
+                      tick={{ fill: 'hsl(var(--muted-foreground))', fontSize: 12 }}
                     />
-                    <YAxis 
-                      axisLine={false} 
-                      tickLine={false} 
+                    <YAxis
+                      axisLine={false}
+                      tickLine={false}
                       tickFormatter={(value) => formatCurrency(value)}
-                      tick={{ fill: 'hsl(var(--muted-foreground))', fontSize: 12 }} 
+                      tick={{ fill: 'hsl(var(--muted-foreground))', fontSize: 12 }}
                     />
-                    <Tooltip 
+                    <Tooltip
                       cursor={{ fill: 'hsl(var(--muted)/0.2)' }}
-                      contentStyle={{ 
-                        backgroundColor: 'hsl(var(--card))', 
+                      contentStyle={{
+                        backgroundColor: 'hsl(var(--card))',
                         borderColor: 'hsl(var(--border))',
                         borderRadius: '12px',
                         color: 'hsl(var(--foreground))',
@@ -242,17 +235,17 @@ export default function AdminDashboardPage() {
                       }}
                       formatter={(value: number) => [formatFullCurrency(value), '']}
                     />
-                    <Bar 
-                      dataKey="gmv" 
+                    <Bar
+                      dataKey="gmv"
                       name="GMV"
-                      fill="hsl(var(--primary))" 
+                      fill="hsl(var(--primary))"
                       radius={[4, 4, 0, 0]}
                       barSize={32}
                     />
-                    <Bar 
-                      dataKey="revenue" 
+                    <Bar
+                      dataKey="revenue"
                       name="Doanh thu"
-                      fill="#10b981" 
+                      fill="#10b981"
                       radius={[4, 4, 0, 0]}
                       barSize={32}
                     />
@@ -282,15 +275,15 @@ export default function AdminDashboardPage() {
                         <Cell key={`cell-${index}`} fill={entry.color} />
                       ))}
                     </Pie>
-                    <Tooltip 
-                       contentStyle={{ 
-                        backgroundColor: 'hsl(var(--card))', 
+                    <Tooltip
+                      contentStyle={{
+                        backgroundColor: 'hsl(var(--card))',
                         borderColor: 'hsl(var(--border))',
                         borderRadius: '8px',
                         color: 'hsl(var(--foreground))'
                       }}
                     />
-                    <Legend verticalAlign="bottom" height={36}/>
+                    <Legend verticalAlign="bottom" height={36} />
                   </PieChart>
                 </ResponsiveContainer>
               </div>
@@ -355,17 +348,17 @@ export default function AdminDashboardPage() {
 
           {/* Data Note */}
           <div className="rounded-xl border border-border bg-muted/30 p-6 flex items-start gap-4">
-             <div className="p-2 bg-foreground/5 rounded-full mt-1">
-                <Clock3 className="h-4 w-4 text-muted-foreground" />
-             </div>
-             <div>
-                <p className="font-semibold text-foreground">Lưu ý về số liệu</p>
-                <p className="mt-1 text-sm leading-6 text-muted-foreground">
-                  GMV (Gross Merchandise Value) là tổng giá trị xe của các giao dịch hoàn tất. 
-                  Doanh thu sàn là phần phí dịch vụ đã được ghi nhận sau khi giao dịch thành công. 
-                  Dữ liệu được cập nhật theo thời gian thực từ hệ thống.
-                </p>
-             </div>
+            <div className="p-2 bg-foreground/5 rounded-full mt-1">
+              <Clock3 className="h-4 w-4 text-muted-foreground" />
+            </div>
+            <div>
+              <p className="font-semibold text-foreground">Lưu ý về số liệu</p>
+              <p className="mt-1 text-sm leading-6 text-muted-foreground">
+                GMV (Gross Merchandise Value) là tổng giá trị xe của các giao dịch hoàn tất.
+                Doanh thu sàn là phần phí dịch vụ đã được ghi nhận sau khi giao dịch thành công.
+                Dữ liệu được cập nhật theo thời gian thực từ hệ thống.
+              </p>
+            </div>
           </div>
         </>
       )}
