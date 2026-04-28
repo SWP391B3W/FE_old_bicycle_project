@@ -95,12 +95,12 @@ export default function SellerListingsPage() {
 
   const filteredProducts = searchQuery
     ? products.filter((product) => {
-        const normalizedQuery = searchQuery.toLowerCase()
-        return (
-          product.title.toLowerCase().includes(normalizedQuery) ||
-          product.id.toLowerCase().includes(normalizedQuery)
-        )
-      })
+      const normalizedQuery = searchQuery.toLowerCase()
+      return (
+        product.title.toLowerCase().includes(normalizedQuery) ||
+        product.id.toLowerCase().includes(normalizedQuery)
+      )
+    })
     : products
 
   return (
@@ -109,7 +109,7 @@ export default function SellerListingsPage() {
         <div>
           <h2 className="text-2xl font-bold tracking-tight">Quản lý tin đăng</h2>
           <p className="text-muted-foreground">
-            Mọi tin đăng đều phải qua admin và inspection trước khi hiển thị công khai.
+            Mọi tin đăng đều phải qua kiểm định trước khi hiển thị công khai.
           </p>
         </div>
         <Link to={ROUTES.SELLER_NEW_PRODUCT}>
@@ -213,7 +213,7 @@ export default function SellerListingsPage() {
                           {(() => {
                             const firstImage = product.images?.[0]
                             const imageUrl = typeof firstImage === 'string' ? firstImage : firstImage?.url
-                            
+
                             return imageUrl ? (
                               <img
                                 src={imageUrl}
@@ -232,11 +232,10 @@ export default function SellerListingsPage() {
                             {timelineEntries.map((entry) => (
                               <p
                                 key={`${product.id}-${entry.label}`}
-                                className={`mt-1 text-xs ${
-                                  entry.tone === 'warning'
+                                className={`mt-1 text-xs ${entry.tone === 'warning'
                                     ? 'text-amber-700 dark:text-amber-300'
                                     : 'text-muted-foreground'
-                                }`}
+                                  }`}
                               >
                                 <span className="font-medium">{entry.label}:</span> {entry.value}
                               </p>
