@@ -215,8 +215,8 @@ export default function AdminListingsPage() {
               <p
                 key={`${row.original.id}-${entry.label}`}
                 className={`mt-1 text-xs ${entry.tone === 'warning'
-                    ? 'text-amber-700 dark:text-amber-300'
-                    : 'text-muted-foreground'
+                  ? 'text-amber-700 dark:text-amber-300'
+                  : 'text-muted-foreground'
                   }`}
               >
                 <span className="font-medium">{entry.label}:</span> {entry.value}
@@ -307,9 +307,6 @@ export default function AdminListingsPage() {
     <div className="space-y-6">
       <div>
         <h2 className="text-2xl font-bold text-foreground">Duyệt và điều phối kiểm định</h2>
-        <p className="text-muted-foreground">
-          Mọi tin đăng phải được admin chuyển sang kiểm định trước khi đủ điều kiện hiển thị công khai.
-        </p>
       </div>
 
       <div className="flex flex-col gap-4 md:flex-row md:items-center">
